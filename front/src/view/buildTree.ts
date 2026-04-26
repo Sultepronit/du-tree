@@ -1,176 +1,182 @@
-import doFetch from "../api/fetch";
-import handleBytes from "../helpers/handleBytes";
-import timePromise from "../helpers/timePromise";
+import doFetch0, { doFetch } from "../api/fetch"
+import { pathInpunt } from "../global/pathInput"
+import handleBytes from "../helpers/handleBytes"
+import timePromise from "../helpers/timePromise"
+import type { Branch, Node } from "../types"
 
-const totalSize = document.getElementById("root")!;
-const treeBlock = document.getElementById("list")!;
+const totalSize = document.getElementById("root") as HTMLDivElement
+const treeBlock = document.getElementById("tree")!
 
-let max = -1;
+let tree = null as Node
+const branches = [] as Branch[]
 
-function setTotalSize(value: number, isTemp = false) {
-  totalSize.textContent = (isTemp ? "~" : "") + handleBytes(value);
-}
+let max = -1
 
-function createLi(data, prePath = ""): string {
-  let content = "";
-  if (data.hasContent) {
-    const path = prePath ? `${prePath}/${data.name}` : data.name;
-    content = `data-path="${path}"`;
-  }
-  // console.log(data.size / max * 100);
-  return `<li class="${content ? "nested" : ""}" data-size="${data.size}">
-        <div class="fd-entry">
+const calcBarWidth = (size: number) => `${((size / max) * 100).toFixed(2)}%`
+
+const displaySize = (node: Node) => `${node.sizeIsTemp ? "~" : ""}${handleBytes(node.size)}`
+
+function createLi(node: Node, prePath = ""): string {
+    // console.log(prePath)
+    let content = ""
+    // if (data.hasContent) {
+    if (node.type[0] === "d") {
+        // const path = pathprePath ? `${prePath}/${node.name}` : node.name
+        // content = `data-path="${prePath + node.name}/"`
+        content = `data-path="${prePath}" data-dirname="${node.name}"`
+    }
+    // console.log(data.size / max * 100);
+    return `<li class="${content ? "nested" : ""}" data-size="${node.size}">
+        <div class="fd-entry" title="path: ${prePath || "root"}\nname: ${node.name}">
             <div
                 class="fd-vizual-size"
-                style="width: ${(data.size / max) * 100}%"
-                data-size="${data.size}"
-                data-max="${max}"
+                style="width: ${calcBarWidth(node.size)}"
+                data-size="${node.size}"
             ></div>
             <div class="fd-size ${content ? "interactive" : ""}" ${content}>
-                ${handleBytes(data.size)}
+                ${displaySize(node)}
             </div>
-            <div class="fd-name">${data.name}</div>
+            <div class="fd-name">${node.name}</div>
         </div>
-        
-    </li>`;
+    </li>`
 }
 
-function createBranch(data: any[], prePath = ""): string {
-  const lis = data.map((entry) => createLi(entry, prePath)).join("");
-  return `<ul class="dir-content">${lis}</ul>`;
+function updateBranches() {
+    branches.sort((a, b) => a.path.length - b.path.length)
+    const rev = [...branches].reverse()
+    for (const b of rev) {
+        console.log(b.path)
+        // if (b.node.tempSize < b.node.size) continue
+        const tempSize = b.node.content.reduce((sum, entry) => sum + entry.size, 0)
+        console.log(b.node.size, tempSize)
+        if (b.node.size === tempSize) continue
+
+        b.node.size = tempSize
+        // const newVal = `~${handleBytes(tempSize)}`
+        const newVal = displaySize(b.node)
+        if (b.sizeDisplay.textContent !== newVal) b.sizeDisplay.textContent = newVal
+        if (b.nodeView) {
+            const str = tempSize.toString()
+            b.nodeView.dataset.size = str
+            b.vizualSizeDisplay.dataset.size = str
+        }
+    }
+    console.log(branches)
+
+    const mainBranchCont = branches[0].node.content
+    mainBranchCont.sort((a, b) => b.size - a.size)
+    console.log(mainBranchCont)
+    if (mainBranchCont[0].size > max) {
+        max = mainBranchCont[0].size
+    }
+    reDrawVisualSize()
+
+    const branchViews = treeBlock.querySelectorAll("ul.dir-content")
+    console.log(branchViews)
+    for (const bv of branchViews) {
+        const nodeViews = [...bv.children] as HTMLLIElement[]
+        nodeViews.sort((a, b) => Number(b.dataset.size) - Number(a.dataset.size))
+        console.log(nodeViews)
+        // console.log(nodeViews[0].dataset)
+        const fragment = document.createDocumentFragment()
+        nodeViews.forEach(e => fragment.appendChild(e))
+        bv.appendChild(fragment)
+    }
 }
 
-let partialData = {
-  content: [], // do we need this???
-};
+function createBranch(
+    node: Node,
+    prePath: string,
+    sizeDisplay: HTMLDivElement,
+    nodeView = null as HTMLLIElement,
+    vizualSizeDisplay = null as HTMLDivElement
+): string {
+    const path = prePath ? `${prePath}/${node.name}` : node.name
+    branches.push({
+        path,
+        node,
+        sizeDisplay,
+        nodeView,
+        vizualSizeDisplay
+    })
+
+    node.content.sort((a, b) => b.size - a.size)
+
+    updateBranches()
+
+    // const lis = node.content.map(entry => createLi(entry, prePath)).join("")
+    const lis = node.content.map(entry => createLi(entry, path)).join("")
+    return `<ul class="dir-content">${lis}</ul>`
+}
 
 function reDrawVisualSize() {
-  const bars = document.querySelectorAll(
-    ".fd-vizual-size",
-  ) as NodeListOf<HTMLDivElement>;
-  console.log(bars);
-  bars.forEach((bar) => {
-    if (bar.dataset.max === max.toString()) return;
-    bar.style.width = (Number(bar.dataset.size) / max) * 100 + "%";
-  });
+    const bars = document.querySelectorAll(".fd-vizual-size") as NodeListOf<HTMLDivElement>
+    // console.log(bars)
+    bars.forEach(bar => {
+        const width = calcBarWidth(Number(bar.dataset.size))
+        if (bar.style.width !== width) bar.style.width = width
+    })
 }
 
-function insertLis(data) {
-  const lis = treeBlock.firstChild.childNodes as NodeListOf<HTMLLIElement>;
-  let liIndex = 0;
-  data.content.forEach((entry) => {
-    // console.log(entry.size);
-    while (true) {
-      if (entry.size > lis[liIndex].dataset.size) {
-        // console.log('bigger!');
-        lis[liIndex].insertAdjacentHTML("beforebegin", createLi(entry));
-      } else if (liIndex < lis.length - 1) {
-        liIndex++;
-        continue;
-      } else {
-        lis[liIndex].insertAdjacentHTML("afterend", createLi(entry));
-      }
-      break;
+export async function initTree() {
+    const path = pathInpunt.value
+    tree = {
+        // name: path,
+        name: "",
+        type: "d",
+        size: 0,
+        sizeIsTemp: true
     }
-  });
+    const data = await doFetch("/dir", { path })
+    // console.log(data)
+    tree.content = data
+    console.log(tree)
+    // buildGradually({ content: data })
+    treeBlock.innerHTML = createBranch(tree, "", totalSize)
 }
 
-async function buildGradually(data) {
-  console.log(data);
-  if (data.content) {
-    data.content.sort((a, b) => b.size - a.size);
+treeBlock.addEventListener("click", async e => {
+    const target = e.target as HTMLDivElement
+    console.log(target)
+    const dataset = target?.dataset
+    if (!dataset?.dirname) return
 
-    if (data.content[0].size > max) {
-      max = data.content[0].size;
-      reDrawVisualSize();
-    }
+    const li = target.closest("li")
+    // if (e.target?.classList.contains('fd-size')) {
+    if (!dataset.active) {
+        const parentNode = branches.find(b => b.path === dataset.path).node
+        // console.log(parentNode)
+        const node = parentNode.content.find(n => n.name === dataset.dirname)
+        // console.log(node)
+        const prePath = dataset.path ? `${pathInpunt.value}${dataset.path}/` : pathInpunt.value
+        const fullPath = prePath + dataset.dirname
+        // const path = target.dataset.path
+        console.log(fullPath)
+        // const data = await doFetch("/dir", { path })
+        node.content = await doFetch("/dir", { path: fullPath })
+        // console.log(data)
+        console.log(node)
+        // const html = createBranch(node, path)
+        const html = createBranch(
+            node,
+            dataset.path,
+            li.querySelector(".fd-size"),
+            li,
+            li.querySelector(".fd-vizual-size")
+        )
 
-    if (!partialData.content.length) {
-      treeBlock.innerHTML = createBranch(data.content);
+        li.insertAdjacentHTML("beforeend", html)
+        // target.dataset.path = ""
+        // delete target.dataset.path
+        dataset.active = "true"
+        dataset.unfolded = "true"
+        // } else if (e.dataset?.unfolded) {
     } else {
-      insertLis(data);
+        // const li = target.closest("li")!
+        // console.log(li);
+        const unfolded = JSON.parse(dataset.unfolded as string)
+        dataset.unfolded = JSON.stringify(!unfolded)
+        // console.log(unfolded);
+        li.querySelector<HTMLDivElement>(".dir-content")!.hidden = unfolded
     }
-
-    partialData.content.push(...data.content);
-    // totalSize.textContent = partialData.content.reduce((sum, entry) => sum + entry.size, 0);
-    setTotalSize(
-      partialData.content.reduce((sum, entry) => sum + entry.size, 0),
-      true,
-    );
-  }
-
-  if (data.size >= 0) {
-    console.timeEnd("t1");
-    setTotalSize(data.size);
-    return;
-  }
-
-  buildGradually(await getPartWithDelay(1000));
-}
-
-async function getPartWithDelay(delay: number) {
-  await timePromise(delay);
-  // console.log('try...')
-  // return await doFetch('http://localhost:8088/get-part');
-  const { size, content: rawContent } = await doFetch(
-    "http://localhost:8088/get-part",
-  );
-  const content =
-    Array.isArray(rawContent) && rawContent.length > partialData.content.length
-      ? rawContent.slice(partialData.content.length)
-      : null;
-  return { size, content };
-}
-
-export default async function execute() {
-  console.time("t1");
-  // const data = await doFetch('http://localhost:8088/du-exec?path=/data/web-projects/du-tree/back/');
-  // const data = await doFetch('http://localhost:8088/du-exec?path=/data/web-projects/du-tree/');
-  // const data = await doFetch('http://localhost:8088/du-exec?path=/data/');
-  // const url = await doFetch("http://localhost:8088/du-exec?path=/snap/");
-  // const url = 'http://localhost:8088/du-exec?path=/data/web-projects/du-tree/test/';
-  // const url = "http://localhost:8088/du-exec?path=/data/web-projects/";
-  // const url = "http://localhost:8088/du-exec?path=/data/";
-  // const url = "http://localhost:8088/du-exec?path=/";
-  const url = "http://localhost:8088/du-exec?path=~";
-  const wholePromise = doFetch(url);
-  const part = getPartWithDelay(500);
-
-  // let result = await Promise.race([wholePromise, part]);
-  const result = await part;
-  console.log(result);
-  buildGradually(result);
-  // if (result.size < 0) {
-  //     buildGradually(result);
-  // } else {
-
-  // }
-}
-
-treeBlock.addEventListener("click", async (e) => {
-  console.log(e.target);
-  // if (e.target?.classList.contains('fd-size')) {
-  if (e.target?.dataset.path) {
-    const target = e.target as HTMLDivElement;
-    const path = encodeURIComponent(target.dataset.path);
-    const li = target.closest("li");
-    console.log(path);
-
-    const data = await doFetch(`http://localhost:8088/get-branch?path=${path}`);
-    const html = createBranch(data, path);
-
-    li.insertAdjacentHTML("beforeend", html);
-
-    target.dataset.path = "";
-    target.dataset.unfolded = "true";
-  } else if (e.target?.dataset.unfolded) {
-    const target = e.target as HTMLDivElement;
-    const li = target.closest("li")!;
-    // console.log(li);
-
-    const unfolded = JSON.parse(target.dataset.unfolded as string);
-    // console.log(unfolded);
-    li.querySelector<HTMLDivElement>(".dir-content")!.hidden = unfolded;
-    target.dataset.unfolded = JSON.stringify(!unfolded);
-  }
-});
+})
