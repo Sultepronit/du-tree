@@ -9,5 +9,6 @@ type Node struct {
 }
 
 type Request struct {
-	Path string `json:"path"`
+	Path   string `json:"path"`
+	InitDu bool   `json:"initDu"`
 }

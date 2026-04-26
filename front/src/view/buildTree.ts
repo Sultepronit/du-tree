@@ -127,7 +127,8 @@ export async function initTree() {
         size: 0,
         sizeIsTemp: true
     }
-    const data = await doFetch("/dir", { path })
+    // const data = await doFetch("/dir", { path })
+    const data = await doFetch("/dir", { path, initDu: true })
     // console.log(data)
     tree.content = data
     console.log(tree)

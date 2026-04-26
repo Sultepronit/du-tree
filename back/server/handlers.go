@@ -1,6 +1,7 @@
 package server
 
 import (
+	"du-tree/du"
 	"du-tree/explorer"
 	"du-tree/models"
 	"encoding/json"
@@ -38,6 +39,19 @@ func handleDir(w http.ResponseWriter, r *http.Request) {
 		// log.Fatal(err)
 		log.Println(err)
 	}
+	sendResult(w, re)
+
+	if req.InitDu {
+		go du.Init(req.Path)
+	}
+}
+
+func handleInitDu(w http.ResponseWriter, r *http.Request) {
+	log.Println(r.URL.Path)
+	p := r.URL.Query().Get("path")
+	log.Println("path:", p)
+
+	re := du.Init(p)
 	sendResult(w, re)
 }
 
