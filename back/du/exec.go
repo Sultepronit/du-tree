@@ -79,7 +79,8 @@ func parseOutput2(line string, discardIndex int) {
 	wholePath := strings.Split(parts[1], "/")
 	path := wholePath[discardIndex:]
 
-	fillTree(path, size)
+	// fillTree(path, size)
+	tree2.fill(path, size)
 
 	// if len(path) == 1 {
 	// 	name := path[0]
@@ -113,10 +114,11 @@ func tempPrinAsJson(input any) {
 }
 
 func Init(path string) {
-	tree = &rawNode{
-		Temp:    true,
-		Content: make(map[string]*rawNode),
-	}
+	// tree = &rawNode{
+	// 	Temp:    true,
+	// 	Content: make(map[string]*rawNode),
+	// }
+	resetTree()
 	// instantRoot = &Root{
 	// 	Size: -1,
 	// }
@@ -172,10 +174,10 @@ func Init(path string) {
 
 	log.Println("finish!")
 
-	tempPrinAsJson(tree)
-	tempPrinAsJson(getDir(""))
-	tempPrinAsJson(getDir("A"))
-	tempPrinAsJson(getDir("a/b"))
+	// tempPrinAsJson(tree)
+	// tempPrinAsJson(getDir(""))
+	// tempPrinAsJson(getDir("A"))
+	// tempPrinAsJson(getDir("a/b"))
 	// return &Root{
 	// 	Size:    tree.Size,
 	// 	Content: parseNodeContent(tree),
