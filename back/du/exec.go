@@ -2,54 +2,67 @@ package du
 
 import (
 	"bufio"
+	"encoding/json"
+	"fmt"
 	"log"
 	"os/exec"
 	"strconv"
 	"strings"
 )
 
-type Branch struct {
-	Size    int                `json:"size"`
-	Content map[string]*Branch `json:"content,omitempty"`
+// remove json?
+type rawNode struct {
+	Size    int64               `json:"size"`
+	Temp    bool                `json:"temp,omitempty"`
+	Content map[string]*rawNode `json:"content,omitempty"`
 }
 
-type FlatBranch struct {
-	Name       string `json:"name"`
-	Size       int    `json:"size"`
-	HasContent bool   `json:"hasContent,omitempty"`
-}
+// type FlatBranch struct {
+// 	Name       string `json:"name"`
+// 	Size       int    `json:"size"`
+// 	HasContent bool   `json:"hasContent,omitempty"`
+// }
 
-type Root struct {
-	Size    int           `json:"size"`
-	Content []*FlatBranch `json:"content,omitempty"`
-}
+// type Root struct {
+// 	Size    int           `json:"size"`
+// 	Content []*FlatBranch `json:"content,omitempty"`
+// }
 
-var tree *Branch
-var instantRoot *Root
+var tree *rawNode
 
-func fillTree(path []string, size int) {
+// var instantRoot *Root
+
+func fillTree(path []string, size int64) {
 	// if len(path) == 1 {
 	// 	log.Println(path, size)
 	// }
+	log.Println(path, size)
 	if len(path) == 1 && path[0] == "" {
 		tree.Size = size
+		tree.Temp = false
 	} else {
 		node := tree
 		for _, stage := range path {
+			node.Size += size
 			if val, prs := node.Content[stage]; prs {
 				node = val
 			} else {
 				if node.Content == nil {
-					node.Content = make(map[string]*Branch)
+					node.Content = make(map[string]*rawNode)
 				}
 
-				new := &Branch{}
+				new := &rawNode{Temp: true}
 				node.Content[stage] = new
 				node = new
 			}
 		}
 		node.Size = size
+		node.Temp = false
 	}
+	// tempPrinAsJson(tree)
+	// tempPrinAsJson(getCachedBranch(path))
+	// tempPrinAsJson(parseNodeContent(tree))
+	tempPrinAsJson(parseNode(tree, "root"))
 }
 
 func parseOutput2(line string, discardIndex int) {
@@ -58,7 +71,7 @@ func parseOutput2(line string, discardIndex int) {
 		return
 	}
 
-	size, err := strconv.Atoi(parts[0])
+	size, err := strconv.ParseInt(parts[0], 10, 64)
 	if err != nil {
 		panic(err)
 	}
@@ -68,36 +81,45 @@ func parseOutput2(line string, discardIndex int) {
 
 	fillTree(path, size)
 
-	if len(path) == 1 {
-		name := path[0]
-		// log.Println(path, size)
-		log.Println(name)
-		if name == "" {
-			instantRoot.Size = size
-		} else {
-			// time.Sleep(time.Second)
-			hasCont := false
-			if len(tree.Content[name].Content) > 0 {
-				hasCont = true
-			}
+	// if len(path) == 1 {
+	// 	name := path[0]
+	// 	// log.Println(path, size)
+	// 	log.Println(name)
+	// 	if name == "" {
+	// 		// instantRoot.Size = size
+	// 	} else {
+	// 		// time.Sleep(time.Second)
+	// 		// hasCont := false
+	// 		// if len(tree.Content[name].Content) > 0 {
+	// 		// 	hasCont = true
+	// 		// }
 
-			instantRoot.Content = append(instantRoot.Content, &FlatBranch{
-				Name:       name,
-				Size:       tree.Content[name].Size,
-				HasContent: hasCont,
-			})
-		}
-		// prinAsJson(instantRoot)
-	}
+	// 		// instantRoot.Content = append(instantRoot.Content, &FlatBranch{
+	// 		// 	Name:       name,
+	// 		// 	Size:       tree.Content[name].Size,
+	// 		// 	HasContent: hasCont,
+	// 		// })
+	// 	}
+	// 	// tempPrinAsJson(instantRoot)
+	// }
 }
 
-func Init(path string) *Root {
-	tree = &Branch{
-		Content: make(map[string]*Branch),
+func tempPrinAsJson(input any) {
+	j, err := json.MarshalIndent(input, "", "  ")
+	if err != nil {
+		panic(err)
 	}
-	instantRoot = &Root{
-		Size: -1,
+	fmt.Println(string(j))
+}
+
+func Init(path string) {
+	tree = &rawNode{
+		Temp:    true,
+		Content: make(map[string]*rawNode),
 	}
+	// instantRoot = &Root{
+	// 	Size: -1,
+	// }
 
 	discardIndex := len(strings.Split(path, "/")) - 1
 
@@ -150,9 +172,12 @@ func Init(path string) *Root {
 
 	log.Println("finish!")
 
-	// prinAsJson(tree)
-	return &Root{
-		Size:    tree.Size,
-		Content: getBranchContent(tree),
-	}
+	tempPrinAsJson(tree)
+	tempPrinAsJson(getDir(""))
+	tempPrinAsJson(getDir("A"))
+	tempPrinAsJson(getDir("a/b"))
+	// return &Root{
+	// 	Size:    tree.Size,
+	// 	Content: parseNodeContent(tree),
+	// }
 }

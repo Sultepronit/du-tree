@@ -46,15 +46,6 @@ func handleDir(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func handleInitDu(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.URL.Path)
-	p := r.URL.Query().Get("path")
-	log.Println("path:", p)
-
-	re := du.Init(p)
-	sendResult(w, re)
-}
-
 // func handleDuExec(w http.ResponseWriter, r *http.Request) {
 // 	log.Println(r.URL.Path)
 // 	p := r.URL.Query().Get("path")

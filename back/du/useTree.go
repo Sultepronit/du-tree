@@ -1,44 +1,77 @@
 package du
 
 import (
-	"sort"
+	"du-tree/models"
+	"strings"
 )
 
-func getBranchContent(branch *Branch) []*FlatBranch {
-	children := []*FlatBranch{} // create it with the length maybe?
-	for cn, child := range branch.Content {
-		// fmt.Println(child.Name)
-		hasCont := false
-		if len(child.Content) > 0 {
-			hasCont = true
+func transformNode(raw *rawNode, name string) models.Node {
+	return models.Node{
+		Name:       name,
+		Type:       "d",
+		Size:       raw.Size,
+		SizeIsTemp: raw.Temp,
+	}
+}
+
+func parseNode(raw *rawNode, name string) models.Node {
+	node := transformNode(raw, name)
+
+	node.Content = make([]*models.Node, 0, len(raw.Content))
+
+	for cn, cr := range raw.Content {
+		cn := transformNode(cr, cn)
+		node.Content = append(node.Content, &cn)
+	}
+
+	return node
+}
+
+func getDir(path string) models.Node {
+	parts := strings.Split(path, "/")
+	target := tree
+	// log.Println(target)
+	for _, br := range parts {
+		if br == "" {
+			continue
 		}
-		children = append(children, &FlatBranch{
-			Name:       cn,
-			Size:       child.Size,
-			HasContent: hasCont,
+		target = target.Content[br]
+	}
+	// log.Println(parts)
+	// log.Println(len(parts))
+	// log.Println(parts[0])
+	// log.Println(parts[len(parts)-1])
+	// log.Println(target)
+	re := parseNode(target, parts[len(parts)-1])
+	// re := parseNode(target, "parts[len(parts)-1]")
+	// prinAsJson(re)
+	return re
+}
+
+func parseNodeContent(raw *rawNode) []*models.Node {
+	re := make([]*models.Node, 0, len(raw.Content))
+	for name, cont := range raw.Content {
+		re = append(re, &models.Node{
+			Name:       name,
+			Type:       "d",
+			Size:       cont.Size,
+			SizeIsTemp: cont.Temp,
 		})
 	}
 
-	sort.Slice(children, func(i, j int) bool {
-		return children[i].Size > children[j].Size
-	})
+	// sort.Slice(children, func(i, j int) bool {
+	// 	return children[i].Size > children[j].Size
+	// })
 
-	return children
+	return re
 }
 
-func getCachedBranch(branches []string) []*FlatBranch {
-	// tree := Node{}
-	// err := readParseJson("res0.json", &tree)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// prinAsJson(tree)
-	// target := &tree
+func getCachedBranch(branches []string) []*models.Node {
 	target := tree
 	for _, br := range branches {
 		target = target.Content[br]
 	}
-	re := getBranchContent(target)
+	re := parseNodeContent(target)
 	// prinAsJson(re)
 	return re
 }
