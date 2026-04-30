@@ -1,15 +1,14 @@
-import { doFetch } from "../api/fetch"
+import doFetch0, { doFetch } from "../api/fetch"
 import { pathInpunt } from "../global/pathInput"
 import handleBytes from "../helpers/handleBytes"
-import type { Branch, Branch2, Node } from "../types"
+import timePromise from "../helpers/timePromise"
+import type { Branch, Node } from "../types"
 
 const totalSize = document.getElementById("root") as HTMLDivElement
 const treeBlock = document.getElementById("tree")!
 
-// let tree = null as Node
+let tree = null as Node
 const branches = [] as Branch[]
-const branches2 = [] as Branch2[]
-const branches3 = new Map() as Map<string, Branch2>
 
 let max = -1
 
@@ -27,7 +26,7 @@ function createLi(node: Node, prePath = ""): string {
         content = `data-path="${prePath}" data-dirname="${node.name}"`
     }
     // console.log(data.size / max * 100);
-    return `<li class="${content ? "nested" : ""}" ${content} data-size="${node.size}">
+    return `<li class="${content ? "nested" : ""}" data-size="${node.size}">
         <div class="fd-entry" title="path: ${prePath || "root"}\nname: ${node.name}">
             <div
                 class="fd-vizual-size"
@@ -42,13 +41,56 @@ function createLi(node: Node, prePath = ""): string {
     </li>`
 }
 
+function updateBranches() {
+    branches.sort((a, b) => a.path.length - b.path.length)
+    const rev = [...branches].reverse()
+    for (const b of rev) {
+        console.log(b.path)
+        // if (b.node.tempSize < b.node.size) continue
+        const tempSize = b.node.content.reduce((sum, entry) => sum + entry.size, 0)
+        console.log(b.node.size, tempSize)
+        if (b.node.size === tempSize) continue
+
+        b.node.size = tempSize
+        // const newVal = `~${handleBytes(tempSize)}`
+        const newVal = displaySize(b.node)
+        if (b.sizeDisplay.textContent !== newVal) b.sizeDisplay.textContent = newVal
+        if (b.nodeView) {
+            const str = tempSize.toString()
+            b.nodeView.dataset.size = str
+            b.vizualSizeDisplay.dataset.size = str
+        }
+    }
+    console.log(branches)
+
+    const mainBranchCont = branches[0].node.content
+    mainBranchCont.sort((a, b) => b.size - a.size)
+    console.log(mainBranchCont)
+    if (mainBranchCont[0].size > max) {
+        max = mainBranchCont[0].size
+    }
+    reDrawVisualSize()
+
+    const branchViews = treeBlock.querySelectorAll("ul.dir-content")
+    console.log(branchViews)
+    for (const bv of branchViews) {
+        const nodeViews = [...bv.children] as HTMLLIElement[]
+        nodeViews.sort((a, b) => Number(b.dataset.size) - Number(a.dataset.size))
+        console.log(nodeViews)
+        // console.log(nodeViews[0].dataset)
+        const fragment = document.createDocumentFragment()
+        nodeViews.forEach(e => fragment.appendChild(e))
+        bv.appendChild(fragment)
+    }
+}
+
 function createBranch(
     node: Node,
     prePath: string,
     sizeDisplay: HTMLDivElement,
     nodeView = null as HTMLLIElement,
     vizualSizeDisplay = null as HTMLDivElement
-): DocumentFragment {
+): string {
     const path = prePath ? `${prePath}/${node.name}` : node.name
     branches.push({
         path,
@@ -60,28 +102,11 @@ function createBranch(
 
     node.content.sort((a, b) => b.size - a.size)
 
-    // updateBranches()
+    updateBranches()
 
     // const lis = node.content.map(entry => createLi(entry, prePath)).join("")
     const lis = node.content.map(entry => createLi(entry, path)).join("")
-    // return `<ul class="dir-content">${lis}</ul>`
-    // const ulHtml = `<ul class="dir-content">${lis}</ul>`
-    const templ = document.createElement("template")
-    // console.log(templ)
-    templ.innerHTML = `<ul class="dir-content">${lis}</ul>`
-
-    // branches2.push({
-    //     path,
-    //     lis: [...templ.content.querySelectorAll("li")]
-    // })
-    // console.log(branches2)
-    branches3.set(path, {
-        path,
-        lis: [...templ.content.querySelectorAll("li")]
-    })
-    console.log(branches3)
-
-    return templ.content
+    return `<ul class="dir-content">${lis}</ul>`
 }
 
 function reDrawVisualSize() {
@@ -93,71 +118,15 @@ function reDrawVisualSize() {
     })
 }
 
-function updateTree(bNode: Node) {
-    // branches.sort((a, b) => a.path.length - b.path.length)
-    // const rev = [...branches].reverse()
-    // for (const b of rev) {
-    //     console.log(b.path)
-    //     // if (b.node.tempSize < b.node.size) continue
-    //     const tempSize = b.node.content.reduce((sum, entry) => sum + entry.size, 0)
-    //     console.log(b.node.size, tempSize)
-    //     if (b.node.size === tempSize) continue
-
-    //     b.node.size = tempSize
-    //     // const newVal = `~${handleBytes(tempSize)}`
-    //     const newVal = displaySize(b.node)
-    //     if (b.sizeDisplay.textContent !== newVal) b.sizeDisplay.textContent = newVal
-    //     if (b.nodeView) {
-    //         const str = tempSize.toString()
-    //         b.nodeView.dataset.size = str
-    //         b.vizualSizeDisplay.dataset.size = str
-    //     }
-    // }
-    // console.log(branches)
-
-    const bView = branches3.get(bNode.name)
-    console.log(bView)
-    for (const li of bView.lis) {
-        console.log(li.dataset)
-        const node = bNode.content.find(n => n.name === li.dataset.dirname)
-        console.log(node)
-        if (!node) continue
-
-        const sizeDisplay = li.querySelector(".fd-size")!
-        const newVal = displaySize(node)
-        if (sizeDisplay.textContent !== newVal) sizeDisplay.textContent = newVal
-    }
-
-    // const mainBranchCont = branches[0].node.content
-    // mainBranchCont.sort((a, b) => b.size - a.size)
-    // console.log(mainBranchCont)
-    // if (mainBranchCont[0].size > max) {
-    //     max = mainBranchCont[0].size
-    // }
-    // reDrawVisualSize()
-
-    // const branchViews = treeBlock.querySelectorAll("ul.dir-content")
-    // console.log(branchViews)
-    // for (const bv of branchViews) {
-    //     const nodeViews = [...bv.children] as HTMLLIElement[]
-    //     nodeViews.sort((a, b) => Number(b.dataset.size) - Number(a.dataset.size))
-    //     console.log(nodeViews)
-    //     // console.log(nodeViews[0].dataset)
-    //     const fragment = document.createDocumentFragment()
-    //     nodeViews.forEach(e => fragment.appendChild(e))
-    //     bv.appendChild(fragment)
-    // }
-}
-
 export async function initTree() {
     const path = pathInpunt.value
-    const tree = {
+    tree = {
         // name: path,
         name: "",
         type: "d",
         size: 0,
         sizeIsTemp: true
-    } as Node
+    }
     // const data = await doFetch("/dir", { path })
     const data = await doFetch("/dir", { path, initDu: true })
 
@@ -166,16 +135,14 @@ export async function initTree() {
         console.log(update)
         if (!update.sizeIsTemp) clearInterval(t)
         // tree.content = update
-        // tree = update
-        // treeBlock.innerHTML = createBranch(tree, "", totalSize)
-        updateTree(update)
+        tree = update
+        treeBlock.innerHTML = createBranch(tree, "", totalSize)
     }, 1000)
     // console.log(data)
     tree.content = data
     console.log(tree)
     // buildGradually({ content: data })
-    // treeBlock.innerHTML = createBranch(tree, "", totalSize)
-    treeBlock.appendChild(createBranch(tree, "", totalSize))
+    treeBlock.innerHTML = createBranch(tree, "", totalSize)
 }
 
 treeBlock.addEventListener("click", async e => {

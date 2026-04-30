@@ -5,6 +5,7 @@ import (
 	"log"
 	"strings"
 	"sync"
+	"time"
 )
 
 type treeStr struct {
@@ -16,7 +17,9 @@ var tree2 = &treeStr{}
 
 func resetTree() {
 	tree2 = &treeStr{
-		root: &rawNode{Content: make(map[string]*rawNode)},
+		root: &rawNode{
+			Temp:    true,
+			Content: make(map[string]*rawNode)},
 	}
 }
 
@@ -25,6 +28,8 @@ func (t *treeStr) fill(path []string, size int64) {
 
 	t.mu.Lock()
 	defer t.mu.Unlock()
+
+	time.Sleep(time.Second)
 
 	if len(path) == 1 && path[0] == "" {
 		t.root.Size = size
@@ -49,7 +54,7 @@ func (t *treeStr) fill(path []string, size int64) {
 		node.Temp = false
 	}
 
-	tempPrinAsJson(parseNode(t.root, "root"))
+	// tempPrinAsJson(parseNode(t.root, "root"))
 }
 
 func (t *treeStr) getDir(path string) models.Node {
@@ -68,4 +73,8 @@ func (t *treeStr) getDir(path string) models.Node {
 	}
 
 	return parseNode(target, parts[len(parts)-1])
+}
+
+func GetUpdate() models.Node {
+	return tree2.getDir("")
 }

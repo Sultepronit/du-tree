@@ -15,9 +15,11 @@ func Start() {
 	// http.HandleFunc("/du-exec", handleDuExec)
 	// http.HandleFunc("/get-branch", handleBranch)
 	// http.HandleFunc("/get-part", handlePart)
-	
-	http.HandleFunc("POST /dir", handleDir)
 	// http.HandleFunc("/dir", handleDir)
+
+	http.HandleFunc("POST /dir", handleDir)
+
+	http.HandleFunc("/update", handleUpdate)
 
 	http.HandleFunc("/", handleHello)
 	port := "8088"

@@ -13,5 +13,6 @@ import execute from "./view/buildTree0"
 // pathInpunt.value = "/home/step/"
 // pathInpunt.value = "/data/web-projects/"
 // pathInpunt.value = "/data/web-projects/du-tree/test/"
-pathInpunt.value = "/home/step/work/du-tree/test"
+// pathInpunt.value = "/home/step/work/du-tree/test/"
+pathInpunt.value = "/home/step/work/du-tree/"
 initTree()

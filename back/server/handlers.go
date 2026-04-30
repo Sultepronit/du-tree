@@ -21,11 +21,7 @@ func sendResult(w http.ResponseWriter, res any) {
 }
 
 func handleDir(w http.ResponseWriter, r *http.Request) {
-	// log.Println("dir handler!")
 	log.Println(r.URL.Path)
-	// log.Println(r.Method)
-	// log.Println(r.Body)
-	// sendResult(w, "success!")
 	var req models.Request
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		log.Println("Bad JSON:", err)
@@ -44,6 +40,11 @@ func handleDir(w http.ResponseWriter, r *http.Request) {
 	if req.InitDu {
 		go du.Init(req.Path)
 	}
+}
+
+func handleUpdate(w http.ResponseWriter, r *http.Request) {
+	log.Println(r.URL.Path)
+	sendResult(w, du.GetUpdate())
 }
 
 // func handleDuExec(w http.ResponseWriter, r *http.Request) {

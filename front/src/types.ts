@@ -13,3 +13,8 @@ export type Branch = {
     sizeDisplay: HTMLDivElement
     vizualSizeDisplay?: HTMLDivElement
 }
+
+export type Branch2 = {
+    path: string
+    lis: HTMLLIElement[]
+}
