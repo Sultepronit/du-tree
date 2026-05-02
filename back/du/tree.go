@@ -2,10 +2,8 @@ package du
 
 import (
 	"du-tree/models"
-	"log"
 	"strings"
 	"sync"
-	"time"
 )
 
 type treeStr struct {
@@ -13,10 +11,12 @@ type treeStr struct {
 	root *rawNode
 }
 
-var tree2 = &treeStr{}
+var tree2 = treeStr{}
+var sizeBranches map[string]bool
 
 func resetTree() {
-	tree2 = &treeStr{
+	sizeBranches = make(map[string]bool)
+	tree2 = treeStr{
 		root: &rawNode{
 			Temp:    true,
 			Content: make(map[string]*rawNode)},
@@ -24,12 +24,15 @@ func resetTree() {
 }
 
 func (t *treeStr) fill(path []string, size int64) {
-	log.Println(path, size)
+	pathPart := ""
+	fullPath := strings.Join(path, "/") + "/"
+	// log.Println(path, size, fullPath)
 
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
-	time.Sleep(time.Second)
+	// time.Sleep(time.Second)
+	// time.Sleep(time.Millisecond * 200)
 
 	if len(path) == 1 && path[0] == "" {
 		t.root.Size = size
@@ -37,7 +40,14 @@ func (t *treeStr) fill(path []string, size int64) {
 	} else {
 		node := t.root
 		for _, stage := range path {
-			node.Size += size
+			pathPart += stage + "/"
+			// log.Println(pathPart)
+			if !sizeBranches[fullPath] {
+				node.Size += size
+				sizeBranches[pathPart] = true
+			}
+
+			// node.Size += size
 			if val, prs := node.Content[stage]; prs {
 				node = val
 			} else {
@@ -52,6 +62,8 @@ func (t *treeStr) fill(path []string, size int64) {
 		}
 		node.Size = size
 		node.Temp = false
+		// tempPrinAsJson(sizeBranches)
+		delete(sizeBranches, pathPart)
 	}
 
 	// tempPrinAsJson(parseNode(t.root, "root"))

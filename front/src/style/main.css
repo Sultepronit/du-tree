@@ -12,6 +12,10 @@ body {
     font-family: "Ubuntu Mono", monospace;
 }
 
+:root {
+    --max-size: 1;
+}
+
 input {
     font: inherit;
 }
@@ -75,6 +79,7 @@ li::before {
 .fd-vizual-size {
     position: absolute;
     height: 1.15em;
+    width: calc(var(--size) / var(--max-size));
     /* width: 10em; */
     /* background-color: yellow; */
     background-color: #0f0;

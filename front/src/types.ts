@@ -18,3 +18,16 @@ export type Branch2 = {
     path: string
     lis: HTMLLIElement[]
 }
+
+export type Shoot = {
+    size: number
+    li: HTMLLIElement
+    text?: HTMLDivElement
+    // bar?: HTMLDivElement
+}
+
+// export type Branch4 = Record<string, Shoot>
+export type Branch4 = {
+    ul: HTMLUListElement
+    shoots: Record<string, Shoot>
+}

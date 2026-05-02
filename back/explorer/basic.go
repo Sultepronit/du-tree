@@ -21,7 +21,8 @@ func ReadDir(path string) ([]*models.Node, error) {
 		// fmt.Print(e.Type().String())
 		node.Name = e.Name()
 		node.Type = e.Type().String()
-		if node.Type != "----------" {
+		// if node.Type != "----------" {
+		if node.Type == "d---------" {
 			node.SizeIsTemp = true
 			continue
 		}

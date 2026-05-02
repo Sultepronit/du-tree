@@ -139,7 +139,8 @@ func Init(path string) {
 
 	// cmd := exec.Command("sudo", "du", "-a", "--max-depth=4", path)
 	// cmd := exec.Command("du", "-a", "--max-depth=4", "~")
-	cmd := exec.Command("du", "-b", "--max-depth=5", path)
+	// cmd := exec.Command("du", "-b", "--max-depth=5", path)
+	cmd := exec.Command("du", "-b", "--exclude=/proc", path)
 	// cmd.Stderr = os.Stderr // ?
 	log.Println("cmd!")
 
