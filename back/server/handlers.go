@@ -2,7 +2,6 @@ package server
 
 import (
 	"du-tree/du"
-	"du-tree/explorer"
 	"du-tree/models"
 	"encoding/json"
 	"fmt"
@@ -29,51 +28,22 @@ func handleDir(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Println(req)
+
+	if req.InitDu {
+		go du.Init(req.Path)
+	}
+
 	// sendResult(w, req)
-	re, err := explorer.ReadDir(req.Path)
+	// re, err := explorer.ReadDir(req.Path)
+	re, err := du.GetDir(req.Path)
 	if err != nil { // temp!
 		// log.Fatal(err)
 		log.Println(err)
 	}
 	sendResult(w, re)
-
-	if req.InitDu {
-		go du.Init(req.Path)
-	}
 }
 
 func handleUpdate(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.URL.Path)
 	sendResult(w, du.GetUpdate())
 }
-
-// func handleDuExec(w http.ResponseWriter, r *http.Request) {
-// 	log.Println(r.URL.Path)
-// 	p := r.URL.Query().Get("path")
-// 	log.Println("path:", p)
-
-// 	re := du2(p)
-// 	sendResult(w, re)
-// }
-
-// func handlePart(w http.ResponseWriter, r *http.Request) {
-// 	log.Println(r.URL.Path)
-// 	sendResult(w, instantRoot)
-// }
-
-// func handleBranch(w http.ResponseWriter, r *http.Request) {
-// 	log.Println(r.URL.Path)
-// 	p := r.URL.Query().Get("path")
-// 	log.Println("path:", p)
-
-// 	// re := getCachedBranch([]string{"a"})
-// 	re := getCachedBranch(strings.Split(p, "/"))
-
-// 	w.Header().Set("Access-Control-Allow-Origin", "*")
-// 	w.Header().Set("Content-Type", "application/json")
-// 	err := json.NewEncoder(w).Encode(re)
-// 	if err != nil {
-// 		log.Println(err)
-// 		http.Error(w, "JSON encode error", http.StatusInternalServerError)
-// 	}
-// }

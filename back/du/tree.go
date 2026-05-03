@@ -86,7 +86,3 @@ func (t *treeStr) getDir(path string) models.Node {
 
 	return parseNode(target, parts[len(parts)-1])
 }
-
-func GetUpdate() models.Node {
-	return tree2.getDir("")
-}

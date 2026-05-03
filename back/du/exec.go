@@ -10,6 +10,8 @@ import (
 	"strings"
 )
 
+var discardIndex int
+
 // remove json?
 type rawNode struct {
 	Size    int64               `json:"size"`
@@ -65,7 +67,7 @@ func fillTree(path []string, size int64) {
 	tempPrinAsJson(parseNode(tree, "root"))
 }
 
-func parseOutput2(line string, discardIndex int) {
+func parseOutput2(line string) {
 	parts := strings.SplitN(line, "\t", 2)
 	if len(parts) != 2 {
 		return
@@ -123,7 +125,7 @@ func Init(path string) {
 	// 	Size: -1,
 	// }
 
-	discardIndex := len(strings.Split(path, "/")) - 1
+	discardIndex = len(strings.Split(path, "/")) - 1
 
 	// cmd := exec.Command("du", "-ab", "--exclude=/proc", path)
 	// cmd := exec.Command("du", "-ab", "--max-depth=2", path)
@@ -159,7 +161,7 @@ func Init(path string) {
 		// fmt.Println("[", line, "]")
 		// parts := strings.SplitN(line, "\t", 2)
 		// fmt.Println(parts)
-		parseOutput2(line, discardIndex)
+		parseOutput2(line)
 	}
 
 	if err := cmd.Wait(); err != nil {

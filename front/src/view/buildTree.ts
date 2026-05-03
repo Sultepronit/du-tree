@@ -64,6 +64,7 @@ function updateTree(bNode: Node) {
         max = bNode.content[0].size
         document.documentElement.style.setProperty("--max-size", (max / 100).toString())
     }
+    totalSize.textContent = formatSize(bNode)
 
     if (!branches4[bNode.name]) {
         const branch = {
@@ -121,32 +122,31 @@ function updateTree(bNode: Node) {
 
 export async function initTree() {
     const path = pathInpunt.value
-    const tree = {
-        // name: path,
-        name: "",
-        type: "d",
-        size: 0,
-        sizeIsTemp: true
-    } as Node
-    // const data = await doFetch("/dir", { path })
-    const data = await doFetch("/dir", { path, initDu: true })
+    // const tree = {
+    //     // name: path,
+    //     name: "",
+    //     type: "d",
+    //     size: 0,
+    //     sizeIsTemp: true
+    // } as Node
+
+    const data = (await doFetch("/dir", { path, initDu: true })) as Node
 
     const t = setInterval(async () => {
         const update = await doFetch("/update")
         console.log(update)
         if (!update.sizeIsTemp) clearInterval(t)
-        // tree.content = update
-        // tree = update
-        // treeBlock.innerHTML = createBranch(tree, "", totalSize)
         updateTree(update)
     }, 1000)
 
-    // console.log(data)
-    tree.content = data
-    console.log(tree)
+    console.log(data)
+    totalSize.textContent = formatSize(data)
+    // tree.content = data
+    // console.log(tree)
     // buildGradually({ content: data })
     // treeBlock.innerHTML = createBranch(tree, "", totalSize)
-    treeBlock.appendChild(createBranch(tree, ""))
+    // treeBlock.appendChild(createBranch(tree, ""))
+    treeBlock.appendChild(createBranch(data, ""))
 }
 
 treeBlock.addEventListener("click", async e => {
@@ -171,16 +171,16 @@ treeBlock.addEventListener("click", async e => {
         const data = await doFetch("/dir", { path: fullPath })
         // node.content = await doFetch("/dir", { path: fullPath })
         console.log(data)
-        const node = {
-            name: dataset.dirname,
-            type: "d",
-            size: 0,
-            content: data
-        }
+        // const node = {
+        //     name: dataset.dirname,
+        //     type: "d",
+        //     size: 0,
+        //     content: data
+        // }
 
         // li.insertAdjacentHTML("beforeend", html)
-        // li.appendChild(createBranch(data, dataset.path))
-        li.appendChild(createBranch(node, dataset.path))
+        li.appendChild(createBranch(data, dataset.path))
+        // li.appendChild(createBranch(node, dataset.path))
         // target.dataset.path = ""
         // delete target.dataset.path
         dataset.active = "true"
