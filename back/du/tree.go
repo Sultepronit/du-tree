@@ -2,7 +2,6 @@ package du
 
 import (
 	"du-tree/models"
-	"log"
 	"strings"
 	"sync"
 )
@@ -25,8 +24,8 @@ func resetTree() {
 }
 
 func (t *treeStr) fill(path []string, size int64) {
-	pathPart := ""
-	fullPath := strings.Join(path, "/") + "/"
+	// pathPart := ""
+	// fullPath := strings.Join(path, "/") + "/"
 	// log.Println(path, size, fullPath)
 
 	t.mu.Lock()
@@ -41,12 +40,12 @@ func (t *treeStr) fill(path []string, size int64) {
 	} else {
 		node := t.root
 		for _, stage := range path {
-			pathPart += stage + "/"
-			// log.Println(pathPart)
-			if !sizeBranches[fullPath] {
-				node.Size += size
-				sizeBranches[pathPart] = true
-			}
+			// pathPart += stage + "/"
+			// // log.Println(pathPart)
+			// if !sizeBranches[fullPath] {
+			// 	node.Size += size
+			// 	sizeBranches[pathPart] = true
+			// }
 
 			// node.Size += size
 			if val, prs := node.Content[stage]; prs {
@@ -61,13 +60,13 @@ func (t *treeStr) fill(path []string, size int64) {
 				node = new
 			}
 		}
-		if node.Size != 0 {
-			log.Println(node.Size)
-		}
+		// if node.Size != 0 {
+		// 	log.Println(node.Size)
+		// }
 		node.Size = size
 		node.Temp = false
 		// tempPrinAsJson(sizeBranches)
-		delete(sizeBranches, pathPart)
+		// delete(sizeBranches, pathPart)
 	}
 
 	// tempPrinAsJson(parseNode(t.root, "root"))

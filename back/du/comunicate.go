@@ -3,7 +3,6 @@ package du
 import (
 	"du-tree/explorer"
 	"du-tree/models"
-	"fmt"
 	"strings"
 )
 
@@ -22,7 +21,7 @@ func GetDir(path string) (*models.Node, error) {
 	for _, n := range dure.Content {
 		dureCont[n.Name] = n
 	}
-	fmt.Println(dureCont)
+	// fmt.Println(dureCont)
 
 	for i, n := range baceCont {
 		if u, found := dureCont[n.Name]; found {
