@@ -21,7 +21,7 @@ input {
 }
 
 .root {
-    width: 7em;
+    width: 6em;
 }
 
 ul {
@@ -69,7 +69,7 @@ li::before {
 .fd-entry {
     /* display: flex; */
     display: grid;
-    grid-template-columns: 7em auto;
+    grid-template-columns: 6em auto;
     gap: 1em;
     /* border-bottom: 3px solid lightgray; */
     /* width: fit-content; */

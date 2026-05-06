@@ -34,38 +34,38 @@ var tree *rawNode
 
 // var instantRoot *Root
 
-func fillTree(path []string, size int64) {
-	// if len(path) == 1 {
-	// 	log.Println(path, size)
-	// }
-	log.Println(path, size)
-	if len(path) == 1 && path[0] == "" {
-		tree.Size = size
-		tree.Temp = false
-	} else {
-		node := tree
-		for _, stage := range path {
-			node.Size += size
-			if val, prs := node.Content[stage]; prs {
-				node = val
-			} else {
-				if node.Content == nil {
-					node.Content = make(map[string]*rawNode)
-				}
+// func fillTree(path []string, size int64) {
+// 	// if len(path) == 1 {
+// 	// 	log.Println(path, size)
+// 	// }
+// 	log.Println(path, size)
+// 	if len(path) == 1 && path[0] == "" {
+// 		tree.Size = size
+// 		tree.Temp = false
+// 	} else {
+// 		node := tree
+// 		for _, stage := range path {
+// 			node.Size += size
+// 			if val, prs := node.Content[stage]; prs {
+// 				node = val
+// 			} else {
+// 				if node.Content == nil {
+// 					node.Content = make(map[string]*rawNode)
+// 				}
 
-				new := &rawNode{Temp: true}
-				node.Content[stage] = new
-				node = new
-			}
-		}
-		node.Size = size
-		node.Temp = false
-	}
-	// tempPrinAsJson(tree)
-	// tempPrinAsJson(getCachedBranch(path))
-	// tempPrinAsJson(parseNodeContent(tree))
-	tempPrinAsJson(parseNode(tree, "root"))
-}
+// 				new := &rawNode{Temp: true}
+// 				node.Content[stage] = new
+// 				node = new
+// 			}
+// 		}
+// 		node.Size = size
+// 		node.Temp = false
+// 	}
+// 	// tempPrinAsJson(tree)
+// 	// tempPrinAsJson(getCachedBranch(path))
+// 	// tempPrinAsJson(parseNodeContent(tree))
+// 	tempPrinAsJson(parseNode(tree, "root"))
+// }
 
 func parseOutput2(line string) {
 	parts := strings.SplitN(line, "\t", 2)
@@ -143,6 +143,8 @@ func Init(path string) {
 	// cmd := exec.Command("du", "-a", "--max-depth=4", "~")
 	// cmd := exec.Command("du", "-b", "--max-depth=5", path)
 	cmd := exec.Command("du", "-b", "--exclude=/proc", path)
+	// cmd := exec.Command("sudo", "du", "-ab", "--exclude=/proc", path)
+	// cmd := exec.Command("du", "-ab", "--exclude=/proc", path)
 	// cmd.Stderr = os.Stderr // ?
 	log.Println("cmd!")
 

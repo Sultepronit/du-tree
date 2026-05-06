@@ -59,12 +59,15 @@ function createBranch(node: Node, prePath: string): DocumentFragment {
 
 function updateTree(bNode: Node) {
     // ADAPT THIS FOR MANY BRANCHES!
+    totalSize.textContent = formatSize(bNode)
+    if (!bNode.content) return
+
     bNode.content.sort((a, b) => b.size - a.size)
-    if (bNode.content[0].size != max) {
+    // if (bNode.content[0].size != max) {
+    if (bNode.content[0].size > max) {
         max = bNode.content[0].size
         document.documentElement.style.setProperty("--max-size", (max / 100).toString())
     }
-    totalSize.textContent = formatSize(bNode)
 
     if (!branches4[bNode.name]) {
         const branch = {

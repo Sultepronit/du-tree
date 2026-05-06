@@ -2,6 +2,7 @@ package du
 
 import (
 	"du-tree/models"
+	"log"
 	"strings"
 	"sync"
 )
@@ -59,6 +60,9 @@ func (t *treeStr) fill(path []string, size int64) {
 				node.Content[stage] = new
 				node = new
 			}
+		}
+		if node.Size != 0 {
+			log.Println(node.Size)
 		}
 		node.Size = size
 		node.Temp = false
