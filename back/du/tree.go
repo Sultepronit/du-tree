@@ -4,7 +4,25 @@ import (
 	"du-tree/models"
 	"strings"
 	"sync"
+	"time"
 )
+
+type rawNode struct {
+	Size    int64               `json:"size"`
+	Temp    bool                `json:"temp,omitempty"`
+	Content map[string]*rawNode `json:"content,omitempty"`
+}
+
+func (n *rawNode) getSize() int64 {
+	if n.Size > 0 || !n.Temp {
+		return n.Size
+	}
+
+	for _, c := range n.Content {
+		n.Size += c.getSize()
+	}
+	return n.Size
+}
 
 type treeStr struct {
 	mu   sync.RWMutex
@@ -32,7 +50,7 @@ func (t *treeStr) fill(path []string, size int64) {
 	defer t.mu.Unlock()
 
 	// time.Sleep(time.Second)
-	// time.Sleep(time.Millisecond * 200)
+	time.Sleep(time.Millisecond * 200)
 
 	if len(path) == 1 && path[0] == "" {
 		t.root.Size = size
@@ -40,6 +58,7 @@ func (t *treeStr) fill(path []string, size int64) {
 	} else {
 		node := t.root
 		for _, stage := range path {
+			node.Size = 0
 			// pathPart += stage + "/"
 			// // log.Println(pathPart)
 			// if !sizeBranches[fullPath] {

@@ -125,15 +125,16 @@ function updateTree(bNode: Node) {
 
 export async function initTree() {
     const path = pathInpunt.value
-    // const tree = {
-    //     // name: path,
-    //     name: "",
-    //     type: "d",
-    //     size: 0,
-    //     sizeIsTemp: true
-    // } as Node
+    const tree = {
+        // name: path,
+        name: "",
+        type: "d",
+        size: 0,
+        sizeIsTemp: true
+    } as Node
 
-    const data = (await doFetch("/dir", { path, initDu: true })) as Node
+    // const data = (await doFetch("/dir", { path, initDu: true })) as Node
+    const data = (await doFetch("/dir", { path, initDu: true })) as Node[]
 
     const t = setInterval(async () => {
         const update = await doFetch("/update")
@@ -143,13 +144,14 @@ export async function initTree() {
     }, 1000)
 
     console.log(data)
-    totalSize.textContent = formatSize(data)
-    // tree.content = data
-    // console.log(tree)
+    // totalSize.textContent = formatSize(data)
+    totalSize.textContent = formatSize(tree)
+    tree.content = data
+    console.log(tree)
     // buildGradually({ content: data })
     // treeBlock.innerHTML = createBranch(tree, "", totalSize)
-    // treeBlock.appendChild(createBranch(tree, ""))
-    treeBlock.appendChild(createBranch(data, ""))
+    treeBlock.appendChild(createBranch(tree, ""))
+    // treeBlock.appendChild(createBranch(data, ""))
 }
 
 treeBlock.addEventListener("click", async e => {

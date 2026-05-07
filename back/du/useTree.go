@@ -2,14 +2,15 @@ package du
 
 import (
 	"du-tree/models"
-	"strings"
+	// "strings"
 )
 
 func transformNode(raw *rawNode, name string) models.Node {
 	return models.Node{
 		Name:       name,
 		Type:       "d",
-		Size:       raw.Size,
+		// Size:       raw.Size,
+		Size:       raw.getSize(),
 		SizeIsTemp: raw.Temp,
 	}
 }
@@ -27,26 +28,26 @@ func parseNode(raw *rawNode, name string) models.Node {
 	return node
 }
 
-func getDir(path string) models.Node {
-	parts := strings.Split(path, "/")
-	target := tree
-	// log.Println(target)
-	for _, br := range parts {
-		if br == "" {
-			continue
-		}
-		target = target.Content[br]
-	}
-	// log.Println(parts)
-	// log.Println(len(parts))
-	// log.Println(parts[0])
-	// log.Println(parts[len(parts)-1])
-	// log.Println(target)
-	re := parseNode(target, parts[len(parts)-1])
-	// re := parseNode(target, "parts[len(parts)-1]")
-	// prinAsJson(re)
-	return re
-}
+// func getDir(path string) models.Node {
+// 	parts := strings.Split(path, "/")
+// 	target := tree
+// 	// log.Println(target)
+// 	for _, br := range parts {
+// 		if br == "" {
+// 			continue
+// 		}
+// 		target = target.Content[br]
+// 	}
+// 	// log.Println(parts)
+// 	// log.Println(len(parts))
+// 	// log.Println(parts[0])
+// 	// log.Println(parts[len(parts)-1])
+// 	// log.Println(target)
+// 	re := parseNode(target, parts[len(parts)-1])
+// 	// re := parseNode(target, "parts[len(parts)-1]")
+// 	// prinAsJson(re)
+// 	return re
+// }
 
 func parseNodeContent(raw *rawNode) []*models.Node {
 	re := make([]*models.Node, 0, len(raw.Content))
@@ -66,12 +67,12 @@ func parseNodeContent(raw *rawNode) []*models.Node {
 	return re
 }
 
-func getCachedBranch(branches []string) []*models.Node {
-	target := tree
-	for _, br := range branches {
-		target = target.Content[br]
-	}
-	re := parseNodeContent(target)
-	// prinAsJson(re)
-	return re
-}
+// func getCachedBranch(branches []string) []*models.Node {
+// 	target := tree
+// 	for _, br := range branches {
+// 		target = target.Content[br]
+// 	}
+// 	re := parseNodeContent(target)
+// 	// prinAsJson(re)
+// 	return re
+// }

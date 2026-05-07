@@ -13,11 +13,11 @@ import (
 var discardIndex int
 
 // remove json?
-type rawNode struct {
-	Size    int64               `json:"size"`
-	Temp    bool                `json:"temp,omitempty"`
-	Content map[string]*rawNode `json:"content,omitempty"`
-}
+// type rawNode struct {
+// 	Size    int64               `json:"size"`
+// 	Temp    bool                `json:"temp,omitempty"`
+// 	Content map[string]*rawNode `json:"content,omitempty"`
+// }
 
 // type FlatBranch struct {
 // 	Name       string `json:"name"`
@@ -30,7 +30,7 @@ type rawNode struct {
 // 	Content []*FlatBranch `json:"content,omitempty"`
 // }
 
-var tree *rawNode
+// var tree *rawNode
 
 // var instantRoot *Root
 
