@@ -115,7 +115,8 @@ func tempPrinAsJson(input any) {
 	fmt.Println(string(j))
 }
 
-func Init(path string) {
+// func Init(path string) {
+func Init(path string, comm []string) {
 	// tree = &rawNode{
 	// 	Temp:    true,
 	// 	Content: make(map[string]*rawNode),
@@ -142,9 +143,16 @@ func Init(path string) {
 	// cmd := exec.Command("sudo", "du", "-a", "--max-depth=4", path)
 	// cmd := exec.Command("du", "-a", "--max-depth=4", "~")
 	// cmd := exec.Command("du", "-b", "--max-depth=5", path)
-	cmd := exec.Command("du", "-b", "--exclude=/proc", path)
+	// cmd := exec.Command("du", "-b", "--exclude=/proc", path)
 	// cmd := exec.Command("sudo", "du", "-ab", "--exclude=/proc", path)
 	// cmd := exec.Command("du", "-ab", "--exclude=/proc", path)
+	// cm := []string{"du", "-b", "--exclude=/proc", path}
+	// cmd := exec.Command(cm...)
+	// cm := []string{"-b", "--exclude=/proc", path}
+	// cmd := exec.Command("du", cm...)
+	// cm := []string{"du", "-b", "--exclude=/proc", path}
+	// cmd := exec.Command(cm[0], cm[1:]...)
+	cmd := exec.Command(comm[0], comm[1:]...)
 	// cmd.Stderr = os.Stderr // ?
 	log.Println("cmd!")
 

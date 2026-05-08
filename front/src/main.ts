@@ -13,8 +13,6 @@ import execute from "./view/buildTree0"
 // pathInpunt.value = "/"
 // pathInpunt.value = "/home/"
 
-// pathInpunt.value = "/home/sultepronit/"
-
 // pathInpunt.value = "/home/step/"
 // pathInpunt.value = "/home/step/Downloads/"
 
@@ -24,5 +22,13 @@ import execute from "./view/buildTree0"
 
 // pathInpunt.value = "/home/step/work/du-tree/test/"
 // pathInpunt.value = "/home/step/work/du-tree/"
-pathInpunt.value = "/home/sultepronit/work/du-tree/"
+
+pathInpunt.value = "/home/sultepronit/"
+// pathInpunt.value = "/home/sultepronit/server/"
+
+// pathInpunt.value = "/home/sultepronit/work/" 
+//   24 11 24 18 2.3 1.3
+//5: 18 21 13 1.5
+
+// pathInpunt.value = "/home/sultepronit/work/du-tree/"
 initTree()

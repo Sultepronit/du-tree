@@ -3,7 +3,7 @@ package server
 import (
 	"du-tree/du"
 	"du-tree/models"
-	"du-tree/explorer"
+	// "du-tree/explorer"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -31,12 +31,13 @@ func handleDir(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(req)
 
 	if req.InitDu {
-		go du.Init(req.Path)
+		// go du.Init(req.Path)
+		go du.Init(req.Path, req.Comm)
 	}
 
 	// sendResult(w, req)
-	re, err := explorer.ReadDir(req.Path)
-	// re, err := du.GetDir(req.Path)
+	// re, err := explorer.ReadDir(req.Path)
+	re, err := du.GetDir(req.Path)
 	if err != nil { // temp!
 		// log.Fatal(err)
 		log.Println(err)

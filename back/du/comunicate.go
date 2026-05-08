@@ -4,6 +4,7 @@ import (
 	"du-tree/explorer"
 	"du-tree/models"
 	"strings"
+	"log"
 )
 
 // func GetDir(path string) ([]*models.Node, error) {
@@ -16,6 +17,15 @@ func GetDir(path string) (*models.Node, error) {
 	allParts := strings.Split(path, "/")
 	parts := allParts[discardIndex:]
 	dure := tree2.getDir(strings.Join(parts, "/"))
+	log.Println("du.GetDir: dure", dure)
+
+	if dure == nil {
+		return &models.Node{
+			Size: 0,
+			SizeIsTemp: true,
+			Content: baceCont,
+		}, nil
+	}
 
 	dureCont := make(map[string]*models.Node, len(dure.Content))
 	for _, n := range dure.Content {
@@ -32,9 +42,9 @@ func GetDir(path string) (*models.Node, error) {
 	dure.Content = baceCont
 
 	// return baceCont, nil
-	return &dure, nil
+	return dure, nil
 }
 
-func GetUpdate() models.Node {
+func GetUpdate() *models.Node {
 	return tree2.getDir("")
 }
