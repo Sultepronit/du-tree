@@ -6,18 +6,18 @@ export type Node = {
     content?: Node[]
 }
 
-export type Branch = {
-    path: string
-    node: Node
-    nodeView?: HTMLLIElement
-    sizeDisplay: HTMLDivElement
-    vizualSizeDisplay?: HTMLDivElement
-}
+// export type Branch = {
+//     path: string
+//     node: Node
+//     nodeView?: HTMLLIElement
+//     sizeDisplay: HTMLDivElement
+//     vizualSizeDisplay?: HTMLDivElement
+// }
 
-export type Branch2 = {
-    path: string
-    lis: HTMLLIElement[]
-}
+// export type Branch2 = {
+//     path: string
+//     lis: HTMLLIElement[]
+// }
 
 export type Shoot = {
     size: number

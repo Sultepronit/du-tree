@@ -4,8 +4,6 @@ import (
 	"du-tree/models"
 	"strings"
 	"sync"
-	// "time"
-	// "log"
 )
 
 type rawNode struct {
@@ -90,6 +88,8 @@ func (t *treeStr) fill(path []string, size int64) {
 	}
 
 	// tempPrinAsJson(parseNode(t.root, "root"))
+	// tempPrinAsJson(t)
+	// tempPrinAsJson(t.root)
 }
 
 func (t *treeStr) getDir(path string) *models.Node {
@@ -101,7 +101,7 @@ func (t *treeStr) getDir(path string) *models.Node {
 
 	target := t.root
 	// log.Println(target)
-	if (target == nil) {
+	if target == nil {
 		return nil
 	}
 	for _, br := range parts {
@@ -116,6 +116,7 @@ func (t *treeStr) getDir(path string) *models.Node {
 	}
 
 	re := parseNode(target, parts[len(parts)-1])
+	// fmt.Println(re)
 
 	return &re
 }

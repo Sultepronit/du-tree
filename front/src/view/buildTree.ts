@@ -1,7 +1,7 @@
 import { doFetch } from "../api/fetch"
 import { pathInpunt } from "../global/pathInput"
 import handleBytes from "../helpers/handleBytes"
-import type { Branch, Branch2, Branch4, Node, Shoot } from "../types"
+import type { Branch4, Node, Shoot } from "../types"
 
 const totalSize = document.getElementById("root") as HTMLDivElement
 const treeBlock = document.getElementById("tree")!
@@ -57,27 +57,20 @@ function createBranch(node: Node, prePath: string): DocumentFragment {
     return templ.content
 }
 
-function updateTree(bNode: Node) {
-    // ADAPT THIS FOR MANY BRANCHES!
-    totalSize.textContent = formatSize(bNode)
+function updateBranch(bNode: Node) {
     if (!bNode.content) return
 
-    bNode.content.sort((a, b) => b.size - a.size)
-    // if (bNode.content[0].size != max) {
-    if (bNode.content[0].size > max) {
-        max = bNode.content[0].size
-        document.documentElement.style.setProperty("--max-size", (max / 100).toString())
-    }
-
+    console.log(bNode)
     if (!branches4[bNode.name]) {
         const branch = {
-            ul: treeBlock.querySelector(`ul[data-path=""]`),
+            ul: treeBlock.querySelector(`ul[data-path="${bNode.name}"]`),
             shoots: {}
         } as Branch4
         // branch.ul = treeBlock.querySelector(`ul[data-path=""]`)
         // console.log(branch.ul)
         // const lis = treeBlock.querySelectorAll(`li[data-path=""]`) as NodeListOf<HTMLLIElement>
-        const lis = treeBlock.querySelectorAll(`li`) as NodeListOf<HTMLLIElement>
+        // const lis = treeBlock.querySelectorAll(`li`) as NodeListOf<HTMLLIElement>
+        const lis = branch.ul.querySelectorAll(`li`) as NodeListOf<HTMLLIElement>
         console.log(lis)
         lis.forEach((li, i) => {
             branch.shoots[li.dataset.dirname || i] = { size: 0, li }
@@ -123,6 +116,23 @@ function updateTree(bNode: Node) {
     branch.ul.appendChild(fragment)
 }
 
+function updateTree(bNodes: Node[]) {
+    const root = bNodes[0]
+    totalSize.textContent = formatSize(root)
+    if (!root.content) return
+
+    root.content.sort((a, b) => b.size - a.size)
+    // if (root.content[0].size != max) {
+    if (root.content[0].size > max) {
+        max = root.content[0].size
+        document.documentElement.style.setProperty("--max-size", (max / 100).toString())
+    }
+
+    for (const b of bNodes) {
+        updateBranch(b)
+    }
+}
+
 export async function initTree() {
     console.time("t1")
     const path = pathInpunt.value
@@ -145,7 +155,7 @@ export async function initTree() {
     const t = setInterval(async () => {
         const update = await doFetch("/update")
         console.log(update)
-        if (!update.sizeIsTemp) {
+        if (!update[0].sizeIsTemp) {
             clearInterval(t)
             console.timeEnd("t1")
         }

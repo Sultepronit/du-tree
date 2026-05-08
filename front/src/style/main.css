@@ -1,6 +1,7 @@
 * {
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
 }
 
 body {
@@ -43,6 +44,8 @@ li {
     position: relative;
     margin-block: 0.2em;
     margin-left: 0.4em;
+    /* max-height: 50vh;
+    overflow: auto; */
 }
 
 li.nested {

@@ -3,9 +3,25 @@ package du
 import (
 	"du-tree/explorer"
 	"du-tree/models"
-	"strings"
+	"fmt"
 	"log"
+	"strings"
 )
+
+// var updatePaths = make(map[string]bool)
+// var updatePaths = make([]string, 0, 3)
+var updatePaths []string
+
+func genfSizePath(basePath []string) []string {
+	if len(basePath) == 1 && basePath[0] == "" {
+		updatePaths = make([]string, 0, 3)
+		return []string{"*files"}
+	}
+	fSizePath := make([]string, len(basePath)+1)
+	copy(fSizePath, basePath)
+	fSizePath[len(basePath)] = "*files"
+	return fSizePath
+}
 
 // func GetDir(path string) ([]*models.Node, error) {
 func GetDir(path string) (*models.Node, error) {
@@ -14,16 +30,33 @@ func GetDir(path string) (*models.Node, error) {
 		return nil, err
 	}
 
+	log.Println(path)
+	var fSize int64
+	for _, n := range baceCont {
+		// fmt.Println(n.Size)
+		fSize += n.Size
+	}
+	log.Println(fSize)
+
 	allParts := strings.Split(path, "/")
 	parts := allParts[discardIndex:]
+
+	fSizePath := genfSizePath(parts)
+	log.Println(fSizePath)
+	tree2.fill(fSizePath, fSize)
+
+	// updatePaths[strings.Join(parts, "/")] = true
+	updatePaths = append(updatePaths, strings.Join(parts, "/"))
+	fmt.Println(updatePaths)
+
 	dure := tree2.getDir(strings.Join(parts, "/"))
 	log.Println("du.GetDir: dure", dure)
 
 	if dure == nil {
 		return &models.Node{
-			Size: 0,
+			Size:       0,
 			SizeIsTemp: true,
-			Content: baceCont,
+			Content:    baceCont,
 		}, nil
 	}
 
@@ -45,6 +78,13 @@ func GetDir(path string) (*models.Node, error) {
 	return dure, nil
 }
 
-func GetUpdate() *models.Node {
-	return tree2.getDir("")
+// func GetUpdate() *models.Node {
+func GetUpdate() []*models.Node {
+	re := make([]*models.Node, len(updatePaths))
+	for i, p := range updatePaths {
+		fmt.Println(p)
+		re[i] = tree2.getDir(p)
+	}
+	// return tree2.getDir("")
+	return re
 }
