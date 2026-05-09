@@ -1,7 +1,7 @@
 import { doFetch } from "../api/fetch"
 import { pathInpunt } from "../global/pathInput"
 import handleBytes from "../helpers/handleBytes"
-import type { Branch4, Node, Shoot } from "../types"
+import type { Branch4, Node } from "../types"
 
 const totalSize = document.getElementById("root") as HTMLDivElement
 const treeBlock = document.getElementById("tree")!
@@ -16,28 +16,32 @@ let max = 1
 const formatSize = (node: Node) => `${node.sizeIsTemp ? "~" : ""}${handleBytes(node.size)}`
 
 function createLi(node: Node, prePath = ""): string {
-    let content = ""
+    let dirDetails = ""
     if (node.type[0] === "d") {
         // const path = pathprePath ? `${prePath}/${node.name}` : node.name
         // content = `data-path="${prePath + node.name}/"`
-        content = `data-path="${prePath}" data-dirname="${node.name}"`
+        dirDetails = `data-path="${prePath}" data-dirname="${node.name}"`
     }
     // console.log(data.size / max * 100);
     return `<li
-      class="${content ? "nested" : ""}"
+      class="${dirDetails ? "nested" : ""}"
       style="--size: ${node.size}%"
-      ${content}
+      ${dirDetails}
       data-size="${node.size}"
     >
-        <div class="fd-entry" title="path: ${prePath || "root"}\nname: ${node.name}">
+        <div
+            class="fd-entry"
+            title="path: ${prePath || "root"}\nname: ${node.name}"
+        >
             <div class="fd-vizual-size"></div>
-            <div class="fd-size ${content ? "interactive" : ""}">${formatSize(node)}</div>
-            <div class="fd-name">${node.name}</div>
+            <div class="fd-size ${dirDetails ? "interactive" : ""}" title="${node.size} B">${formatSize(node)}</div>
+            <div class="fd-name">${node.type[0]} ${node.name}</div>
         </div>
     </li>`
-} //style="width: ${calcBarWidth(node.size)}"
+}
 
 function createBranch(node: Node, prePath: string): DocumentFragment {
+    if (!node.content) return
     const path = prePath ? `${prePath}/${node.name}` : node.name
 
     node.content.sort((a, b) => b.size - a.size)
@@ -97,7 +101,10 @@ function updateBranch(bNode: Node) {
         const newVal = formatSize(cNode)
         if (!cNode.sizeIsTemp && shoot.text.textContent !== newVal)
             console.log(shoot.text.textContent, newVal)
-        if (shoot.text.textContent !== newVal) shoot.text.textContent = newVal
+        if (shoot.text.textContent !== newVal) {
+            shoot.text.textContent = newVal
+            shoot.text.title = `${cNode.size} B`
+        }
         // const width = calcBarWidth(Number(cNode.size))
         // console.log(cNode.size, width)
         // if (shoot.bar.style.width !== width) shoot.bar.style.width = width
@@ -148,6 +155,7 @@ export async function initTree() {
         path,
         initDu: true,
         command: ["du", "-b", "--exclude=/proc", path]
+        // command: ["du", "-B 1", "--exclude=/proc", path]
         // command: ["du", "-b", "--exclude=/proc", "d 5", path]
     })) as Node
     // const data = (await doFetch("/dir", { path, initDu: true })) as Node[]
@@ -203,7 +211,8 @@ treeBlock.addEventListener("click", async e => {
         // }
 
         // li.insertAdjacentHTML("beforeend", html)
-        li.appendChild(createBranch(data, dataset.path))
+        const branch = createBranch(data, dataset.path)
+        if (branch) li.appendChild(branch)
         // li.appendChild(createBranch(node, dataset.path))
         // target.dataset.path = ""
         // delete target.dataset.path
