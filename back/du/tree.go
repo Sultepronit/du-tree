@@ -29,10 +29,8 @@ type treeStr struct {
 }
 
 var tree2 = treeStr{}
-var sizeBranches map[string]bool
 
 func resetTree() {
-	sizeBranches = make(map[string]bool)
 	tree2 = treeStr{
 		root: &rawNode{
 			Temp:    true,
@@ -41,15 +39,8 @@ func resetTree() {
 }
 
 func (t *treeStr) fill(path []string, size int64) {
-	// pathPart := ""
-	// fullPath := strings.Join(path, "/") + "/"
-	// log.Println(path, size, fullPath)
-
 	t.mu.Lock()
 	defer t.mu.Unlock()
-
-	// time.Sleep(time.Second)
-	// time.Sleep(time.Millisecond * 200)
 
 	if len(path) == 1 && path[0] == "" {
 		t.root.Size = size
@@ -57,15 +48,10 @@ func (t *treeStr) fill(path []string, size int64) {
 	} else {
 		node := t.root
 		for _, stage := range path {
-			node.Size = 0
-			// pathPart += stage + "/"
-			// // log.Println(pathPart)
-			// if !sizeBranches[fullPath] {
-			// 	node.Size += size
-			// 	sizeBranches[pathPart] = true
-			// }
+			if node.Temp {
+				node.Size = 0
+			}
 
-			// node.Size += size
 			if val, prs := node.Content[stage]; prs {
 				node = val
 			} else {
@@ -78,18 +64,9 @@ func (t *treeStr) fill(path []string, size int64) {
 				node = new
 			}
 		}
-		// if node.Size != 0 {
-		// 	log.Println(node.Size)
-		// }
 		node.Size = size
 		node.Temp = false
-		// tempPrinAsJson(sizeBranches)
-		// delete(sizeBranches, pathPart)
 	}
-
-	// tempPrinAsJson(parseNode(t.root, "root"))
-	// tempPrinAsJson(t)
-	// tempPrinAsJson(t.root)
 }
 
 func (t *treeStr) getDir(path string) *models.Node {
