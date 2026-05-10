@@ -33,15 +33,25 @@ function createLi(node: Node, prePath = ""): string {
             class="fd-entry"
             title="path: ${prePath || "root"}\nname: ${node.name}"
         >
-            <div class="fd-vizual-size"></div>
-            <div class="fd-size ${dirDetails ? "interactive" : ""}" title="${node.size} B">${formatSize(node)}</div>
-            <div class="fd-name">${node.type[0]} ${node.name}</div>
+            <div class="fd-type t${node.type[0]}"></div>
+            <div class="fd-details">
+                <div class="fd-vizual-size"></div>
+                <div class="fd-size ${dirDetails ? "interactive" : ""} ${node.sizeIsTemp ? "temp" : ""}" title="${node.size} B">${formatSize(node)}</div>
+                <div class="fd-name">${node.name}</div>
+            </div>
+            
         </div>
     </li>`
 }
 
 function createBranch(node: Node, prePath: string): DocumentFragment {
-    if (!node.content) return
+    // if (!node.content) return
+    if (!node.content) {
+        const templ = document.createElement("template")
+        templ.innerHTML = `<ul class="dir-content"></ul>`
+
+        return templ.content
+    }
     const path = prePath ? `${prePath}/${node.name}` : node.name
 
     node.content.sort((a, b) => b.size - a.size)
@@ -70,10 +80,7 @@ function updateBranch(bNode: Node) {
             ul: treeBlock.querySelector(`ul[data-path="${bNode.name}"]`),
             shoots: {}
         } as Branch4
-        // branch.ul = treeBlock.querySelector(`ul[data-path=""]`)
-        // console.log(branch.ul)
-        // const lis = treeBlock.querySelectorAll(`li[data-path=""]`) as NodeListOf<HTMLLIElement>
-        // const lis = treeBlock.querySelectorAll(`li`) as NodeListOf<HTMLLIElement>
+
         const lis = branch.ul.querySelectorAll(`li`) as NodeListOf<HTMLLIElement>
         console.log(lis)
         lis.forEach((li, i) => {
@@ -104,6 +111,9 @@ function updateBranch(bNode: Node) {
         if (shoot.text.textContent !== newVal) {
             shoot.text.textContent = newVal
             shoot.text.title = `${cNode.size} B`
+            // if (cNode.sizeIsTemp) shoot.text.classList.add("temp")
+            // else shoot.text.classList.remove("temp")
+            if (!cNode.sizeIsTemp) shoot.text.classList.remove("temp")
         }
         // const width = calcBarWidth(Number(cNode.size))
         // console.log(cNode.size, width)
@@ -154,8 +164,8 @@ export async function initTree() {
     const data = (await doFetch("/dir", {
         path,
         initDu: true,
-        command: ["du", "-b", "--exclude=/proc", path]
-        // command: ["du", "-B 1", "--exclude=/proc", path]
+        // command: ["du", "-b", "--exclude=/proc", path]
+        command: ["du", "-B 1", "--exclude=/proc", path]
         // command: ["du", "-b", "--exclude=/proc", "d 5", path]
     })) as Node
     // const data = (await doFetch("/dir", { path, initDu: true })) as Node[]
@@ -184,7 +194,8 @@ export async function initTree() {
 treeBlock.addEventListener("click", async e => {
     const target = e.target as HTMLDivElement
     console.log(target)
-    if (!target.classList.contains("interactive")) return
+    // if (!target.classList.contains("interactive")) return
+    if (!target.classList.contains("td")) return
     const li = target.closest("li")
     // const dataset = target?.dataset
     const dataset = li?.dataset
@@ -218,13 +229,17 @@ treeBlock.addEventListener("click", async e => {
         // delete target.dataset.path
         dataset.active = "true"
         dataset.unfolded = "true"
+        target.classList.add("unfold")
         // } else if (e.dataset?.unfolded) {
     } else {
         // const li = target.closest("li")!
         // console.log(li);
-        const unfolded = JSON.parse(dataset.unfolded as string)
-        dataset.unfolded = JSON.stringify(!unfolded)
+        // const unfolded = JSON.parse(dataset.unfolded as string)
+        // dataset.unfolded = JSON.stringify(!unfolded)
+        target.classList.toggle("unfold")
         // console.log(unfolded);
-        li.querySelector<HTMLDivElement>(".dir-content")!.hidden = unfolded
+        // li.querySelector<HTMLDivElement>(".dir-content")!.hidden = unfolded
+        li.querySelector<HTMLDivElement>(".dir-content")!.hidden =
+            !target.classList.contains("unfold")
     }
 })

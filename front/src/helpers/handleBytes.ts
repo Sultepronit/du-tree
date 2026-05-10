@@ -14,9 +14,11 @@ export default function handleBytes(bytes: number) {
         i++
     }
 
+    const rounded = Math.round(value)
     let decimals = 0
-    if (value < 10) decimals = 2
-    else if (value < 100) decimals = 1
+    if (rounded < 10) decimals = 2
+    else if (rounded < 100) decimals = 1
+    // console.log(value)
 
     return `${value.toFixed(decimals)} ${sizes[i]}`
 }
@@ -26,4 +28,4 @@ export default function handleBytes(bytes: number) {
 // console.log(handleBytes(1023 * 1024))
 // console.log(handleBytes(1123))
 // console.log(handleBytes(11245413))
-// console.log(handleBytes(123456))
+// console.log(handleBytes(102387))

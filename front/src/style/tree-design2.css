@@ -1,0 +1,120 @@
+ul.dir-content {
+    list-style-type: none;
+    min-height: 0.9em;
+    /* border-left: 3px solid aqua; */
+    /* border-left: 3px solid gray; */
+    /* border-left: 3px solid; */
+    /* border-left: 5px solid aliceblue; */
+    /* margin-left: 0.9em; */
+    padding: 0.2em 0 1px;
+    /* margin-bottom: 0.4em; */
+}
+.dir-content .dir-content {
+    margin-left: 0.9em;
+}
+
+li {
+    border: none;
+    /* border-left: 3px solid #ffffff00; */
+    position: relative;
+    margin: 0 0 0.2em 0;
+    /* margin-block: 0.2em; */
+    /* margin-left: 0.4em; */
+    /* max-height: 50vh;
+    overflow: auto; */
+}
+
+li.nested {
+    border: none;
+    /* border-left: 3px solid gray; */
+    /* border-left: 9px solid black; */
+    /* list-style-type: none; */
+    /* font-weight: bold; */
+}
+
+.fd-entry {
+    display: grid;
+    grid-template-columns: 1.4em auto;
+    gap: 0;
+    background-color: aliceblue;
+}
+
+.fd-type {
+    text-align: center;
+    /* background-color: gray; */
+    background-color: white;
+    /* color: white; */
+}
+
+.fd-type.t-::before {
+    content: "📄";
+}
+
+.fd-type.td {
+    cursor: pointer;
+}
+
+.fd-type.td::before {
+    content: "📁";
+}
+
+.fd-type.td.unfold::before {
+    content: "📂";
+}
+
+.fd-type.tL::before {
+    content: "🔗";
+}
+
+/* .dir {
+    background-color: black;
+    background-color: gray;
+    color: white;
+} */
+
+.fd-details {
+    display: grid;
+    grid-template-columns: 4em auto;
+    gap: 0.9em;
+    position: relative;
+}
+
+@keyframes wave-pulse {
+    0% {
+        opacity: 0.8;
+    }
+    50% {
+        opacity: 0.3;
+    }
+    100% {
+        opacity: 0.8;
+    }
+}
+
+.fd-size.temp {
+    /* .fd-size { */
+    /* animation: wave-pulse 2s infinite ease-in-out; */
+    opacity: 0.5;
+}
+
+/*.fd-vizual-size {
+    position: absolute;
+    height: 1.15em;
+    width: calc(var(--size) / var(--max-size));
+    background-color: #0f0;
+    z-index: 1;
+}
+
+.fd-name {
+    z-index: 10;
+    text-wrap: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+
+.interactive {
+    cursor: pointer;
+    user-select: none;
+} */
