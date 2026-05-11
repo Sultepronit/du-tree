@@ -7,7 +7,6 @@ import (
 	"strconv"
 	"strings"
 	// "time"
-	"fmt"
 )
 
 var discardIndex int

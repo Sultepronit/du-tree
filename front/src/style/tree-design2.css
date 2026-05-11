@@ -91,10 +91,11 @@ li.nested {
     }
 }
 
-.fd-size.temp {
-    /* .fd-size { */
+/* .fd-size.temp { */
+/* .fd-size { */
+.temp {
     /* animation: wave-pulse 2s infinite ease-in-out; */
-    opacity: 0.5;
+    opacity: 0.4;
 }
 
 /*.fd-vizual-size {

@@ -6,14 +6,11 @@ import type { Branch4, Node } from "../types"
 const totalSize = document.getElementById("root") as HTMLDivElement
 const treeBlock = document.getElementById("tree")!
 
-const branches4 = {} as Record<string, Branch4>
+const branches = {} as Record<string, Branch4>
 
 let max = 1
 
-// const calcBarWidth = (size: number) => `${((size / max) * 100).toFixed(2)}%`
-// const calcBarWidth = (size: number) => `calc(${size}% / var(--max-size)`
-
-const formatSize = (node: Node) => `${node.sizeIsTemp ? "~" : ""}${handleBytes(node.size)}`
+// const formatSize = (node: Node) => `${node.sizeIsTemp ? "~" : ""}${handleBytes(node.size)}`
 
 function createLi(node: Node, prePath = ""): string {
     let dirDetails = ""
@@ -24,7 +21,7 @@ function createLi(node: Node, prePath = ""): string {
     }
     // console.log(data.size / max * 100);
     return `<li
-      style="--size: ${node.size}%"
+    style="--size: ${node.size}%"
       ${dirDetails}
       data-size="${node.size}"
     >
@@ -35,7 +32,12 @@ function createLi(node: Node, prePath = ""): string {
             <div class="fd-type t${node.type[0]}"></div>
             <div class="fd-details">
                 <div class="fd-vizual-size"></div>
-                <div class="fd-size ${node.sizeIsTemp ? "temp" : ""}" title="${node.size} B">${formatSize(node)}</div>
+                <div
+                    class="fd-size ${node.sizeIsTemp ? "temp" : ""}"
+                    title="${node.size} B"
+                >
+                    ${handleBytes(node.size)}
+                </div>
                 <div class="fd-name">${node.name}</div>
             </div>
             
@@ -70,11 +72,27 @@ function createBranch(node: Node, prePath: string): DocumentFragment {
     return templ.content
 }
 
+function updateSize(node: Node, display: HTMLDivElement) {
+    const b = `${node.size} B`
+    const h = handleBytes(node.size)
+    // const newVal = formatSize(node)
+    // if (!node.sizeIsTemp && display.textContent !== newVal)
+    //     console.log(display.textContent, newVal)
+    if (display.title !== b) {
+        display.title = b
+        display.textContent = h
+
+        if (node.sizeIsTemp) display.classList.add("temp")
+        else display.classList.remove("temp")
+        // if (!node.sizeIsTemp) display.classList.remove("temp")
+    }
+}
+
 function updateBranch(bNode: Node) {
     if (!bNode.content) return
 
     console.log(bNode)
-    if (!branches4[bNode.name]) {
+    if (!branches[bNode.name]) {
         const branch = {
             ul: treeBlock.querySelector(`ul[data-path="${bNode.name}"]`),
             shoots: {}
@@ -85,18 +103,15 @@ function updateBranch(bNode: Node) {
         lis.forEach((li, i) => {
             branch.shoots[li.dataset.dirname || i] = { size: 0, li }
         })
-        branches4[bNode.name] = branch
+        branches[bNode.name] = branch
     }
-    const branch = branches4[bNode.name]
+    const branch = branches[bNode.name]
     console.log(branch)
     for (const cNode of bNode.content) {
         // console.log(cNode)
         const shoot = branch.shoots[cNode.name]
         // console.log(shoot)
         if (!shoot.text) shoot.text = shoot.li.querySelector(".fd-size")
-        // if (!shoot.bar) shoot.bar = shoot.li.querySelector(".fd-vizual-size")
-
-        // shoot.size = cNode.size
 
         const sizeStr = cNode.size.toString()
         if (sizeStr !== shoot.li.dataset.size) {
@@ -104,21 +119,7 @@ function updateBranch(bNode: Node) {
             shoot.li.style.setProperty("--size", `${cNode.size}%`)
         }
 
-        const newVal = formatSize(cNode)
-        if (!cNode.sizeIsTemp && shoot.text.textContent !== newVal)
-            console.log(shoot.text.textContent, newVal)
-        if (shoot.text.textContent !== newVal) {
-            shoot.text.textContent = newVal
-            shoot.text.title = `${cNode.size} B`
-            // if (cNode.sizeIsTemp) shoot.text.classList.add("temp")
-            // else shoot.text.classList.remove("temp")
-            if (!cNode.sizeIsTemp) shoot.text.classList.remove("temp")
-        }
-        // const width = calcBarWidth(Number(cNode.size))
-        // console.log(cNode.size, width)
-        // if (shoot.bar.style.width !== width) shoot.bar.style.width = width
-        // if (shoot.bar.style.width !== width) shoot.bar.style = ""
-        // shoot.bar.style.setProperty("--size", `${cNode.size}%`)
+        updateSize(cNode, shoot.text)
     }
 
     const shoots = Object.values(branch.shoots)
@@ -130,11 +131,13 @@ function updateBranch(bNode: Node) {
     const fragment = document.createDocumentFragment()
     shoots.forEach(e => fragment.appendChild(e.li))
     branch.ul.appendChild(fragment)
+    console.log(branch)
 }
 
 function updateTree(bNodes: Node[]) {
     const root = bNodes[0]
-    totalSize.textContent = formatSize(root)
+    // totalSize.textContent = formatSize(root)
+    updateSize(root, totalSize)
     if (!root.content) return
 
     root.content.sort((a, b) => b.size - a.size)
@@ -180,7 +183,8 @@ export async function initTree() {
     }, 1000)
 
     console.log(data)
-    totalSize.textContent = formatSize(data)
+    // totalSize.textContent = formatSize(data)
+    updateSize(data, totalSize)
     // totalSize.textContent = formatSize(tree)
     // tree.content = data
     // console.log(tree)
