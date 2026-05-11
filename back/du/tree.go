@@ -28,9 +28,9 @@ type treeStr struct {
 	root *rawNode
 }
 
-var tree2 = treeStr{}
+var tree2 treeStr
 
-func resetTree() {
+func ResetTree() {
 	tree2 = treeStr{
 		root: &rawNode{
 			Temp:    true,
@@ -39,6 +39,7 @@ func resetTree() {
 }
 
 func (t *treeStr) fill(path []string, size int64) {
+
 	t.mu.Lock()
 	defer t.mu.Unlock()
 

@@ -6,6 +6,8 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	// "time"
+	"fmt"
 )
 
 var discardIndex int
@@ -31,7 +33,7 @@ func parseOutput(line string) {
 
 // func Init(path string) {
 func Init(path string, comm []string) {
-	resetTree()
+	ResetTree()
 
 	discardIndex = len(strings.Split(path, "/")) - 1
 

@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"time"
 	"net/http"
 )
 
@@ -35,6 +36,7 @@ func handleDir(w http.ResponseWriter, r *http.Request) {
 		go du.Init(req.Path, req.Comm)
 	}
 
+	time.Sleep(time.Millisecond * 100)
 	// sendResult(w, req)
 	// re, err := explorer.ReadDir(req.Path)
 	re, err := du.GetDir(req.Path)

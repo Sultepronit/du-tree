@@ -24,7 +24,6 @@ function createLi(node: Node, prePath = ""): string {
     }
     // console.log(data.size / max * 100);
     return `<li
-      class="${dirDetails ? "nested" : ""}"
       style="--size: ${node.size}%"
       ${dirDetails}
       data-size="${node.size}"
@@ -36,7 +35,7 @@ function createLi(node: Node, prePath = ""): string {
             <div class="fd-type t${node.type[0]}"></div>
             <div class="fd-details">
                 <div class="fd-vizual-size"></div>
-                <div class="fd-size ${dirDetails ? "interactive" : ""} ${node.sizeIsTemp ? "temp" : ""}" title="${node.size} B">${formatSize(node)}</div>
+                <div class="fd-size ${node.sizeIsTemp ? "temp" : ""}" title="${node.size} B">${formatSize(node)}</div>
                 <div class="fd-name">${node.name}</div>
             </div>
             
