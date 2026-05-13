@@ -115,16 +115,17 @@ function updateBranch(bNode: Node) {
         // console.log(cNode)
         const shoot = branch.shoots[cNode.name]
         // console.log(shoot)
+
         if (!shoot.sizeDisplay) shoot.sizeDisplay = shoot.li.querySelector(".fd-size")
+        const updated = updateSize(cNode, shoot.sizeDisplay)
+        console.log(updated)
+        if (!updated) continue
 
         const sizeStr = cNode.size.toString()
         if (sizeStr !== shoot.li.dataset.size) {
             shoot.li.dataset.size = sizeStr
             shoot.li.style.setProperty("--size", `${sizeStr}%`)
         }
-
-        const updated = updateSize(cNode, shoot.sizeDisplay)
-        console.log(updated)
     }
 
     const shoots = Object.values(branch.shoots)
