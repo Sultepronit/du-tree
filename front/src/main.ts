@@ -20,10 +20,10 @@ import execute from "./view/buildTree0"
 // pathInpunt.value = "/data/"
 // pathInpunt.value = "/data/web-projects/"
 // pathInpunt.value = "/data/web-projects/du-tree/test/"
-pathInpunt.value = "/data/web-projects/du-tree/"
+// pathInpunt.value = "/data/web-projects/du-tree/"
 
 // pathInpunt.value = "/home/step/work/du-tree/test/"
-// pathInpunt.value = "/home/step/work/du-tree/"
+pathInpunt.value = "/home/step/work/du-tree/"
 
 // pathInpunt.value = "/home/sultepronit/"
 // pathInpunt.value = "/home/sultepronit/server/"

@@ -1,29 +1,29 @@
 import { doFetch } from "../api/fetch"
 import { pathInpunt } from "../global/pathInput"
 import handleBytes from "../helpers/handleBytes"
-import type { Branch4, Node } from "../types"
+import type { Branch, Node } from "../types"
 
 const totalSize = document.getElementById("root") as HTMLDivElement
 const treeBlock = document.getElementById("tree")!
 
-const branches = {} as Record<string, Branch4>
+const branches = {} as Record<string, Branch>
 
 let max = 1
-
-// const formatSize = (node: Node) => `${node.sizeIsTemp ? "~" : ""}${handleBytes(node.size)}`
 
 function createLi(node: Node, prePath = ""): string {
     let dirDetails = ""
     if (node.type[0] === "d") {
         // const path = pathprePath ? `${prePath}/${node.name}` : node.name
         // content = `data-path="${prePath + node.name}/"`
-        dirDetails = `data-path="${prePath}" data-dirname="${node.name}"`
+        // dirDetails = `data-path="${prePath}" data-dirname="${node.name}"`
+        dirDetails = `data-dirname="${node.name}"`
     }
     // console.log(data.size / max * 100);
     return `<li
     style="--size: ${node.size}%"
-      ${dirDetails}
-      data-size="${node.size}"
+        data-path="${prePath}" 
+        ${dirDetails}
+        data-size="${node.size}"
     >
         <div
             class="fd-entry"
@@ -73,19 +73,21 @@ function createBranch(node: Node, prePath: string): DocumentFragment {
 }
 
 function updateSize(node: Node, display: HTMLDivElement) {
+    if (!display.classList.contains("temp") && !node.sizeIsTemp) return false
+
+    if (node.sizeIsTemp) display.classList.add("temp")
+    else display.classList.remove("temp")
+
     const b = `${node.size} B`
     const h = handleBytes(node.size)
-    // const newVal = formatSize(node)
-    // if (!node.sizeIsTemp && display.textContent !== newVal)
-    //     console.log(display.textContent, newVal)
     if (display.title !== b) {
         display.title = b
         display.textContent = h
 
-        if (node.sizeIsTemp) display.classList.add("temp")
-        else display.classList.remove("temp")
-        // if (!node.sizeIsTemp) display.classList.remove("temp")
+        return true
     }
+
+    return false
 }
 
 function updateBranch(bNode: Node) {
@@ -96,12 +98,14 @@ function updateBranch(bNode: Node) {
         const branch = {
             ul: treeBlock.querySelector(`ul[data-path="${bNode.name}"]`),
             shoots: {}
-        } as Branch4
+        } as Branch
 
-        const lis = branch.ul.querySelectorAll(`li`) as NodeListOf<HTMLLIElement>
+        const lis = branch.ul.querySelectorAll(
+            `li[data-path="${bNode.name}"]`
+        ) as NodeListOf<HTMLLIElement>
         console.log(lis)
         lis.forEach((li, i) => {
-            branch.shoots[li.dataset.dirname || i] = { size: 0, li }
+            branch.shoots[li.dataset.dirname || i] = { li }
         })
         branches[bNode.name] = branch
     }
@@ -111,15 +115,16 @@ function updateBranch(bNode: Node) {
         // console.log(cNode)
         const shoot = branch.shoots[cNode.name]
         // console.log(shoot)
-        if (!shoot.text) shoot.text = shoot.li.querySelector(".fd-size")
+        if (!shoot.sizeDisplay) shoot.sizeDisplay = shoot.li.querySelector(".fd-size")
 
         const sizeStr = cNode.size.toString()
         if (sizeStr !== shoot.li.dataset.size) {
-            shoot.li.dataset.size = cNode.size.toString()
-            shoot.li.style.setProperty("--size", `${cNode.size}%`)
+            shoot.li.dataset.size = sizeStr
+            shoot.li.style.setProperty("--size", `${sizeStr}%`)
         }
 
-        updateSize(cNode, shoot.text)
+        const updated = updateSize(cNode, shoot.sizeDisplay)
+        console.log(updated)
     }
 
     const shoots = Object.values(branch.shoots)
@@ -166,8 +171,8 @@ export async function initTree() {
     const data = (await doFetch("/dir", {
         path,
         initDu: true,
-        // command: ["du", "-b", "--exclude=/proc", path]
-        command: ["du", "-B 1", "--exclude=/proc", path]
+        command: ["du", "-b", "--exclude=/proc", path]
+        // command: ["du", "-B 1", "--exclude=/proc", path]
         // command: ["du", "-b", "--exclude=/proc", "d 5", path]
     })) as Node
     // const data = (await doFetch("/dir", { path, initDu: true })) as Node[]
