@@ -145,7 +145,7 @@ function updateBranch(bNode: Node) {
 function updateTree(bNodes: Node[]) {
     const root = bNodes[0]
     // totalSize.textContent = formatSize(root)
-    console.log(root, totalSize)
+    // console.log(root, totalSize)
     updateSize(root, totalSize)
     if (!root.content) return
 
@@ -210,6 +210,9 @@ treeBlock.addEventListener("click", async e => {
         const fullPath = prePath + dataset.dirname
         // const path = target.dataset.path
         console.log(fullPath)
+
+        target.classList.add("unfold")
+
         const data = await doFetch("/dir", { path: fullPath })
         // node.content = await doFetch("/dir", { path: fullPath })
         console.log(data)
@@ -217,7 +220,7 @@ treeBlock.addEventListener("click", async e => {
         if (branch) shoot.appendChild(branch)
         dataset.nested = "true"
         dataset.unfolded = "true"
-        target.classList.add("unfold")
+        // target.classList.add("unfold")
     } else {
         target.classList.toggle("unfold")
         shoot.querySelector<HTMLDivElement>(".dir-content")!.hidden =
