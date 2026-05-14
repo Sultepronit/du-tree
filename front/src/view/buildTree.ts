@@ -10,24 +10,16 @@ const branches = {} as Record<string, Branch>
 
 let max = 1
 
-function createLi(node: Node, prePath = ""): string {
-    let dirDetails = ""
-    if (node.type[0] === "d") {
-        // const path = pathprePath ? `${prePath}/${node.name}` : node.name
-        // content = `data-path="${prePath + node.name}/"`
-        // dirDetails = `data-path="${prePath}" data-dirname="${node.name}"`
-        dirDetails = `data-dirname="${node.name}"`
-    }
-    // console.log(data.size / max * 100);
+function createLi(node: Node, prePath: string): string {
     return `<li
-    style="--size: ${node.size}%"
+        style="--size: ${node.size}%"
         data-path="${prePath}" 
-        ${dirDetails}
+        ${node.type[0] === "d" ? 'data-dirname="' + node.name + '"' : ""}
         data-size="${node.size}"
     >
         <div
             class="fd-entry"
-            title="path: ${prePath || "root"}\nname: ${node.name}"
+            title="path: ${prePath ? prePath + "/" : "root"}\nname: ${node.name}"
         >
             <div class="fd-type t${node.type[0]}"></div>
             <div class="fd-details">

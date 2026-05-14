@@ -14,8 +14,8 @@ import execute from "./view/buildTree0"
 // pathInpunt.value = "/"
 // pathInpunt.value = "/home/"
 
-// pathInpunt.value = "/home/step/"
-pathInpunt.value = "/home/step/Downloads/"
+pathInpunt.value = "/home/step/"
+// pathInpunt.value = "/home/step/Downloads/"
 
 // pathInpunt.value = "/data/"
 // pathInpunt.value = "/data/web-projects/"
