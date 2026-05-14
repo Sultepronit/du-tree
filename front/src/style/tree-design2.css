@@ -32,6 +32,28 @@ li.nested {
     /* font-weight: bold; */
 }
 
+/* .shoot {
+    animation: fadeIn 1s ease-in forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0.3;
+    }
+    to {
+        opacity: 1;
+    }
+} */
+
+/* .shoot {
+    opacity: 1;
+    transition: opacity 0.5s;
+
+    @starting-style {
+        opacity: 0;
+    }
+} */
+
 .fd-entry {
     display: grid;
     grid-template-columns: 1.4em auto;
