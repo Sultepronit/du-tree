@@ -7,7 +7,7 @@ export type Node = {
 }
 
 export type Shoot = {
-    li: HTMLLIElement
+    el: HTMLDivElement
     sizeDisplay?: HTMLDivElement
 }
 

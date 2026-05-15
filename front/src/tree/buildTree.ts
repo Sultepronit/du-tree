@@ -1,14 +1,16 @@
 import { doFetch } from "../api/fetch"
-import { pathInpunt } from "../global/pathInput"
+// import { pathInpunt } from "../path/pathInput"
 import handleBytes from "../helpers/handleBytes"
 import type { Branch, Node } from "../types"
 
 const totalSize = document.getElementById("root") as HTMLDivElement
 const treeBlock = document.getElementById("tree")!
 
-const branches = {} as Record<string, Branch>
+let root = ""
 
 let max = 1
+
+let branches = {} as Record<string, Branch>
 
 function createLi(node: Node, prePath: string): string {
     return `<li><div
@@ -93,40 +95,37 @@ function updateBranch(bNode: Node) {
             shoots: {}
         } as Branch
 
-        console.log(branch.ul.childNodes)
-
-        const lis = branch.ul.querySelectorAll(
-            // `li[data-path="${bNode.name}"]`
+        const shootEls = branch.ul.querySelectorAll(
             `.shoot[data-path="${bNode.name}"]`
-        ) as NodeListOf<HTMLLIElement>
-        console.log(lis)
-        lis.forEach((li, i) => {
-            branch.shoots[li.dataset.dirname || i] = { li }
+        ) as NodeListOf<HTMLDivElement>
+        console.log(shootEls)
+        shootEls.forEach((el, i) => {
+            branch.shoots[el.dataset.dirname || i] = { el }
         })
         branches[bNode.name] = branch
     }
     const branch = branches[bNode.name]
-    console.log(branch)
+    // console.log(branch)
     for (const cNode of bNode.content) {
         // console.log(cNode)
         const shoot = branch.shoots[cNode.name]
         // console.log(shoot)
 
-        if (!shoot.sizeDisplay) shoot.sizeDisplay = shoot.li.querySelector(".fd-size")
+        if (!shoot.sizeDisplay) shoot.sizeDisplay = shoot.el.querySelector(".fd-size")
         const updated = updateSize(cNode, shoot.sizeDisplay)
         console.log(updated)
         if (!updated) continue
 
         const sizeStr = cNode.size.toString()
-        if (sizeStr !== shoot.li.dataset.size) {
-            shoot.li.dataset.size = sizeStr
-            shoot.li.style.setProperty("--size", `${sizeStr}%`)
+        if (sizeStr !== shoot.el.dataset.size) {
+            shoot.el.dataset.size = sizeStr
+            shoot.el.style.setProperty("--size", `${sizeStr}%`)
         }
     }
 
     const shoots = Object.values(branch.shoots)
 
-    shoots.sort((a, b) => Number(b.li.dataset.size) - Number(a.li.dataset.size))
+    shoots.sort((a, b) => Number(b.el.dataset.size) - Number(a.el.dataset.size))
     console.log(shoots)
 
     // const fragment = document.createDocumentFragment()
@@ -134,8 +133,8 @@ function updateBranch(bNode: Node) {
     // branch.ul.appendChild(fragment)
     // console.log(branch)
     shoots.forEach((shoot, i) => {
-        if (branch.ul.childNodes[i].childNodes[0] !== shoot.li) {
-            branch.ul.childNodes[i].appendChild(shoot.li)
+        if (branch.ul.childNodes[i].childNodes[0] !== shoot.el) {
+            branch.ul.childNodes[i].appendChild(shoot.el)
             // console.log("moved", shoot.li)
             console.log("moved")
         }
@@ -150,8 +149,8 @@ function updateTree(bNodes: Node[]) {
     if (!root.content) return
 
     root.content.sort((a, b) => b.size - a.size)
-    // if (root.content[0].size != max) {
-    if (root.content[0].size > max) {
+    if (root.content[0].size != max) {
+        // if (root.content[0].size > max) {
         max = root.content[0].size
         document.documentElement.style.setProperty("--max-size", (max / 100).toString())
     }
@@ -161,35 +160,43 @@ function updateTree(bNodes: Node[]) {
     }
 }
 
-export async function initTree() {
+function initUpdate() {
+    const t = setInterval(async () => {
+        const update = await doFetch("/update")
+        console.log(update)
+        if (!update[0].sizeIsTemp) {
+            clearInterval(t)
+            console.timeEnd("t1")
+        }
+        updateTree(update)
+    }, 1000)
+}
+
+export async function initTree(path: string) {
+    root = path
+
+    treeBlock.innerHTML = ""
+    totalSize.classList.add("temp")
+    max = 1
+    branches = {}
+
     console.time("t1")
-    const path = pathInpunt.value
+    // const path = pathInpunt.value
 
     const data = (await doFetch("/dir", {
         path,
         initDu: true,
-        // command: ["du", "-b", "--exclude=/proc", path]
-        command: ["du", "-B 1", "--exclude=/proc", path]
+        command: ["du", "-b", "--exclude=/proc", path]
+        // command: ["du", "-B 1", "--exclude=/proc", path]
     })) as Node
     // const data = (await doFetch("/dir", { path, initDu: true })) as Node[]
 
-    if (data.sizeIsTemp) {
-        const t = setInterval(async () => {
-            const update = await doFetch("/update")
-            console.log(update)
-            if (!update[0].sizeIsTemp) {
-                clearInterval(t)
-                console.timeEnd("t1")
-            }
-            updateTree(update)
-        }, 1000)
-    }
-
     console.log(data)
-    // totalSize.textContent = formatSize(data)
     updateSize(data, totalSize)
 
     treeBlock.appendChild(createBranch(data, ""))
+
+    if (data.sizeIsTemp) initUpdate()
 }
 
 treeBlock.addEventListener("click", async e => {
@@ -202,7 +209,8 @@ treeBlock.addEventListener("click", async e => {
     const dataset = shoot?.dataset
 
     if (!dataset.nested) {
-        const prePath = dataset.path ? `${pathInpunt.value}${dataset.path}/` : pathInpunt.value
+        // const prePath = dataset.path ? `${pathInpunt.value}${dataset.path}/` : pathInpunt.value
+        const prePath = dataset.path ? `${root}${dataset.path}/` : root
         const fullPath = prePath + dataset.dirname
         // const path = target.dataset.path
         console.log(fullPath)
