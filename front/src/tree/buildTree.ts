@@ -168,31 +168,27 @@ export async function initTree() {
     const data = (await doFetch("/dir", {
         path,
         initDu: true,
-        command: ["du", "-b", "--exclude=/proc", path]
-        // command: ["du", "-B 1", "--exclude=/proc", path]
-        // command: ["du", "-b", "--exclude=/proc", "d 5", path]
+        // command: ["du", "-b", "--exclude=/proc", path]
+        command: ["du", "-B 1", "--exclude=/proc", path]
     })) as Node
     // const data = (await doFetch("/dir", { path, initDu: true })) as Node[]
 
-    const t = setInterval(async () => {
-        const update = await doFetch("/update")
-        console.log(update)
-        if (!update[0].sizeIsTemp) {
-            clearInterval(t)
-            console.timeEnd("t1")
-        }
-        updateTree(update)
-    }, 1000)
+    if (data.sizeIsTemp) {
+        const t = setInterval(async () => {
+            const update = await doFetch("/update")
+            console.log(update)
+            if (!update[0].sizeIsTemp) {
+                clearInterval(t)
+                console.timeEnd("t1")
+            }
+            updateTree(update)
+        }, 1000)
+    }
 
     console.log(data)
     // totalSize.textContent = formatSize(data)
     updateSize(data, totalSize)
-    // totalSize.textContent = formatSize(tree)
-    // tree.content = data
-    // console.log(tree)
-    // buildGradually({ content: data })
-    // treeBlock.innerHTML = createBranch(tree, "", totalSize)
-    // treeBlock.appendChild(createBranch(tree, ""))
+
     treeBlock.appendChild(createBranch(data, ""))
 }
 

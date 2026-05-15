@@ -2,8 +2,7 @@ import { doFetch } from "./api/fetch"
 import { pathInpunt } from "./global/pathInput"
 import "./style/main.css"
 import "./style/tree-design2.css"
-import { initTree } from "./view/buildTree"
-import execute from "./view/buildTree0"
+import { initTree } from "./tree/buildTree"
 
 // execute()
 
@@ -14,13 +13,13 @@ import execute from "./view/buildTree0"
 // pathInpunt.value = "/"
 // pathInpunt.value = "/home/"
 
-pathInpunt.value = "/home/step/"
+// pathInpunt.value = "/home/step/"
 // pathInpunt.value = "/home/step/Downloads/"
 
 // pathInpunt.value = "/data/"
 // pathInpunt.value = "/data/web-projects/"
 // pathInpunt.value = "/data/web-projects/du-tree/test/"
-// pathInpunt.value = "/data/web-projects/du-tree/"
+pathInpunt.value = "/data/web-projects/du-tree/"
 
 // pathInpunt.value = "/home/step/work/du-tree/test/"
 // pathInpunt.value = "/home/step/work/du-tree/"
