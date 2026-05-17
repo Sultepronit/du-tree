@@ -1,4 +1,4 @@
 import "./style/main.css"
 import "./style/tree-design2.css"
 
-import { pathInpunt } from "./path/pathInput"
+import { input } from "./path/pathInput"

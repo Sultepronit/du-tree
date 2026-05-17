@@ -1,3 +1,52 @@
+/* input design */
+
+#path.almost {
+    color: gray;
+}
+
+#path.wrong {
+    color: red;
+}
+
+#pre-suggestions {
+    white-space: nowrap;
+    opacity: 0;
+}
+
+.suggestions-block {
+    position: absolute;
+    display: flex;
+}
+
+.suggestions {
+    /* position: absolute; */
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background: white;
+    /* background: #111;
+    border: 1px solid #00ff00; */
+    z-index: 1000;
+    max-height: 50vh;
+    overflow-y: auto;
+}
+
+.suggestion:nth-child(odd) {
+    background-color: aliceblue;
+}
+
+.suggestion-item {
+    /* padding: 8px 12px; */
+    cursor: pointer;
+    /* color: #fff; */
+}
+
+.suggestion-item:hover {
+    background: #00ff00;
+    color: #000;
+}
+
+/* tree desing */
 ul.dir-content {
     list-style-type: none;
     min-height: 0.9em;
@@ -119,25 +168,3 @@ li.nested {
     /* animation: wave-pulse 2s infinite ease-in-out; */
     opacity: 0.4;
 }
-
-/*.fd-vizual-size {
-    position: absolute;
-    height: 1.15em;
-    width: calc(var(--size) / var(--max-size));
-    background-color: #0f0;
-    z-index: 1;
-}
-
-.fd-name {
-    z-index: 10;
-    text-wrap: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-
-
-.interactive {
-    cursor: pointer;
-    user-select: none;
-} */

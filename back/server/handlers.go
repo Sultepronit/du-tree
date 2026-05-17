@@ -2,13 +2,15 @@ package server
 
 import (
 	"du-tree/du"
+	"du-tree/explorer"
 	"du-tree/models"
+
 	// "du-tree/explorer"
 	"encoding/json"
 	"fmt"
 	"log"
-	"time"
 	"net/http"
+	"time"
 )
 
 func sendResult(w http.ResponseWriter, res any) {
@@ -19,6 +21,20 @@ func sendResult(w http.ResponseWriter, res any) {
 		log.Println(err)
 		http.Error(w, "JSON encode error", http.StatusInternalServerError)
 	}
+}
+
+func checkPath(w http.ResponseWriter, r *http.Request) {
+	log.Println(r.URL.Path)
+
+	var req models.Request
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		log.Println("Bad JSON:", err)
+		http.Error(w, "Bad JSON", 400)
+		return
+	}
+	fmt.Println(req)
+
+	sendResult(w, explorer.CheckPath(req.Path))
 }
 
 func handleDir(w http.ResponseWriter, r *http.Request) {

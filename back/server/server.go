@@ -12,10 +12,7 @@ func handleHello(w http.ResponseWriter, r *http.Request) {
 }
 
 func Start() {
-	// http.HandleFunc("/du-exec", handleDuExec)
-	// http.HandleFunc("/get-branch", handleBranch)
-	// http.HandleFunc("/get-part", handlePart)
-	// http.HandleFunc("/dir", handleDir)
+	http.HandleFunc("POST /path", checkPath)
 
 	http.HandleFunc("POST /dir", handleDir)
 

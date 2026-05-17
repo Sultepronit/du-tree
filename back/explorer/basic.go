@@ -20,9 +20,13 @@ func ReadDir(path string) ([]*models.Node, error) {
 		// fmt.Println(e.Name())
 		// fmt.Print(e.Type().String())
 		node.Name = e.Name()
-		node.Type = e.Type().String()
+		// runes := []rune(e.Type().String())
+		// fmt.Println(runes)
+		// fmt.Println(e.Type().String()[0:1])
+		node.Type = e.Type().String()[0:1]
 		// if node.Type != "----------" {
-		if node.Type == "d---------" {
+		// if node.Type == "d---------" {
+		if node.Type == "d" {
 			node.SizeIsTemp = true
 			continue
 		}

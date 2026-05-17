@@ -21,6 +21,10 @@ input {
     font: inherit;
 }
 
+.hidden {
+    display: none;
+}
+
 #path {
     width: 100%;
 }
