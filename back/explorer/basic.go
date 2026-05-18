@@ -30,6 +30,9 @@ func ReadDir(path string) ([]*models.Node, error) {
 		if e.IsDir() {
 			node.SizeIsTemp = true
 			continue
+		} else if node.Type == "L" {
+			typ, realPath := getRealEntity(path, node.Name)
+			node.Name += "/" + typ + "/" + realPath
 		}
 		// fmt.Println(e.Type().IsRegular())
 		// fmt.Println(e.Type().Perm())

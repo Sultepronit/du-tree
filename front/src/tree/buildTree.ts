@@ -13,18 +13,33 @@ let max = 1
 let branches = {} as Record<string, Branch>
 
 function createLi(node: Node, prePath: string): string {
+    let realPath: string
+    let linkedType: string
+    let linked: string
+    let linkType: string
+    if (node.type == "L") {
+        // const [name, type, path] = node.name.split("/", 3)
+        // console.log(name, type, path)
+        const parts = node.name.split("/")
+        console.log(parts)
+        node.name = parts[0]
+        linkedType = "t" + parts[1]
+        realPath = parts.slice(2).join("/")
+        linked = ` ➡ <span class="${linkedType}"><span>${realPath}`
+        linkType = `<span class="t${parts[1]}"><span>`
+    }
     return `<li><div
             class="shoot"
             data-path="${prePath}" 
-            ${node.type[0] === "d" ? 'data-dirname="' + node.name + '"' : ""}
+            ${node.type === "d" ? 'data-dirname="' + node.name + '"' : ""}
             data-size="${node.size}"
             style="--size: ${node.size}%"
         >
             <div
                 class="fd-entry"
-                title="path: ${prePath ? prePath + "/" : "root"}\nname: ${node.name}"
+                title="path: ${prePath ? prePath + "/" : "root"}\nname: ${node.name}\n${realPath ? "linked: " + realPath : ""}"
             >
-                <div class="fd-type t${node.type[0]}"></div>
+                <div class="fd-type t${node.type}"></div>
                 <div class="fd-details">
                     <div class="fd-vizual-size"></div>
                     <div
@@ -33,9 +48,8 @@ function createLi(node: Node, prePath: string): string {
                     >
                         ${handleBytes(node.size)}
                     </div>
-                    <div class="fd-name">${node.name}</div>
+                    <div class="fd-name">${linkType ? linkType : ""}${node.name}</div>
                 </div>
-                
             </div>
     </div></li>`
 }

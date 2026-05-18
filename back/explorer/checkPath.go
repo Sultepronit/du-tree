@@ -49,13 +49,13 @@ func CheckPath(path string) any {
 	}
 
 	for i := range 100 {
-		fmt.Println(i)
+		// fmt.Println(i)
 		entries, err := os.ReadDir(path)
 		if err == nil {
 			if i > 0 {
 				re.Current = path
 			}
-			fmt.Println("here?")
+			// fmt.Println("here?")
 			for _, e := range entries {
 				// fmt.Println("here!")
 				// fmt.Println("p:", e.Name())
