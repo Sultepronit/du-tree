@@ -49,16 +49,29 @@ func CheckPath(path string) any {
 	}
 
 	for i := range 100 {
+		fmt.Println(i)
 		entries, err := os.ReadDir(path)
 		if err == nil {
 			if i > 0 {
 				re.Current = path
 			}
-
-			// re := make([]string, 0, 5)
+			fmt.Println("here?")
 			for _, e := range entries {
+				// fmt.Println("here!")
+				// fmt.Println("p:", e.Name())
 				if e.IsDir() {
 					re.Next = append(re.Next, e.Name())
+				} else if e.Type().String()[0:1] == "L" {
+					// re.Next = append(re.Next, "*"+e.Name())
+					realPath, err := filepath.EvalSymlinks(path + "/" + e.Name())
+					if err == nil {
+
+						info, err := os.Stat(realPath)
+						if err == nil && info.IsDir() {
+							fmt.Println(e.Name(), "->", realPath)
+							re.Next = append(re.Next, "*"+e.Name()+"*"+realPath)
+						}
+					}
 				}
 
 			}

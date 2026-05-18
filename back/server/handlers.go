@@ -28,11 +28,10 @@ func checkPath(w http.ResponseWriter, r *http.Request) {
 
 	var req models.Request
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		log.Println("Bad JSON:", err)
 		http.Error(w, "Bad JSON", 400)
 		return
 	}
-	fmt.Println(req)
+	// fmt.Println(req)
 
 	sendResult(w, explorer.CheckPath(req.Path))
 }

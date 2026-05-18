@@ -35,7 +35,15 @@ input.addEventListener("change", () => {
 
 function addSuggestions(names: string[]) {
     suggestions.classList.remove("hidden")
-    const html = names.map(n => `<div class="suggestion">${n}</div>`).join("")
+    const html = names
+        .map(n => {
+            if (n.startsWith("*")) {
+                const [_, name, link] = n.split("*")
+                return `<div class="suggestion tL" title="${link}">${name}</div>`
+            }
+            return `<div class="suggestion td">${n}</div>`
+        })
+        .join("")
     suggestions.innerHTML = html
 }
 
@@ -54,11 +62,11 @@ input.addEventListener("input", async () => {
     } else {
         isOk = false
         pre.textContent = path.current
-        let next = input.value.slice(path.current.length)
+        let next = input.value.slice(path.current.length).toLocaleLowerCase()
         if (next.startsWith("/")) next = next.slice(1)
         console.log("next:", next)
         // const candidates = path.next.filter(e => `/${e}`.startsWith(next) || e.startsWith(next))
-        const candidates = path.next.filter(e => e.includes(next))
+        const candidates = path.next.filter(e => e.toLocaleLowerCase().includes(next))
         console.log(candidates)
 
         if (candidates.length > 0) {
@@ -72,7 +80,7 @@ input.addEventListener("input", async () => {
 })
 
 input.addEventListener("keydown", e => {
-    console.log(e.key)
+    // console.log(e.key)
     if (e.key === "Enter" && isOk) {
         const path = input.value.endsWith("/") ? input.value : input.value + "/"
         initTree(path)

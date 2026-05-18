@@ -117,7 +117,7 @@ li.nested {
     /* color: white; */
 }
 
-.fd-type.t-::before {
+.t-::before {
     content: "📄";
 }
 
@@ -125,15 +125,15 @@ li.nested {
     cursor: pointer;
 }
 
-.fd-type.td::before {
+.td::before {
     content: "📁";
 }
 
-.fd-type.td.unfold::before {
+.td.unfold::before {
     content: "📂";
 }
 
-.fd-type.tL::before {
+.tL::before {
     content: "🔗";
 }
 
