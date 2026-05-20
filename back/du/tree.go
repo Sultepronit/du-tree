@@ -9,6 +9,7 @@ import (
 type rawNode struct {
 	Size    int64               `json:"size"`
 	Temp    bool                `json:"temp,omitempty"`
+	Locked  bool                `json:"locked,omitempty"`
 	Content map[string]*rawNode `json:"content,omitempty"`
 }
 
@@ -38,6 +39,7 @@ func ResetTree() {
 	}
 }
 
+// size = -1 - locked
 func (t *treeStr) fill(path []string, size int64) {
 
 	t.mu.Lock()
@@ -49,7 +51,7 @@ func (t *treeStr) fill(path []string, size int64) {
 	} else {
 		node := t.root
 		for _, stage := range path {
-			if node.Temp {
+			if node.Temp && size >= 0 {
 				node.Size = 0
 			}
 
@@ -65,8 +67,12 @@ func (t *treeStr) fill(path []string, size int64) {
 				node = new
 			}
 		}
-		node.Size = size
-		node.Temp = false
+		if size == -1 {
+			node.Locked = true
+		} else {
+			node.Size = size
+			node.Temp = false
+		}
 	}
 }
 

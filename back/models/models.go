@@ -16,5 +16,6 @@ type Node struct {
 	Type       string  `json:"type"`
 	Size       int64   `json:"size"`
 	SizeIsTemp bool    `json:"sizeIsTemp,omitempty"`
+	Locked     bool    `json:"locked,omitempty"`
 	Content    []*Node `json:"content,omitempty"`
 }

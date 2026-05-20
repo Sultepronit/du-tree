@@ -7,9 +7,13 @@ import (
 	"path/filepath"
 )
 
-func CheckPath(path string) any {
+func CheckPath(path string) *models.Path {
 	fmt.Println("path:", path)
 	// filepath.Clean()?
+	// fmt.Println(filepath.Clean(path))
+	// if filepath.Clean(path) + "/" != path {
+	// 	return nil
+	// }
 
 	re := models.Path{
 		Current: "ok",
@@ -20,6 +24,11 @@ func CheckPath(path string) any {
 		// fmt.Println(i)
 		entries, err := os.ReadDir(path)
 		if err == nil {
+			// fmt.Println(filepath.Clean(path))
+			// if filepath.Clean(path) + "/" != path {
+			// 	return nil
+			// }
+
 			if i > 0 {
 				re.Current = path
 			}
@@ -34,16 +43,6 @@ func CheckPath(path string) any {
 					if typ == "d" {
 						re.Next = append(re.Next, "///"+e.Name()+"///"+realPath)
 					}
-
-					// realPath, err := filepath.EvalSymlinks(path + "/" + e.Name())
-					// if err == nil {
-					// 	info, err := os.Stat(realPath)
-					// 	if err == nil && info.IsDir() {
-					// 		fmt.Println(e.Name(), "->", realPath)
-					// 		// re.Next = append(re.Next, "*"+e.Name()+"*"+realPath)
-					// 		re.Next = append(re.Next, "/"+e.Name()+"/"+realPath)
-					// 	}
-					// }
 				}
 
 			}
@@ -52,7 +51,13 @@ func CheckPath(path string) any {
 
 		fmt.Println("err:", err)
 
-		path = filepath.Dir(path)
+		// path = filepath.Dir(path)
+		prev := filepath.Dir(path)
+		if (prev[0] != path[0]) {
+			return nil
+		}
+
+		path = prev
 	}
 
 	return nil

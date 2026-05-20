@@ -22,7 +22,7 @@ function createLi(node: Node, prePath: string): string {
         linkType = `<span class="t${parts[1]}"><span>`
     }
     return `<li><div
-            class="shoot"
+            class="shoot ${node.type === "-locked" ? "locked" : ""}"
             data-path="${prePath}" 
             ${node.type === "d" ? 'data-dirname="' + node.name + '"' : ""}
             data-size="${node.size}"

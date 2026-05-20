@@ -26,7 +26,11 @@ input.addEventListener("input", async () => {
     // const re = await doFetch("/path", pathInpunt.value)
     const path = (await doFetch("/path", { path: input.value })) as pathCheck
     console.log(path)
-    if (path.current === "ok") {
+    if (!path) {
+        isOk = false
+        suggestions.classList.add("hidden")
+        input.className = "wrong"
+    } else if (path?.current === "ok") {
         isOk = true
         pre.textContent = input.value
         input.className = "ok"

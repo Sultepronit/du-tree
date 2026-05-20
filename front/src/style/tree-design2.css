@@ -1,4 +1,19 @@
+body {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    gap: 0.4em;
+    height: 100vh;
+}
+
+#tree {
+    overflow: auto;
+}
+
 /* input design */
+
+.header {
+    /* position: fixed; */
+}
 
 #path.almost {
     color: gray;
@@ -117,6 +132,10 @@ li.nested {
     /* color: white; */
 }
 
+.locked {
+    color: red;
+}
+
 .t-::before {
     content: "📄";
 }
@@ -137,8 +156,12 @@ li.nested {
     content: "🔗";
 }
 
+.t-locked::before {
+    content: "🔒";
+}
+
 .tbrk::before {
-     content: "❌";
+    content: "❌";
 }
 
 .fd-details {
