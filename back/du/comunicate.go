@@ -4,7 +4,6 @@ import (
 	"du-tree/explorer"
 	"du-tree/models"
 	"fmt"
-	"log"
 	"strings"
 )
 
@@ -30,27 +29,27 @@ func GetDir(path string) (*models.Node, error) {
 		return nil, err
 	}
 
-	log.Println(path)
+	// log.Println(path)
 	var fSize int64
 	for _, n := range baceCont {
 		// fmt.Println(n.Size)
 		fSize += n.Size
 	}
-	log.Println(fSize)
+	// log.Println(fSize)
 
 	allParts := strings.Split(path, "/")
 	parts := allParts[discardIndex:]
 
 	fSizePath := genfSizePath(parts)
-	log.Println(fSizePath)
+	// log.Println(fSizePath)
 	tree2.fill(fSizePath, fSize)
 
 	// updatePaths[strings.Join(parts, "/")] = true
 	updatePaths = append(updatePaths, strings.Join(parts, "/"))
-	fmt.Println(updatePaths)
+	// fmt.Println(updatePaths)
 
 	dure := tree2.getDir(strings.Join(parts, "/"))
-	log.Println("du.GetDir: dure", dure)
+	// log.Println("du.GetDir: dure", dure)
 
 	if dure == nil {
 		return &models.Node{

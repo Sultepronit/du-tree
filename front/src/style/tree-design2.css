@@ -137,16 +137,14 @@ li.nested {
     content: "🔗";
 }
 
-/* .dir {
-    background-color: black;
-    background-color: gray;
-    color: white;
-} */
+.tbrk::before {
+     content: "❌";
+}
 
 .fd-details {
     display: grid;
     grid-template-columns: 4em auto;
-    gap: 0.9em;
+    gap: 1em;
     position: relative;
 }
 

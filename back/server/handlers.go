@@ -5,7 +5,6 @@ import (
 	"du-tree/explorer"
 	"du-tree/models"
 
-	// "du-tree/explorer"
 	"encoding/json"
 	"fmt"
 	"log"

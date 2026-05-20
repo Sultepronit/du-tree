@@ -36,31 +36,11 @@ func Init(path string, comm []string) {
 
 	discardIndex = len(strings.Split(path, "/")) - 1
 
-	// cmd := exec.Command("du", "-ab", "--exclude=/proc", path)
-	// cmd := exec.Command("du", "-ab", "--max-depth=2", path)
-	// cmd := exec.Command("du", "-a", "--max-depth=1", path)
-	// 9, 13
-	// cmd := exec.Command("du", "-a", "--max-depth=3", path) // 120, 94, 81
-	// 10, 11, 9, 9, 9
-	// cmd := exec.Command("du", "-a", "--max-depth=4", path)
-	// 14, 10, 10, 10, 10, 10
-	// cmd := exec.Command("du", "-a", "--max-depth=5", path) // 96, 109, 126, 134
-	// 48, 20, 18, 10, 10, 14, 15
-	// cmd := exec.Command("du", "-a", "--exclude=/proc", path)
+	args := comm[1:]
+	args = append(args, path)
 
-	// cmd := exec.Command("sudo", "du", "-a", "--max-depth=4", path)
-	// cmd := exec.Command("du", "-a", "--max-depth=4", "~")
-	// cmd := exec.Command("du", "-b", "--max-depth=5", path)
-	// cmd := exec.Command("du", "-b", "--exclude=/proc", path)
-	// cmd := exec.Command("sudo", "du", "-ab", "--exclude=/proc", path)
-	// cmd := exec.Command("du", "-ab", "--exclude=/proc", path)
-	// cm := []string{"du", "-b", "--exclude=/proc", path}
-	// cmd := exec.Command(cm...)
-	// cm := []string{"-b", "--exclude=/proc", path}
-	// cmd := exec.Command("du", cm...)
-	// cm := []string{"du", "-b", "--exclude=/proc", path}
-	// cmd := exec.Command(cm[0], cm[1:]...)
-	cmd := exec.Command(comm[0], comm[1:]...)
+	// cmd := exec.Command(comm[0], comm[1:]...)
+	cmd := exec.Command(comm[0], args...)
 	// cmd.Stderr = os.Stderr // ?
 	log.Println("cmd!")
 
@@ -87,6 +67,7 @@ func Init(path string, comm []string) {
 		if exitErr, ok := err.(*exec.ExitError); ok {
 			if exitErr.ExitCode() != 0 {
 				log.Printf("Command finished with non-zero code: %d", exitErr.ExitCode())
+				log.Println(exitErr)
 			}
 		} else {
 			log.Printf("Wait error: %v", err)

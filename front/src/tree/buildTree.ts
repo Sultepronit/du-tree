@@ -14,18 +14,11 @@ let branches = {} as Record<string, Branch>
 
 function createLi(node: Node, prePath: string): string {
     let realPath: string
-    let linkedType: string
-    let linked: string
     let linkType: string
     if (node.type == "L") {
-        // const [name, type, path] = node.name.split("/", 3)
-        // console.log(name, type, path)
         const parts = node.name.split("/")
-        console.log(parts)
         node.name = parts[0]
-        linkedType = "t" + parts[1]
         realPath = parts.slice(2).join("/")
-        linked = ` ➡ <span class="${linkedType}"><span>${realPath}`
         linkType = `<span class="t${parts[1]}"><span>`
     }
     return `<li><div
@@ -39,7 +32,11 @@ function createLi(node: Node, prePath: string): string {
                 class="fd-entry"
                 title="path: ${prePath ? prePath + "/" : "root"}\nname: ${node.name}\n${realPath ? "linked: " + realPath : ""}"
             >
-                <div class="fd-type t${node.type}"></div>
+                <div
+                    class="fd-type t${node.type}"
+                    ${node.type === "d" ? "data-dir='true'" : ""}
+                >
+                </div>
                 <div class="fd-details">
                     <div class="fd-vizual-size"></div>
                     <div
@@ -200,8 +197,9 @@ export async function initTree(path: string) {
     const data = (await doFetch("/dir", {
         path,
         initDu: true,
-        command: ["du", "-b", "--exclude=/proc", path]
+        // command: ["du", "-b", "--exclude=/proc", path]
         // command: ["du", "-B 1", "--exclude=/proc", path]
+        command: ["du", "-b", "--exclude=/proc"]
     })) as Node
     // const data = (await doFetch("/dir", { path, initDu: true })) as Node[]
 
@@ -217,7 +215,8 @@ treeBlock.addEventListener("click", async e => {
     const target = e.target as HTMLDivElement
     console.log(target)
     // if (!target.classList.contains("interactive")) return
-    if (!target.classList.contains("td")) return
+    // if (!target.classList.contains("td")) return
+    if (!target.dataset.dir) return
     const shoot = target.closest("div.shoot") as HTMLDivElement
     // const dataset = target?.dataset
     const dataset = shoot?.dataset

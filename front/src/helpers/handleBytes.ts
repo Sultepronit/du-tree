@@ -3,7 +3,7 @@ export default function handleBytes(bytes: number) {
     if (bytes < 1000) return `${bytes} B`
 
     const k = 1024
-    const sizes = ["B", "KB", "MB", "GB", "TB", "PB", "EB"]
+    const sizes = ["B ", "KB", "MB", "GB", "TB", "PB", "EB"]
     let i = Math.floor(Math.log(bytes) / Math.log(k))
 
     let value = bytes / k ** i
