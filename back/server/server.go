@@ -12,6 +12,8 @@ func handleHello(w http.ResponseWriter, r *http.Request) {
 }
 
 func Start() {
+	http.HandleFunc("/user", checkUser)
+
 	http.HandleFunc("POST /path", checkPath)
 
 	http.HandleFunc("POST /dir", handleDir)

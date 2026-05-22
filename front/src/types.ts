@@ -3,6 +3,7 @@ export type Node = {
     type: string
     size: number
     sizeIsTemp?: boolean
+    locked?: number
     content?: Node[]
 }
 

@@ -3,6 +3,7 @@ package models
 type Path struct {
 	Current string   `json:"current"`
 	Next    []string `json:"next"`
+	Msg     string   `json:"msg"`
 }
 
 type Request struct {

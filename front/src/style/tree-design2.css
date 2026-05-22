@@ -10,9 +10,28 @@ body {
 }
 
 /* input design */
+.path-plus {
+    display: flex;
+}
 
-.header {
-    /* position: fixed; */
+#access-widged {
+    width: 0.9em;
+    color: #0f0;
+    font-weight: bold;
+}
+
+#access-widged::before {
+    content: "$";
+}
+
+#access-widged.locked::before {
+    content: "🔒";
+    margin-left: -0.3em;
+}
+
+#access-widged.root::before {
+    content: "#";
+    color: #f00;
 }
 
 #path.almost {
@@ -26,6 +45,7 @@ body {
 #pre-suggestions {
     white-space: nowrap;
     opacity: 0;
+    margin-right: 1em;
 }
 
 .suggestions-block {
@@ -39,8 +59,9 @@ body {
     left: 0;
     width: 100%;
     background: white;
-    /* background: #111;
-    border: 1px solid #00ff00; */
+
+    border: 2px solid #80808031;
+    border-top: none;
     z-index: 1000;
     max-height: 50vh;
     overflow-y: auto;
@@ -50,18 +71,15 @@ body {
     background-color: aliceblue;
 }
 
-.suggestion-item {
-    /* padding: 8px 12px; */
-    cursor: pointer;
-    /* color: #fff; */
+.suggestion.locked {
+    color: red;
 }
 
-.suggestion-item:hover {
-    background: #00ff00;
-    color: #000;
+.suggestion.locked::before {
+    opacity: 0.4;
 }
 
-/* tree desing */
+/* tree design */
 ul.dir-content {
     list-style-type: none;
     min-height: 0.9em;
@@ -137,7 +155,11 @@ li.nested {
 }
 
 .t-::before {
-    content: "📄";
+    /* content: "📄"; */
+}
+
+.t- {
+    background: url(/file.svg) no-repeat;
 }
 
 .fd-type.td {
@@ -145,19 +167,30 @@ li.nested {
 }
 
 .td::before {
-    content: "📁";
+    /* content: "📁"; */
 }
 
-.td.unfold::before {
+.td {
+    /* background: url(/folder.svg) no-repeat; */
+    background-image: url(/folder.svg);
+    background-repeat: no-repeat;
+}
+
+/* .td.unfold::before {
     content: "📂";
+} */
+
+.td.unfold {
+    /* background: url(/folder-open.svg) no-repeat; */
+    /* background-image: url(/folder-open.svg);
+    background-repeat: no-repeat; */
+    background-color: aqua;
+    mask-image: url("folder-open.svg");
+    -webkit-mask-image: url("folder-open.svg");
 }
 
 .tL::before {
     content: "🔗";
-}
-
-.t-locked::before {
-    content: "🔒";
 }
 
 .locked.itself .td::before {
@@ -179,8 +212,13 @@ li.nested {
     opacity: 1;
 }
 
+.tbrk {
+    color: #ff3a3a;
+}
+
 .tbrk::before {
-    content: "❌";
+    /* content: "❌"; */
+    content: "⛓️‍💥";
 }
 
 .fd-details {

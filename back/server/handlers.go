@@ -4,6 +4,7 @@ import (
 	"du-tree/du"
 	"du-tree/explorer"
 	"du-tree/models"
+	"os"
 
 	"encoding/json"
 	"fmt"
@@ -20,6 +21,10 @@ func sendResult(w http.ResponseWriter, res any) {
 		log.Println(err)
 		http.Error(w, "JSON encode error", http.StatusInternalServerError)
 	}
+}
+
+func checkUser(w http.ResponseWriter, _ *http.Request) {
+	sendResult(w, map[string]bool{"root": os.Getuid() == 0})
 }
 
 func checkPath(w http.ResponseWriter, r *http.Request) {
