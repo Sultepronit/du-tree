@@ -2,24 +2,24 @@ package du
 
 import (
 	"bufio"
+	"io"
 	"log"
 	"os/exec"
 	"strconv"
 	"strings"
-	"io"
 )
 
 var discardIndex int
 
 func parseErr(line string) {
 	if strings.HasSuffix(line, "Permission denied") {
-		log.Println(line)
+		// log.Println(line)
 		startIdx := strings.Index(line, "'")
 		endIdx := strings.LastIndex(line, "'")
-			
+
 		if startIdx != -1 && endIdx != -1 && startIdx < endIdx {
 			pathlLine := line[startIdx+1 : endIdx]
-			log.Println(pathlLine)
+			log.Println("locked:", pathlLine)
 
 			// DRY!
 			wholePath := strings.Split(pathlLine, "/")
@@ -34,8 +34,6 @@ func parseOutput(line string) {
 	// time.Sleep(time.Millisecond * 200)
 	parts := strings.SplitN(line, "\t", 2)
 	if len(parts) != 2 {
-		// log.Println(parts)
-		// log.Println(parts[0])
 		parseErr(line)
 		return
 	}
@@ -51,7 +49,6 @@ func parseOutput(line string) {
 	tree2.fill(path, size)
 }
 
-// func Init(path string) {
 func Init(path string, comm []string) error {
 	ResetTree()
 

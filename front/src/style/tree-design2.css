@@ -132,7 +132,7 @@ li.nested {
     /* color: white; */
 }
 
-.locked {
+.locked.itself {
     color: red;
 }
 
@@ -158,6 +158,25 @@ li.nested {
 
 .t-locked::before {
     content: "🔒";
+}
+
+.locked.itself .td::before {
+    /* content: "📁"; */
+    opacity: 0.4;
+}
+
+/* .locked .fd-size::before {
+    content: "🔒";
+} */
+
+.locked > * > * > .fd-name::before {
+    content: "🔒";
+    opacity: 0.8;
+}
+
+.locked.itself > * > * > .fd-name::before {
+    /* content: "🔒"; */
+    opacity: 1;
 }
 
 .tbrk::before {

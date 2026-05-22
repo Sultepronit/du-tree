@@ -5,17 +5,17 @@ import (
 )
 
 func transformNode(raw *rawNode, name string) models.Node {
-	t := "d"
-	if raw.Locked {
-		t = "-locked"
-	}
+	// t := "d"
+	// if raw.Locked {
+	// 	t = "-locked"
+	// }
 	return models.Node{
 		Name: name,
-		// Type: "d",
-		Type: t,
+		Type: "d",
+		// Type: t,
 		Size:       raw.getSize(),
 		SizeIsTemp: raw.Temp,
-		Locked: raw.Locked,
+		Locked:     raw.Locked,
 	}
 }
 

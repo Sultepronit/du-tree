@@ -7,9 +7,10 @@ import (
 )
 
 type rawNode struct {
-	Size    int64               `json:"size"`
-	Temp    bool                `json:"temp,omitempty"`
-	Locked  bool                `json:"locked,omitempty"`
+	Size int64 `json:"size"`
+	Temp bool  `json:"temp,omitempty"`
+	// Locked  bool                `json:"locked,omitempty"`
+	Locked  int                 `json:"locked,omitempty"`
 	Content map[string]*rawNode `json:"content,omitempty"`
 }
 
@@ -51,7 +52,13 @@ func (t *treeStr) fill(path []string, size int64) {
 	} else {
 		node := t.root
 		for _, stage := range path {
-			if node.Temp && size >= 0 {
+			// if node.Temp && size >= 0 {
+			// 	node.Size = 0
+			// }
+			if size == -1 {
+				// node.Locked = 1
+				node.Locked++
+			} else if node.Temp {
 				node.Size = 0
 			}
 
@@ -68,7 +75,9 @@ func (t *treeStr) fill(path []string, size int64) {
 			}
 		}
 		if size == -1 {
-			node.Locked = true
+			// node.Locked = true
+			// node.Locked = 2
+			node.Locked = -1
 		} else {
 			node.Size = size
 			node.Temp = false

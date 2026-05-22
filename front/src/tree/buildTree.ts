@@ -12,6 +12,18 @@ let max = 1
 
 let branches = {} as Record<string, Branch>
 
+function genLockedDetails(node: Node) {
+    const re = []
+    if (node.locked === -1) {
+        re.push(`You have no read rights for this dir`)
+    } else {
+        re.push(`Contains ${node.locked} nested dir(s) without access`)
+    }
+    re.push(` run as root to get the full size.`)
+
+    return re
+}
+
 function createLi(node: Node, prePath: string): string {
     let realPath: string
     let linkType: string
@@ -21,8 +33,20 @@ function createLi(node: Node, prePath: string): string {
         realPath = parts.slice(2).join("/")
         linkType = `<span class="t${parts[1]}"><span>`
     }
+    const title = [
+        `path: ${prePath ? prePath + "/" : "root"}`,
+        `name: ${node.name}`
+        // `${realPath ? "linked: " + realPath : ""}`
+    ]
+    if (realPath) {
+        title.push("linked: " + realPath)
+    } else if (node.locked) {
+        title.push(...genLockedDetails(node))
+    }
+    // console.log(node.name, node.locked)
+    // title="path: ${prePath ? prePath + "/" : "root"}\nname: ${node.name}\n${realPath ? "linked: " + realPath : ""}"
     return `<li><div
-            class="shoot ${node.type === "-locked" ? "locked" : ""}"
+            class="shoot ${node.locked > 0 ? "locked" : node.locked === -1 ? "locked itself" : ""}"
             data-path="${prePath}" 
             ${node.type === "d" ? 'data-dirname="' + node.name + '"' : ""}
             data-size="${node.size}"
@@ -30,7 +54,7 @@ function createLi(node: Node, prePath: string): string {
         >
             <div
                 class="fd-entry"
-                title="path: ${prePath ? prePath + "/" : "root"}\nname: ${node.name}\n${realPath ? "linked: " + realPath : ""}"
+                title="${title.join("\n")}"
             >
                 <div
                     class="fd-type t${node.type}"
@@ -120,7 +144,23 @@ function updateBranch(bNode: Node) {
     for (const cNode of bNode.content) {
         // console.log(cNode)
         const shoot = branch.shoots[cNode.name]
-        // console.log(shoot)
+        // console.log(cNode.name, shoot)
+        if (cNode.locked) {
+            console.log("Locked!", cNode.name)
+            shoot.el.classList.add("locked")
+            // if (cNode.locked > 1) shoot.el.classList.add("itself")
+            const details = genLockedDetails(cNode).join("\n")
+            const element = shoot.el.querySelector(".fd-entry") as HTMLDivElement
+            if (cNode.locked === -1) {
+                shoot.el.classList.add("itself")
+                if (!element.title.includes("You have no")) {
+                    element.title += "\n" + details
+                }
+            } else {
+                const base = element.title.split("\nContains ")[0]
+                element.title = base + "\n" + details
+            }
+        }
 
         if (!shoot.sizeDisplay) shoot.sizeDisplay = shoot.el.querySelector(".fd-size")
         const updated = updateSize(cNode, shoot.sizeDisplay)
