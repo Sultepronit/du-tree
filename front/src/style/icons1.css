@@ -1,0 +1,56 @@
+#access-widged.locked::before {
+    content: "🔒";
+    margin-left: -0.3em;
+}
+
+.locked.itself {
+    color: red;
+}
+
+.t-::before {
+    content: "📄";
+}
+
+.fd-type.td {
+    cursor: pointer;
+}
+
+.td::before {
+    content: "📁";
+}
+
+.td.unfold::before {
+    content: "📂";
+}
+
+.tL::before {
+    content: "🔗";
+}
+
+.locked.itself .td::before {
+    /* content: "📁"; */
+    opacity: 0.4;
+}
+
+/* .locked .fd-size::before {
+    content: "🔒";
+} */
+
+.locked > * > * > .fd-name::before {
+    content: "🔒";
+    opacity: 0.8;
+}
+
+.locked.itself > * > * > .fd-name::before {
+    /* content: "🔒"; */
+    opacity: 1;
+}
+
+.tbrk {
+    color: #ff3a3a;
+}
+
+.tbrk::before {
+    /* content: "❌"; */
+    content: "⛓️‍💥";
+}

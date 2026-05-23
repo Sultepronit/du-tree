@@ -10,8 +10,6 @@ export async function updateAccessWidget() {
     const root = await checkUser()
     if (root) accessWidget.classList.add("root")
     else accessWidget.classList.remove("root")
-
-    // accessWidget.className = root ? "root" : ""
 }
 
 export async function checkUser() {
@@ -20,48 +18,72 @@ export async function checkUser() {
     return user?.root
 }
 
-function addSuggestions(names: string[]) {
+// type pathHint = { current: string; next: string[] }
+type nextDetails = {
+    name: string
+    link?: string
+    isLocked?: true
+}
+type pathHint = {
+    current: string
+    next: nextDetails[]
+}
+
+// function addSuggestions(names: string[]) {
+function addSuggestions(sugg: nextDetails[]) {
     suggestions.classList.remove("hidden")
-    const html = names
-        .map(n => {
-            if (n.startsWith("///")) {
-                const [_, name, link] = n.split("///")
-                const title = `Link to: ${link}`
-                if (name.startsWith("🔒/")) {
-                    const name2 = name.slice(3)
-                    const title2 = title + "\nYou cannot access this dir!"
-                    return `<div class="suggestion tL locked" title="${title2}">🔒${name2}</div>`
-                }
-                return `<div class="suggestion tL" title="${title}">${name}</div>`
-            } else if (n.startsWith("/🔒")) {
-                const name = n.slice(1)
-                const title = "You cannot access this dir!"
-                return `<div class="suggestion td locked" title="${title}">${name}</div>`
+    const html = sugg
+        .map(s => {
+            const classes = [] as string[]
+            let title = [] as string[]
+
+            if (s.link) {
+                classes.push("link")
+                title = [`Link to: ${s.link}`]
             }
-            return `<div class="suggestion td">${n}</div>`
+            if (s.isLocked) {
+                title.push("You cannot access this dir!")
+                classes.push("locked")
+            }
+
+            return `<div
+                class="suggestion ${classes.join(" ")}"
+                ${title.length > 0 ? `title="${title.join("\n")}"` : ""}
+            >${s.name}</div>`
+
+            // if (s.startsWith("///")) {
+            //     const [_, name, link] = s.split("///")
+            //     const title = `Link to: ${link}`
+            //     // if (name.startsWith("🔒/")) {
+            //     //     const name2 = name.slice(3)
+            //     //     const title2 = title + "\nYou cannot access this dir!"
+            //     //     return `<div class="suggestion tL locked" title="${title2}">🔒${name2}</div>`
+            //     // }
+            //     return `<div class="suggestion link" title="${title}">${name}</div>`
+            // } /*/else if (n.startsWith("/🔒")) {
+            //     const name = n.slice(1)
+            //     const title = "You cannot access this dir!"
+            //     return `<div class="suggestion td locked" title="${title}">${name}</div>`
+            // } */
+            // return `<div class="suggestion">${s}</div>`
         })
         .join("")
     suggestions.innerHTML = html
 }
 
-type pathCheck = { current: string; next: string[] }
 let isOk = false
 input.addEventListener("input", async () => {
     updateAccessWidget()
     console.log(input.value)
     if (!input.value) return
     // const re = await doFetch("/path", pathInpunt.value)
-    const path = (await doFetch("/path", { path: input.value })) as pathCheck
+    const path = (await doFetch("/path", { path: input.value })) as pathHint
     console.log(path)
 
     if (path?.current === "Permission denied") accessWidget.classList.add("locked")
     else accessWidget.classList.remove("locked")
 
-    /*if (!path) {
-        isOk = false
-        suggestions.classList.add("hidden")
-        input.className = "wrong"
-    } else*/ if (path?.current === "ok") {
+    if (path?.current === "ok") {
         isOk = true
         pre.textContent = input.value
         input.className = "ok"
@@ -76,7 +98,7 @@ input.addEventListener("input", async () => {
             if (next.startsWith("/")) next = next.slice(1)
             console.log("next:", next)
             // const candidates = path.next.filter(e => `/${e}`.startsWith(next) || e.startsWith(next))
-            candidates = path.next.filter(e => e.toLocaleLowerCase().includes(next))
+            candidates = path.next.filter(e => e.name.toLocaleLowerCase().includes(next))
             console.log(candidates)
         }
 

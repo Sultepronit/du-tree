@@ -26,12 +26,13 @@ function genLockedDetails(node: Node) {
 
 function createLi(node: Node, prePath: string): string {
     let realPath: string
-    let linkType: string
+    // let linkType: string
     if (node.type == "L") {
         const parts = node.name.split("/")
         node.name = parts[0]
         realPath = parts.slice(2).join("/")
-        linkType = `<span class="t${parts[1]}"><span>`
+        // linkType = `<span class="t${parts[1]}"><span>`
+        node.type += parts[1]
     }
     const title = [
         `path: ${prePath ? prePath + "/" : "root"}`,
@@ -45,8 +46,12 @@ function createLi(node: Node, prePath: string): string {
     }
     // console.log(node.name, node.locked)
     // title="path: ${prePath ? prePath + "/" : "root"}\nname: ${node.name}\n${realPath ? "linked: " + realPath : ""}"
+    //
     return `<li><div
-            class="shoot ${node.locked > 0 ? "locked" : node.locked === -1 ? "locked itself" : ""}"
+            class="
+                shoot
+                ${node.locked > 0 ? "locked" : node.locked === -1 ? "locked itself" : ""}
+                ${node.sizeIsTemp ? "temp" : ""}"
             data-path="${prePath}" 
             ${node.type === "d" ? 'data-dirname="' + node.name + '"' : ""}
             data-size="${node.size}"
@@ -63,17 +68,12 @@ function createLi(node: Node, prePath: string): string {
                 </div>
                 <div class="fd-details">
                     <div class="fd-vizual-size"></div>
-                    <div
-                        class="fd-size ${node.sizeIsTemp ? "temp" : ""}"
-                        title="${node.size} B"
-                    >
-                        ${handleBytes(node.size)}
-                    </div>
-                    <div class="fd-name">${linkType ? linkType : ""}${node.name}</div>
+                    <div class="fd-size" title="${node.size} B">${handleBytes(node.size)}</div>
+                    <div class="fd-name">${node.name}</div>
                 </div>
             </div>
     </div></li>`
-}
+} // <div class="fd-name">${linkType ? linkType : ""}${node.name}</div>
 
 function createBranch(node: Node, prePath: string): DocumentFragment {
     // if (!node.content) return
@@ -102,11 +102,14 @@ function createBranch(node: Node, prePath: string): DocumentFragment {
     return templ.content
 }
 
-function updateSize(node: Node, display: HTMLDivElement) {
-    if (!display.classList.contains("temp") && !node.sizeIsTemp) return false
+function updateSize(node: Node, display: HTMLDivElement, tempWidget: HTMLDivElement = display) {
+    // if (!display.classList.contains("temp") && !node.sizeIsTemp) return false
+    if (!tempWidget.classList.contains("temp") && !node.sizeIsTemp) return false
 
-    if (node.sizeIsTemp) display.classList.add("temp")
-    else display.classList.remove("temp")
+    // if (node.sizeIsTemp) display.classList.add("temp")
+    // else display.classList.remove("temp")
+    if (node.sizeIsTemp) tempWidget.classList.add("temp")
+    else tempWidget.classList.remove("temp")
 
     const b = `${node.size} B`
     const h = handleBytes(node.size)
@@ -163,7 +166,7 @@ function updateBranch(bNode: Node) {
         }
 
         if (!shoot.sizeDisplay) shoot.sizeDisplay = shoot.el.querySelector(".fd-size")
-        const updated = updateSize(cNode, shoot.sizeDisplay)
+        const updated = updateSize(cNode, shoot.sizeDisplay, shoot.el)
         console.log(updated)
         if (!updated) continue
 

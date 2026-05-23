@@ -1,0 +1,110 @@
+/* path iput -------------------- */
+
+#access-widged.locked::before {
+    content: "";
+    display: inline-block;
+    width: 1.2em;
+    height: 1em;
+    /* margin-left: -0.3em; */
+    margin: 0.1em 0 0 -0.3em;
+    background-color: red;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    mask-image: url("icons/lock.svg");
+    -webkit-mask-image: url("icons/lock.svg");
+}
+
+.suggestion::before {
+    content: "";
+    display: inline-block;
+    width: 1.2em;
+    height: 1em;
+    background-color: black;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    mask-image: url("icons/folder.svg");
+    -webkit-mask-image: url("icons/folder.svg");
+}
+
+.suggestion.locked::before {
+    background-color: red;
+    mask-image: url("icons/folder-lock.svg");
+    -webkit-mask-image: url("icons/folder-lock.svg");
+}
+
+.suggestion.link::before {
+    background-color: #00acff;
+    mask-image: url("icons/folder-link.svg");
+    -webkit-mask-image: url("icons/folder-link.svg");
+}
+
+.suggestion.locked.link::before {
+    background-color: red;
+}
+
+/* tree design ----------------------- */
+
+.locked.itself {
+    color: red;
+}
+
+.locked.itself .td {
+    background-color: red;
+}
+
+.fd-type {
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    /* -webkit-mask-size: contain;
+    mask-size: contain; */
+}
+
+.fd-type.td {
+    cursor: pointer;
+}
+
+.td {
+    background-color: black;
+    mask-image: url("icons/folder.svg");
+    -webkit-mask-image: url("icons/folder.svg");
+}
+
+.temp > * > .td {
+    background-color: var(--temp-color);
+    mask-image: url("icons/folder-clock.svg");
+    -webkit-mask-image: url("icons/folder-clock.svg");
+}
+
+.locked > * > .td {
+    mask-image: url("icons/folder-lock.svg");
+    -webkit-mask-image: url("icons/folder-lock.svg");
+}
+
+.td.unfold {
+    mask-image: url("icons/folder-open.svg");
+    -webkit-mask-image: url("icons/folder-open.svg");
+}
+
+.t- {
+    background-color: gray;
+    mask-image: url("icons/file.svg");
+    -webkit-mask-image: url("icons/file.svg");
+}
+
+.tL- {
+    background-color: #00acff;
+    mask-image: url("icons/file-link.svg");
+    -webkit-mask-image: url("icons/file-link.svg");
+}
+
+.tLd {
+    background-color: #00acff;
+    mask-image: url("icons/folder-link.svg");
+    -webkit-mask-image: url("icons/folder-link.svg");
+}
+
+.tLbrk {
+    background-color: #ff71c7;
+    mask-image: url("icons/link-2-off.svg");
+    -webkit-mask-image: url("icons/link-2-off.svg");
+}

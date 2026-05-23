@@ -23,7 +23,8 @@ func CheckPath(path string) *models.Path {
 
 	re := models.Path{
 		Current: "ok",
-		Next:    make([]string, 0, 5),
+		// Next:    make([]string, 0, 5),
+		Next: make([]models.PathDetail, 0, 5),
 	}
 
 	for i := range 100 {
@@ -42,27 +43,37 @@ func CheckPath(path string) *models.Path {
 
 			for _, e := range entries {
 				if e.IsDir() {
-					fullP := filepath.Join(path, e.Name())
-					err := unix.Access(fullP, unix.R_OK|unix.X_OK)
-					if err != nil {
-						re.Next = append(re.Next, "/🔒"+e.Name())
-					} else {
-						re.Next = append(re.Next, e.Name())
+					next := models.PathDetail{Name: e.Name()}
+					// acc := checkAccess(path, e.Name())
+					if !checkAccess(path, e.Name()) {
+						next.IsLocked = true
 					}
+					// fullP := filepath.Join(path, e.Name())
+					// err := unix.Access(fullP, unix.R_OK|unix.X_OK)
+					// if err != nil {
+					// 	re.Next = append(re.Next, "/🔒"+e.Name())
+					// } else {
+					// 	// re.Next = append(re.Next, e.Name())
+					// }
+					re.Next = append(re.Next, next)
 
 				} else if e.Type().String()[0:1] == "L" {
 					typ, realPath := getRealEntity(path, e.Name())
 					if typ == "d" {
-						acc := checkAccess(realPath, "")
-						if acc {
-							re.Next = append(re.Next, "///"+e.Name()+"///"+realPath)
-						} else {
-							re.Next = append(re.Next, "///🔒/"+e.Name()+"///"+realPath)
+						next := models.PathDetail{Name: e.Name(), Link: realPath}
+						if !checkAccess(realPath, "") {
+							next.IsLocked = true
 						}
+						re.Next = append(re.Next, next)
+						// acc := checkAccess(realPath, "")
+						// if acc {
+						// 	re.Next = append(re.Next, "///"+e.Name()+"///"+realPath)
+						// } else {
+						// 	re.Next = append(re.Next, "///🔒/"+e.Name()+"///"+realPath)
+						// }
 
 					}
 				}
-
 			}
 			return &re
 		}
