@@ -64,11 +64,11 @@
 }
 
 .td {
-    /* background-color: black; */
+    background-color: black;
     /* background-color: yellow; */
-    /* mask-image: url("icons/folder.svg");
-    -webkit-mask-image: url("icons/folder.svg"); */
-    background: url("icons/folder.svg") no-repeat center;
+    mask-image: url("icons/folder.svg");
+    -webkit-mask-image: url("icons/folder.svg");
+    /* background: url("icons/folder.svg") no-repeat center; */
 }
 
 .temp > * > .td {
