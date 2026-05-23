@@ -64,9 +64,11 @@
 }
 
 .td {
-    background-color: black;
-    mask-image: url("icons/folder.svg");
-    -webkit-mask-image: url("icons/folder.svg");
+    /* background-color: black; */
+    /* background-color: yellow; */
+    /* mask-image: url("icons/folder.svg");
+    -webkit-mask-image: url("icons/folder.svg"); */
+    background: url("icons/folder.svg") no-repeat center;
 }
 
 .temp > * > .td {
@@ -86,9 +88,11 @@
 }
 
 .t- {
-    background-color: gray;
-    mask-image: url("icons/file.svg");
-    -webkit-mask-image: url("icons/file.svg");
+    /* background-color: gray; */
+    /* mask-image: url("icons/file.svg");
+    -webkit-mask-image: url("icons/file.svg"); */
+    color: gray;
+    background: url("icons/file.svg") no-repeat center;
 }
 
 .tL- {
