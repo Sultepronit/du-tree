@@ -1,6 +1,7 @@
 package du
 
 import (
+	"context"
 	"du-tree/models"
 	"strings"
 	"sync"
@@ -26,17 +27,25 @@ func (n *rawNode) getSize() int64 {
 }
 
 type treeStr struct {
-	mu   sync.RWMutex
-	root *rawNode
+	mu sync.RWMutex
+	// cancel *context.CancelFunc
+	cancel context.CancelFunc
+	root   *rawNode
 }
 
-var tree2 treeStr
+var tree treeStr
 
 func ResetTree() {
-	tree2 = treeStr{
-		root: &rawNode{
-			Temp:    true,
-			Content: make(map[string]*rawNode)},
+	// tree = treeStr{
+	// 	root: &rawNode{
+	// 		Temp:    true,
+	// 		Content: make(map[string]*rawNode)},
+	// }
+	tree.mu.Lock()
+	defer tree.mu.Unlock()
+	tree.root = &rawNode{
+		Temp:    true,
+		Content: make(map[string]*rawNode),
 	}
 }
 

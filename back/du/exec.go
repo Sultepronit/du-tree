@@ -2,66 +2,30 @@ package du
 
 import (
 	"bufio"
+	"context"
 	"io"
 	"log"
 	"os/exec"
-	"strconv"
 	"strings"
 )
 
-var discardIndex int
-
-func parseErr(line string) {
-	if strings.HasSuffix(line, "Permission denied") {
-		// log.Println(line)
-		startIdx := strings.Index(line, "'")
-		endIdx := strings.LastIndex(line, "'")
-
-		if startIdx != -1 && endIdx != -1 && startIdx < endIdx {
-			pathlLine := line[startIdx+1 : endIdx]
-			log.Println("locked:", pathlLine)
-
-			// DRY!
-			wholePath := strings.Split(pathlLine, "/")
-			path := wholePath[discardIndex:]
-			tree2.fill(path, -1)
-		}
-	}
-}
-
-func parseOutput(line string) {
-	// time.Sleep(time.Second)
-	// time.Sleep(time.Millisecond * 200)
-	parts := strings.SplitN(line, "\t", 2)
-	if len(parts) != 2 {
-		parseErr(line)
-		return
-	}
-
-	size, err := strconv.ParseInt(parts[0], 10, 64)
-	if err != nil {
-		panic(err)
-	}
-
-	wholePath := strings.Split(parts[1], "/")
-	path := wholePath[discardIndex:]
-
-	tree2.fill(path, size)
-}
-
-func Init(path string, comm []string) error {
+// return to who?
+func doStart(path string, comm []string, ctx context.Context) error {
 	ResetTree()
+
+	// ctx, cancel := context.WithCancel(context.Background())
+	// defer cancel()
 
 	discardIndex = len(strings.Split(path, "/")) - 1
 
 	args := comm[1:]
 	args = append(args, path)
 
-	// cmd := exec.Command(comm[0], comm[1:]...)
-	cmd := exec.Command(comm[0], args...)
-	// cmd.Stderr = os.Stderr // ?
-	// cmd.Stderr = cmd.Stdout
-	// cmd.Stderr = os.Stdout
+	// cmd := exec.Command(comm[0], args...)
+	cmd := exec.CommandContext(ctx, comm[0], args...)
+	cmd.Env = append(cmd.Env, "LC_ALL=C")
+	// cmd.Env = append(os.Environ(), "LC_ALL=es_ES.UTF-8")
+	// fmt.Println(cmd.Env)
 	log.Println("cmd!")
 
 	pr, pw := io.Pipe()
@@ -72,6 +36,11 @@ func Init(path string, comm []string) error {
 	// if err != nil {
 	// 	log.Println(err)
 	// }
+	// go func() {
+	// 	time.Sleep(time.Second)
+	// 	fmt.Println("🛑 Користувач натиснув 'Скасувати' у веб-інтерфейсі...")
+	// 	cancel()
+	// }()
 
 	if err := cmd.Start(); err != nil {
 		log.Println(err)
@@ -93,18 +62,49 @@ func Init(path string, comm []string) error {
 		parseOutput(line)
 	}
 
-	// if err := cmd.Wait(); err != nil {
-	// 	// log.Panic(err)
-	// 	if exitErr, ok := err.(*exec.ExitError); ok {
-	// 		if exitErr.ExitCode() != 0 {
-	// 			log.Printf("Command finished with non-zero code: %d", exitErr.ExitCode())
-	// 			log.Println(exitErr)
-	// 		}
-	// 	} else {
-	// 		log.Printf("Wait error: %v", err)
-	// 	}
-	// }
+	err := scanner.Err()
+	if err != nil {
+		log.Printf("Scanner error: %v", err)
+		return err
+	}
 
 	log.Println("finish!")
 	return nil
+}
+
+// var manager struct {
+// 	mu     sync.Mutex
+// 	cancel context.CancelFunc
+// }
+
+func Start(path string, comm []string) {
+	// manager.mu.Lock()
+	// defer manager.mu.Unlock()
+	tree.mu.Lock()
+	defer tree.mu.Unlock()
+
+	if tree.cancel != nil {
+		log.Println("Previous scan is still running!")
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	// manager.cancel = cancel
+	tree.cancel = cancel
+
+	// if manager.cancel != nil {
+
+	go doStart(path, comm, ctx)
+}
+
+func Stop() {
+	tree.mu.Lock()
+	defer tree.mu.Unlock()
+
+	if tree.cancel != nil {
+		log.Println("Stopping scan...")
+		tree.cancel()
+		tree.cancel = nil
+	} else {
+		log.Println("No scan is currently running.")
+	}
 }

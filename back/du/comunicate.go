@@ -3,7 +3,6 @@ package du
 import (
 	"du-tree/explorer"
 	"du-tree/models"
-	"fmt"
 	"strings"
 )
 
@@ -42,13 +41,13 @@ func GetDir(path string) (*models.Node, error) {
 
 	fSizePath := genfSizePath(parts)
 	// log.Println(fSizePath)
-	tree2.fill(fSizePath, fSize)
+	tree.fill(fSizePath, fSize)
 
 	// updatePaths[strings.Join(parts, "/")] = true
 	updatePaths = append(updatePaths, strings.Join(parts, "/"))
 	// fmt.Println(updatePaths)
 
-	dure := tree2.getDir(strings.Join(parts, "/"))
+	dure := tree.getDir(strings.Join(parts, "/"))
 	// log.Println("du.GetDir: dure", dure)
 
 	if dure == nil {
@@ -81,8 +80,8 @@ func GetDir(path string) (*models.Node, error) {
 func GetUpdate() []*models.Node {
 	re := make([]*models.Node, len(updatePaths))
 	for i, p := range updatePaths {
-		fmt.Println(p)
-		re[i] = tree2.getDir(p)
+		// fmt.Println(p)
+		re[i] = tree.getDir(p)
 	}
 	// return tree2.getDir("")
 	return re

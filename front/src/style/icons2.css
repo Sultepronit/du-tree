@@ -88,11 +88,11 @@
 }
 
 .t- {
-    /* background-color: gray; */
-    /* mask-image: url("icons/file.svg");
-    -webkit-mask-image: url("icons/file.svg"); */
-    color: gray;
-    background: url("icons/file.svg") no-repeat center;
+    background-color: gray;
+    mask-image: url("icons/file.svg");
+    -webkit-mask-image: url("icons/file.svg");
+    /* color: gray; */
+    /* background: url("icons/file.svg") no-repeat center; */
 }
 
 .tL- {

@@ -52,10 +52,11 @@ func handleDir(w http.ResponseWriter, r *http.Request) {
 
 	if req.InitDu {
 		// go du.Init(req.Path)
-		go du.Init(req.Path, req.Comm)
+		// go du.Start(req.Path, req.Comm)
+		du.Start(req.Path, req.Comm)
+		time.Sleep(time.Millisecond * 100)
 	}
 
-	time.Sleep(time.Millisecond * 100)
 	// sendResult(w, req)
 	// re, err := explorer.ReadDir(req.Path)
 	re, err := du.GetDir(req.Path)
@@ -67,6 +68,12 @@ func handleDir(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleUpdate(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.URL.Path)
+	// log.Println(r.URL.Path)
 	sendResult(w, du.GetUpdate())
+}
+
+func handleCancel(w http.ResponseWriter, r *http.Request) {
+	log.Println(r.URL.Path)
+	du.Stop()
+	sendResult(w, map[string]string{"status": "canceled"})
 }
