@@ -2,12 +2,12 @@ package main
 
 import (
 	// "du-tree/du"
+
 	"du-tree/server"
 )
 
 func main() {
-	// explorer.ReadDir("/")
-	// explorer.ReadDir("/home/step/")
-	// du.ResetTree()
+	// go work.ReRoot("pkexec")
+	// go work.ReRoot("sudo -S")
 	server.Start()
 }

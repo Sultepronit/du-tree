@@ -32,16 +32,6 @@ func doStart(path string, comm []string, ctx context.Context) error {
 	cmd.Stdout = pw
 	cmd.Stderr = pw
 
-	// stdout, err := cmd.StdoutPipe()
-	// if err != nil {
-	// 	log.Println(err)
-	// }
-	// go func() {
-	// 	time.Sleep(time.Second)
-	// 	fmt.Println("🛑 Користувач натиснув 'Скасувати' у веб-інтерфейсі...")
-	// 	cancel()
-	// }()
-
 	if err := cmd.Start(); err != nil {
 		log.Println(err)
 		return err
