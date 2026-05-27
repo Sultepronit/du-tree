@@ -1,5 +1,6 @@
 import { doFetch } from "../api/fetch"
-import { initTree } from "../tree/buildTree"
+import { initTree } from "../tree/controls"
+
 
 const accessWidget = document.getElementById("access-widged")
 const input = document.getElementById("path") as HTMLInputElement
@@ -50,22 +51,6 @@ function addSuggestions(sugg: nextDetails[]) {
                 class="suggestion ${classes.join(" ")}"
                 ${title.length > 0 ? `title="${title.join("\n")}"` : ""}
             >${s.name}</div>`
-
-            // if (s.startsWith("///")) {
-            //     const [_, name, link] = s.split("///")
-            //     const title = `Link to: ${link}`
-            //     // if (name.startsWith("🔒/")) {
-            //     //     const name2 = name.slice(3)
-            //     //     const title2 = title + "\nYou cannot access this dir!"
-            //     //     return `<div class="suggestion tL locked" title="${title2}">🔒${name2}</div>`
-            //     // }
-            //     return `<div class="suggestion link" title="${title}">${name}</div>`
-            // } /*/else if (n.startsWith("/🔒")) {
-            //     const name = n.slice(1)
-            //     const title = "You cannot access this dir!"
-            //     return `<div class="suggestion td locked" title="${title}">${name}</div>`
-            // } */
-            // return `<div class="suggestion">${s}</div>`
         })
         .join("")
     suggestions.innerHTML = html

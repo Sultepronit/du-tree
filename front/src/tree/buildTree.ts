@@ -6,6 +6,7 @@ import type { Branch, Node } from "../types"
 const totalSize = document.getElementById("total-size") as HTMLDivElement
 const totalLocked = document.getElementById("lock-widget") as HTMLDivElement
 const treeBlock = document.getElementById("tree")!
+// const cancelButton = document.getElementById("cancel")
 
 let root = ""
 
@@ -196,7 +197,7 @@ function updateBranch(bNode: Node) {
     })
 }
 
-function updateTree(bNodes: Node[]) {
+export function updateTree(bNodes: Node[]) {
     const root = bNodes[0]
     // totalSize.textContent = formatSize(root)
     // console.log(root, totalSize)
@@ -205,8 +206,8 @@ function updateTree(bNodes: Node[]) {
     if (!root.content) return
 
     root.content.sort((a, b) => b.size - a.size)
-    if (root.content[0].size != max) {
-        // if (root.content[0].size > max) {
+    // if (root.content[0].size != max) {
+    if (root.content[0].size > max) {
         max = root.content[0].size
         document.documentElement.style.setProperty("--max-size", (max / 100).toString())
     }
@@ -226,19 +227,48 @@ function updateTreeRoot(node: Node) {
     }
 }
 
-function initUpdate() {
-    const t = setInterval(async () => {
-        const update = await doFetch("/update")
-        console.log(update)
-        if (!update[0].sizeIsTemp) {
-            clearInterval(t)
-            console.timeEnd("t1")
-        }
-        updateTree(update)
-    }, 1000)
-}
+// function initUpdate() {
+//     const t = setInterval(async () => {
+//         const update = await doFetch("/update")
+//         console.log(update)
+//         if (!update[0].sizeIsTemp) {
+//             clearInterval(t)
+//             // console.timeEnd("t1")
+//         }
+//         updateTree(update)
+//     }, 10000)
+// }
 
-export async function initTree(path: string) {
+// export async function initTree(path: string) {
+//     root = path
+
+//     treeBlock.innerHTML = ""
+//     totalSize.parentElement.classList.add("temp")
+//     max = 1
+//     branches = {}
+
+//     console.time("t1")
+//     // const path = pathInpunt.value
+
+//     const data = (await doFetch("/dir", {
+//         path,
+//         initDu: true,
+//         // command: ["du", "-b", "--exclude=/proc", path]
+//         // command: ["du", "-B 1", "--exclude=/proc", path]
+//         command: ["du", "-b", "--exclude=/proc"]
+//     })) as Node
+//     // const data = (await doFetch("/dir", { path, initDu: true })) as Node[]
+
+//     console.log(data)
+//     // updateSize(data, totalSize, totalSize.parentElement as HTMLDivElement)
+//     updateTreeRoot(data)
+
+//     treeBlock.appendChild(createBranch(data, ""))
+
+//     if (data.sizeIsTemp) initUpdate()
+// }
+
+export async function rebuildTree(data: Node, path: string) {
     root = path
 
     treeBlock.innerHTML = ""
@@ -246,25 +276,24 @@ export async function initTree(path: string) {
     max = 1
     branches = {}
 
-    console.time("t1")
+    // console.time("t1")
     // const path = pathInpunt.value
 
-    const data = (await doFetch("/dir", {
-        path,
-        initDu: true,
-        // command: ["du", "-b", "--exclude=/proc", path]
-        // command: ["du", "-B 1", "--exclude=/proc", path]
-        command: ["du", "-b", "--exclude=/proc"]
-    })) as Node
-    // const data = (await doFetch("/dir", { path, initDu: true })) as Node[]
+    // const data = (await doFetch("/dir", {
+    //     path,
+    //     initDu: true,
+    //     // command: ["du", "-b", "--exclude=/proc", path]
+    //     // command: ["du", "-B 1", "--exclude=/proc", path]
+    //     command: ["du", "-b", "--exclude=/proc"]
+    // })) as Node
 
-    console.log(data)
+    // console.log(data)
     // updateSize(data, totalSize, totalSize.parentElement as HTMLDivElement)
     updateTreeRoot(data)
 
     treeBlock.appendChild(createBranch(data, ""))
 
-    if (data.sizeIsTemp) initUpdate()
+    // if (data.sizeIsTemp) initUpdate()
 }
 
 treeBlock.addEventListener("click", async e => {
