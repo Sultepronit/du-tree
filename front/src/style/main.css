@@ -15,7 +15,7 @@ body {
     --temp-color: #00f;
 }
 
-input {
+input, button {
     font: inherit;
 }
 

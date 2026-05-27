@@ -3,7 +3,8 @@ import { doFetch } from "../api/fetch"
 import handleBytes from "../helpers/handleBytes"
 import type { Branch, Node } from "../types"
 
-const totalSize = document.getElementById("root") as HTMLDivElement
+const totalSize = document.getElementById("total-size") as HTMLDivElement
+const totalLocked = document.getElementById("lock-widget") as HTMLDivElement
 const treeBlock = document.getElementById("tree")!
 
 let root = ""
@@ -48,8 +49,7 @@ function createLi(node: Node, prePath: string): string {
     // title="path: ${prePath ? prePath + "/" : "root"}\nname: ${node.name}\n${realPath ? "linked: " + realPath : ""}"
     //
     return `<li><div
-            class="
-                shoot
+            class="shoot
                 ${node.locked > 0 ? "locked" : node.locked === -1 ? "locked itself" : ""}
                 ${node.sizeIsTemp ? "temp" : ""}"
             data-path="${prePath}" 
@@ -102,9 +102,10 @@ function createBranch(node: Node, prePath: string): DocumentFragment {
     return templ.content
 }
 
-function updateSize(node: Node, display: HTMLDivElement, tempWidget: HTMLDivElement = display) {
+function updateSize(node: Node, display: HTMLDivElement, tempWidget: HTMLDivElement) {
     // if (!display.classList.contains("temp") && !node.sizeIsTemp) return false
     if (!tempWidget.classList.contains("temp") && !node.sizeIsTemp) return false
+    // console.log(node, display, tempWidget)
 
     // if (node.sizeIsTemp) display.classList.add("temp")
     // else display.classList.remove("temp")
@@ -199,7 +200,8 @@ function updateTree(bNodes: Node[]) {
     const root = bNodes[0]
     // totalSize.textContent = formatSize(root)
     // console.log(root, totalSize)
-    updateSize(root, totalSize)
+    // updateSize(root, totalSize, totalSize.parentElement as HTMLDivElement)
+    updateTreeRoot(root)
     if (!root.content) return
 
     root.content.sort((a, b) => b.size - a.size)
@@ -211,6 +213,16 @@ function updateTree(bNodes: Node[]) {
 
     for (const b of bNodes) {
         updateBranch(b)
+    }
+}
+
+function updateTreeRoot(node: Node) {
+    updateSize(node, totalSize, totalSize.parentElement as HTMLDivElement)
+    if (node.locked) {
+        totalLocked.classList.remove("hidden")
+        totalLocked.textContent = node.locked.toString()
+    } else {
+        totalLocked.classList.add("hidden")
     }
 }
 
@@ -230,7 +242,7 @@ export async function initTree(path: string) {
     root = path
 
     treeBlock.innerHTML = ""
-    totalSize.classList.add("temp")
+    totalSize.parentElement.classList.add("temp")
     max = 1
     branches = {}
 
@@ -247,7 +259,8 @@ export async function initTree(path: string) {
     // const data = (await doFetch("/dir", { path, initDu: true })) as Node[]
 
     console.log(data)
-    updateSize(data, totalSize)
+    // updateSize(data, totalSize, totalSize.parentElement as HTMLDivElement)
+    updateTreeRoot(data)
 
     treeBlock.appendChild(createBranch(data, ""))
 
