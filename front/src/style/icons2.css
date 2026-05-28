@@ -1,3 +1,8 @@
+:root {
+    --temp-dir-icon: url("icons/folder-sync.svg");
+    /* --temp-dir-icon: url("icons/folder-x.svg"); */
+}
+
 /* path iput -------------------- */
 
 #access-widged.locked::before {
@@ -73,8 +78,11 @@
 
 .temp > * > .td {
     background-color: var(--temp-color);
-    mask-image: url("icons/folder-clock.svg");
-    -webkit-mask-image: url("icons/folder-clock.svg");
+    /* mask-image: url("icons/folder-clock.svg");
+    -webkit-mask-image: url("icons/folder-clock.svg"); */
+    /* mask-image: url("icons/folder-sync.svg"); */
+    /* -webkit-mask-image: url("icons/folder-sync.svg"); */
+    -webkit-mask-image: var(--temp-dir-icon);
 }
 
 .locked > * > .td {

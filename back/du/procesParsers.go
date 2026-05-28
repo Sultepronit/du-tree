@@ -5,6 +5,7 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	"time"
 )
 
 var discardIndex int
@@ -30,7 +31,7 @@ func parseErr(line string) {
 
 func parseOutput(line string) {
 	// time.Sleep(time.Second)
-	// time.Sleep(time.Millisecond * 200)
+	time.Sleep(time.Millisecond * 200)
 	parts := strings.SplitN(line, "\t", 2)
 	if len(parts) != 2 {
 		parseErr(line)

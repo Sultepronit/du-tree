@@ -58,7 +58,7 @@ func doStart(path string, comm []string, ctx context.Context) error {
 		return err
 	}
 
-	tree.cancel()
+	// tree.cancel()
 	tree.cancel = nil
 
 	log.Println("finish!")

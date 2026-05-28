@@ -1,3 +1,7 @@
+:root {
+    --max-size: 1;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -8,11 +12,6 @@ body {
     font-size: 1.4rem;
     padding: 0.5em;
     font-family: "Ubuntu Mono", monospace;
-}
-
-:root {
-    --max-size: 1;
-    --temp-color: #00f;
 }
 
 input, button {
