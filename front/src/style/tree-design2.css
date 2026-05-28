@@ -98,11 +98,11 @@ body {
 }
 
 .temp #total-size::after {
-/* #total-size::after { */
+    /* #total-size::after { */
     content: "";
     display: inline-block;
     margin: 0 0.1em -0.1em;
-    width: 1em;
+    width: 0.9em;
     height: 0.9em;
     -webkit-mask-repeat: no-repeat;
     mask-repeat: no-repeat;
@@ -113,14 +113,25 @@ body {
     -webkit-mask-image: url("icons/sync.svg");
     -webkit-mask-size: contain;
     mask-size: contain;
-    animation: wave-pulse 2s infinite ease-in-out;
+    /* animation: wave-pulse 2s infinite ease-in-out; */
+
+    transform-origin: center center;
+    animation: spin-counter 2s linear infinite;
+}
+
+@keyframes spin-counter {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(-360deg);
+    }
 }
 
 .canceled #total-size::after {
     animation: none;
     mask-image: url("icons/refresh-cw-off.svg");
     -webkit-mask-image: url("icons/refresh-cw-off.svg");
-    
 }
 
 #lock-widget {
@@ -130,7 +141,7 @@ body {
 #lock-widget::before {
     content: "";
     display: inline-block;
-    margin-bottom: -0.1em;  
+    margin-bottom: -0.1em;
     width: 1em;
     height: 0.85em;
     -webkit-mask-repeat: no-repeat;
@@ -147,7 +158,7 @@ body {
 }
 
 .temp #cancel {
-/* #cancel { */
+    /* #cancel { */
     display: block;
     border: none;
     /* background: none; */
@@ -220,6 +231,3 @@ li {
     /* opacity: 0.4; */
     color: var(--temp-color);
 }
-
-
-

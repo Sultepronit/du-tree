@@ -9,7 +9,7 @@ const statePannel = totalSize.parentElement
 const treeBlock = document.getElementById("tree")!
 // const cancelButton = document.getElementById("cancel")
 
-let root = ""
+let rootPath = ""
 
 let max = 1
 
@@ -79,7 +79,7 @@ function createLi(node: Node, prePath: string): string {
     </div></li>`
 } // <div class="fd-name">${linkType ? linkType : ""}${node.name}</div>
 
-function createBranch(node: Node, prePath: string): DocumentFragment {
+export function createBranch(node: Node, prePath: string): DocumentFragment {
     // if (!node.content) return
     if (!node.content) {
         const templ = document.createElement("template")
@@ -228,7 +228,7 @@ function updateTreeRoot(node: Node) {
 }
 
 export async function rebuildTree(data: Node, path: string) {
-    root = path
+    rootPath = path
 
     removeCanceled()
     treeBlock.innerHTML = ""
@@ -244,46 +244,46 @@ export async function rebuildTree(data: Node, path: string) {
 export function setCanceled() {
     canceled = true
     document.documentElement.style.setProperty("--temp-dir-icon", `url("icons/folder-x.svg")`)
-    statePannel.classList.add("canceled");
+    statePannel.classList.add("canceled")
 }
 
 export function removeCanceled() {
     if (!canceled) return
     canceled = false
     document.documentElement.style.removeProperty("--temp-dir-icon")
-    statePannel.classList.remove("canceled");
+    statePannel.classList.remove("canceled")
 }
 
-treeBlock.addEventListener("click", async e => {
-    const target = e.target as HTMLDivElement
-    console.log(target)
-    // if (!target.classList.contains("interactive")) return
-    // if (!target.classList.contains("td")) return
-    if (!target.dataset.dir) return
-    const shoot = target.closest("div.shoot") as HTMLDivElement
-    // const dataset = target?.dataset
-    const dataset = shoot?.dataset
+// treeBlock.addEventListener("click", async e => {
+//     const target = e.target as HTMLDivElement
+//     console.log(target)
+//     // if (!target.classList.contains("interactive")) return
+//     // if (!target.classList.contains("td")) return
+//     if (!target.dataset.dir) return
+//     const shoot = target.closest("div.shoot") as HTMLDivElement
+//     // const dataset = target?.dataset
+//     const dataset = shoot?.dataset
 
-    if (!dataset.nested) {
-        // const prePath = dataset.path ? `${pathInpunt.value}${dataset.path}/` : pathInpunt.value
-        const prePath = dataset.path ? `${root}${dataset.path}/` : root
-        const fullPath = prePath + dataset.dirname
-        // const path = target.dataset.path
-        console.log(fullPath)
+//     if (!dataset.nested) {
+//         // const prePath = dataset.path ? `${pathInpunt.value}${dataset.path}/` : pathInpunt.value
+//         const prePath = dataset.path ? `${rootPath}${dataset.path}/` : rootPath
+//         const fullPath = prePath + dataset.dirname
+//         // const path = target.dataset.path
+//         console.log(fullPath)
 
-        target.classList.add("unfold")
+//         target.classList.add("unfold")
 
-        const data = await doFetch("/dir", { path: fullPath })
-        // node.content = await doFetch("/dir", { path: fullPath })
-        console.log(data)
-        const branch = createBranch(data, dataset.path)
-        if (branch) shoot.appendChild(branch)
-        dataset.nested = "true"
-        dataset.unfolded = "true"
-        // target.classList.add("unfold")
-    } else {
-        target.classList.toggle("unfold")
-        shoot.querySelector<HTMLDivElement>(".dir-content")!.hidden =
-            !target.classList.contains("unfold")
-    }
-})
+//         const data = await doFetch("/dir", { path: fullPath })
+//         // node.content = await doFetch("/dir", { path: fullPath })
+//         console.log(data)
+//         const branch = createBranch(data, dataset.path)
+//         if (branch) shoot.appendChild(branch)
+//         dataset.nested = "true"
+//         dataset.unfolded = "true"
+//         // target.classList.add("unfold")
+//     } else {
+//         target.classList.toggle("unfold")
+//         shoot.querySelector<HTMLDivElement>(".dir-content")!.hidden =
+//             !target.classList.contains("unfold")
+//     }
+// })
