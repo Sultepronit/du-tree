@@ -8,8 +8,7 @@ let rootPath = ""
 export async function initTree(path: string) {
     rootPath = path
 
-    // const command = ["du", "-b", "--exclude=/proc", path]
-    // const command = ["du", "-B 1", "--exclude=/proc", path]
+    // const command = ["du", "-B 1", "--exclude=/proc"]
     const command = ["du", "-b", "--exclude=/proc"]
 
     const data = (await doFetch("/dir", {
@@ -38,7 +37,7 @@ function initUpdate() {
     updateInterval = setInterval(async () => {
         const updates = await doFetch("/update", updateBranches)
         console.log(updates)
-        if (updates.length < 1) {
+        if (!updates) {
             clearInterval(updateInterval)
             updateInterval = 0
             setCanceled()

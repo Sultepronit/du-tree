@@ -76,9 +76,21 @@ func GetDir(path string) (*models.Node, error) {
 	return dure, nil
 }
 
+func checkCancel() bool {
+	tree.mu.RLock()
+	defer tree.mu.RUnlock()
+	if tree.root == nil {
+		return true
+	}
+	return tree.cancel == nil && tree.root.Temp
+}
+
 // func GetUpdate() *models.Node {
 // func GetUpdate() []*models.Node {
 func GetUpdate(reqPaths []string) []*models.Node {
+	if checkCancel() {
+		return nil
+	}
 	// re := make([]*models.Node, len(updatePaths))
 	re := make([]*models.Node, len(reqPaths)+1)
 	// updatePaths := make([]string, 0, len(reqPaths)+1)
