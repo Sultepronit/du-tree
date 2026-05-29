@@ -8,11 +8,11 @@ import (
 
 // var updatePaths = make(map[string]bool)
 // var updatePaths = make([]string, 0, 3)
-var updatePaths []string
+// var updatePaths []string
 
 func genfSizePath(basePath []string) []string {
 	if len(basePath) == 1 && basePath[0] == "" {
-		updatePaths = make([]string, 0, 3)
+		// updatePaths = make([]string, 0, 3)
 		return []string{"*files"}
 	}
 	fSizePath := make([]string, len(basePath)+1)
@@ -44,7 +44,7 @@ func GetDir(path string) (*models.Node, error) {
 	tree.fill(fSizePath, fSize)
 
 	// updatePaths[strings.Join(parts, "/")] = true
-	updatePaths = append(updatePaths, strings.Join(parts, "/"))
+	// updatePaths = append(updatePaths, strings.Join(parts, "/"))
 	// fmt.Println(updatePaths)
 
 	dure := tree.getDir(strings.Join(parts, "/"))
@@ -77,12 +77,19 @@ func GetDir(path string) (*models.Node, error) {
 }
 
 // func GetUpdate() *models.Node {
-func GetUpdate() []*models.Node {
-	re := make([]*models.Node, len(updatePaths))
-	for i, p := range updatePaths {
+// func GetUpdate() []*models.Node {
+func GetUpdate(reqPaths []string) []*models.Node {
+	// re := make([]*models.Node, len(updatePaths))
+	re := make([]*models.Node, len(reqPaths)+1)
+	// updatePaths := make([]string, 0, len(reqPaths)+1)
+	// updatePaths[0] = "",
+	// updatePaths = append(updatePaths, )
+	re[0] = tree.getDir("")
+	// for i, p := range updatePaths {
+	for i, p := range reqPaths {
 		// fmt.Println(p)
-		re[i] = tree.getDir(p)
+		re[i+1] = tree.getDir(p)
 	}
-	// return tree2.getDir("")
+
 	return re
 }

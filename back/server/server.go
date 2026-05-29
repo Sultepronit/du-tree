@@ -15,7 +15,7 @@ func Start() {
 	http.HandleFunc("/user", checkUser)
 	http.HandleFunc("POST /path", checkPath)
 	http.HandleFunc("POST /dir", handleDir)
-	http.HandleFunc("/update", handleUpdate)
+	http.HandleFunc("POST /update", handleUpdate)
 	http.HandleFunc("/cancel", handleCancel)
 
 	http.HandleFunc("/", handleHello)

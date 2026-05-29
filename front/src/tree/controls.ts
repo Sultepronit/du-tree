@@ -25,29 +25,46 @@ export async function initTree(path: string) {
     if (data.sizeIsTemp) initUpdate()
 }
 
-function initUpdate() {
-    const t = setInterval(async () => {
-        const update = await doFetch("/update")
-        console.log(update)
-        if (update.length < 1) {
-            clearInterval(t)
-            setCanceled()
-            return
-        }
-
-        if (!update[0].sizeIsTemp) {
-            clearInterval(t)
-            // console.timeEnd("t1")
-        }
-        updateTree(update)
-    }, 1000)
-}
-
 document.getElementById("cancel").addEventListener("click", async () => {
     const re = await doFetch("/cancel")
     console.log(re)
     if (re?.status === "canceled") setCanceled()
 })
+
+let updateInterval = 0
+let updateBranches = [] as string[]
+function initUpdate() {
+    updateBranches = []
+    updateInterval = setInterval(async () => {
+        const updates = await doFetch("/update", updateBranches)
+        console.log(updates)
+        if (updates.length < 1) {
+            clearInterval(updateInterval)
+            updateInterval = 0
+            setCanceled()
+            return
+        }
+
+        if (!updates[0].sizeIsTemp) {
+            clearInterval(updateInterval)
+            updateInterval = 0
+            // console.timeEnd("t1")
+        } else {
+            removeUpdates(updates)
+        }
+        updateTree(updates)
+    }, 1000)
+}
+
+function addUpdates(data: Node, path: string, dirname: string) {
+    if (updateInterval > 0 && data.sizeIsTemp) {
+        updateBranches.push(path ? `${path}/${dirname}` : dirname)
+    }
+}
+
+function removeUpdates(results: Node[]) {
+    updateBranches = updateBranches.filter((_, i) => results[i + 1].sizeIsTemp)
+}
 
 document.getElementById("tree").addEventListener("click", async e => {
     const target = e.target as HTMLDivElement
@@ -64,8 +81,13 @@ document.getElementById("tree").addEventListener("click", async e => {
 
         target.classList.add("unfold")
 
-        const data = await doFetch("/dir", { path: fullPath })
+        const data = (await doFetch("/dir", { path: fullPath })) as Node
         console.log(data)
+        // if (updateInterval > 0 && data.sizeIsTemp) {
+        //     const p = dataset.path ? `${dataset.path}/${dataset.dirname}` : dataset.dirname
+        //     updateBranches.push(p)
+        // }
+        addUpdates(data, dataset.path, dataset.dirname)
 
         const branch = createBranch(data, dataset.path)
         if (branch) shoot.appendChild(branch)

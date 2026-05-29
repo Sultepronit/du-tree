@@ -69,7 +69,14 @@ func handleDir(w http.ResponseWriter, r *http.Request) {
 
 func handleUpdate(w http.ResponseWriter, r *http.Request) {
 	// log.Println(r.URL.Path)
-	sendResult(w, du.GetUpdate())
+	var req []string
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		log.Println("Bad JSON:", err)
+		http.Error(w, "Bad JSON", 400)
+		return
+	}
+	fmt.Println(req)
+	sendResult(w, du.GetUpdate(req))
 }
 
 func handleCancel(w http.ResponseWriter, r *http.Request) {

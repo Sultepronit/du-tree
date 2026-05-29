@@ -116,7 +116,7 @@ body {
     /* animation: wave-pulse 2s infinite ease-in-out; */
 
     transform-origin: center center;
-    animation: spin-counter 2s linear infinite;
+    /* animation: spin-counter 2s linear infinite; */
 }
 
 @keyframes spin-counter {
@@ -173,7 +173,7 @@ body {
     margin: 0.1em 0.5em 0;
     padding-inline: 0.5em;
     /* text-decoration: underline; */
-    animation: wave-pulse 3s infinite ease-in-out;
+    /* animation: wave-pulse 3s infinite ease-in-out; */
 }
 
 .canceled #cancel {

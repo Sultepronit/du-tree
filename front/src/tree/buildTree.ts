@@ -114,7 +114,7 @@ function updateSize(node: Node, display: HTMLDivElement, tempWidget: HTMLDivElem
     // if (node.sizeIsTemp) display.classList.add("temp")
     // else display.classList.remove("temp")
     if (node.sizeIsTemp) tempWidget.classList.add("temp")
-    // else tempWidget.classList.remove("temp")
+    else tempWidget.classList.remove("temp")
 
     const b = `${node.size} B`
     const h = handleBytes(node.size)
