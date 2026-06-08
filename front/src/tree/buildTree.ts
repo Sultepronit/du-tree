@@ -128,13 +128,21 @@ function updateSize(node: Node, display: HTMLDivElement, tempWidget: HTMLDivElem
     return false
 }
 
-function updateBranch(bNode: Node) {
+async function updateBranch(bNode: Node) {
     if (!bNode.content) return
 
     console.log(bNode)
     if (!branches[bNode.name]) {
+        let ul: HTMLUListElement
+        for (let i = 0; i < 22; i++) {
+            ul = treeBlock.querySelector(`ul[data-path="${bNode.name}"]`)
+            if (ul) break;
+            await new Promise(res => setTimeout(res, 200))
+        }
+
         const branch = {
-            ul: treeBlock.querySelector(`ul[data-path="${bNode.name}"]`),
+            // ul: treeBlock.querySelector(`ul[data-path="${bNode.name}"]`),
+            ul,
             shoots: {}
         } as Branch
 

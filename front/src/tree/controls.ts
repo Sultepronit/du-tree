@@ -8,8 +8,8 @@ let rootPath = ""
 export async function initTree(path: string) {
     rootPath = path
 
-    // const command = ["du", "-B 1", "--exclude=/proc"]
-    const command = ["du", "-b", "--exclude=/proc"]
+    const command = ["du", "-B 1", "--exclude=/proc"]
+    // const command = ["du", "-b", "--exclude=/proc"]
 
     const data = (await doFetch("/dir", {
         path,
@@ -62,7 +62,7 @@ function addUpdates(data: Node, path: string, dirname: string) {
 }
 
 function removeUpdates(results: Node[]) {
-    updateBranches = updateBranches.filter((_, i) => results[i + 1].sizeIsTemp)
+    updateBranches = updateBranches.filter((_, i) => results[i + 1]?.sizeIsTemp)
 }
 
 document.getElementById("tree").addEventListener("click", async e => {
