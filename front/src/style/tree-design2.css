@@ -193,6 +193,9 @@ ul.dir-content {
     list-style-type: none;
     min-height: 0.9em;
     padding: 0.2em 0 1px;
+    /* max-height: 150vh;
+    overflow: auto;
+    overflow: hidden; */
 }
 
 .dir-content .dir-content {

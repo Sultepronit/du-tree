@@ -1,7 +1,7 @@
 import { doFetch } from "../api/fetch"
 
 import type { Node } from "../types"
-import { createBranch, rebuildTree, removeCanceled, setCanceled, updateTree } from "./buildTree"
+import { createBranch, rebuildTree, setCanceled, updateTree } from "./buildTree"
 
 let rootPath = ""
 
@@ -56,13 +56,14 @@ function initUpdate() {
 }
 
 function addUpdates(data: Node, path: string, dirname: string) {
+    console.log(updateInterval, data.sizeIsTemp)
     if (updateInterval > 0 && data.sizeIsTemp) {
         updateBranches.push(path ? `${path}/${dirname}` : dirname)
     }
 }
 
 function removeUpdates(results: Node[]) {
-    updateBranches = updateBranches.filter((_, i) => results[i + 1]?.sizeIsTemp)
+    updateBranches = updateBranches.filter((_, i) => !results[i + 1] || results[i + 1].sizeIsTemp)
 }
 
 document.getElementById("tree").addEventListener("click", async e => {

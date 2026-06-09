@@ -1,5 +1,3 @@
-import { doFetch } from "../api/fetch"
-// import { pathInpunt } from "../path/pathInput"
 import handleBytes from "../helpers/handleBytes"
 import type { Branch, Node } from "../types"
 
@@ -95,10 +93,9 @@ export function createBranch(node: Node, prePath: string): DocumentFragment {
         document.documentElement.style.setProperty("--max-size", (max / 100).toString())
     }
 
-    // const lis = node.content.map(entry => createLi(entry, prePath)).join("")
+    // const first1000 = node.content.slice(0, 1000)
     const lis = node.content.map(entry => createLi(entry, path)).join("")
-    // return `<ul class="dir-content">${lis}</ul>`
-    // const ulHtml = `<ul class="dir-content">${lis}</ul>`
+    // const lis = first1000.map(entry => createLi(entry, path)).join("")
     const templ = document.createElement("template")
     // console.log(templ)
     templ.innerHTML = `<ul class="dir-content" data-path="${path}">${lis}</ul>`

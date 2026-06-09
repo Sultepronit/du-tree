@@ -59,8 +59,11 @@ function addSuggestions(sugg: nextDetails[]) {
 let isOk = false
 input.addEventListener("input", async () => {
     updateAccessWidget()
-    console.log(input.value)
-    if (!input.value) return
+    // console.log(input.value)
+    if (!input.value) {
+        suggestions.classList.add("hidden")
+        return
+    }
     // const re = await doFetch("/path", pathInpunt.value)
     const path = (await doFetch("/path", { path: input.value })) as pathHint
     console.log(path)
@@ -98,10 +101,16 @@ input.addEventListener("input", async () => {
 })
 
 input.addEventListener("keydown", e => {
-    // console.log(e.key)
+    console.log(e.key)
     if (e.key === "Enter" && isOk) {
         const path = input.value.endsWith("/") ? input.value : input.value + "/"
         initTree(path)
         suggestions.classList.add("hidden")
+    } else if (e.key === "Escape") {
+        suggestions.classList.add("hidden")
+    } else if (e.key === "ArrowDown") {
+        console.log(suggestions.firstChild)
+    } else if (e.key === "ArrowUp") {
+        
     }
 })
