@@ -1,7 +1,6 @@
 import { doFetch } from "../api/fetch"
 import { initTree } from "../tree/controls"
 
-
 const accessWidget = document.getElementById("access-widged")
 const input = document.getElementById("path") as HTMLInputElement
 const pre = document.getElementById("pre-suggestions") as HTMLDivElement
@@ -30,9 +29,11 @@ type pathHint = {
     next: nextDetails[]
 }
 
+let selected = null as HTMLDivElement
 // function addSuggestions(names: string[]) {
 function addSuggestions(sugg: nextDetails[]) {
     suggestions.classList.remove("hidden")
+    selected = null
     const html = sugg
         .map(s => {
             const classes = [] as string[]
@@ -110,7 +111,7 @@ input.addEventListener("keydown", e => {
         suggestions.classList.add("hidden")
     } else if (e.key === "ArrowDown") {
         console.log(suggestions.firstChild)
+        if (selected === null) selected = suggestions.firstElementChild
     } else if (e.key === "ArrowUp") {
-        
     }
 })
