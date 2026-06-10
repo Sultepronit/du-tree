@@ -8,7 +8,7 @@ let rootPath = ""
 export async function initTree(path: string) {
     rootPath = path
 
-    const command = ["du", "-B 1", "--exclude=/proc"]
+    const command = ["du", "-B", "1", "--exclude=/proc"]
     // const command = ["du", "-b", "--exclude=/proc"]
 
     const data = (await doFetch("/dir", {

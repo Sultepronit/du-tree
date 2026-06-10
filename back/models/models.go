@@ -10,7 +10,7 @@ type Path struct {
 	Current string `json:"current"`
 	// Next    []string `json:"next"`
 	Next []PathDetail `json:"next"`
-	Msg  string       `json:"msg"`
+	// Msg  string       `json:"msg"`
 }
 
 type Request struct {

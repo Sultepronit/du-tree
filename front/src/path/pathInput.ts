@@ -29,7 +29,7 @@ type pathHint = {
     next: nextDetails[]
 }
 
-let selected = null as HTMLDivElement
+let selected = null as Element
 // function addSuggestions(names: string[]) {
 function addSuggestions(sugg: nextDetails[]) {
     suggestions.classList.remove("hidden")
@@ -57,6 +57,7 @@ function addSuggestions(sugg: nextDetails[]) {
     suggestions.innerHTML = html
 }
 
+let approvedPath = null as pathHint
 let isOk = false
 input.addEventListener("input", async () => {
     updateAccessWidget()
@@ -66,52 +67,96 @@ input.addEventListener("input", async () => {
         return
     }
     // const re = await doFetch("/path", pathInpunt.value)
-    const path = (await doFetch("/path", { path: input.value })) as pathHint
-    console.log(path)
+    approvedPath = (await doFetch("/path", { path: input.value })) as pathHint
+    console.log(approvedPath)
 
-    if (path?.current === "Permission denied") accessWidget.classList.add("locked")
+    if (approvedPath?.current === "Permission denied") accessWidget.classList.add("locked")
     else accessWidget.classList.remove("locked")
 
-    if (path?.current === "ok") {
+    if (approvedPath?.current === "ok") {
         isOk = true
         pre.textContent = input.value
         input.className = "ok"
-        addSuggestions(path.next)
+        addSuggestions(approvedPath.next)
     } else {
         isOk = false
-        pre.textContent = path?.current
+        pre.textContent = approvedPath?.current
 
         let candidates = []
-        if (path?.next) {
-            let next = input.value.slice(path.current.length).toLocaleLowerCase()
+        if (approvedPath?.next) {
+            let next = input.value.slice(approvedPath.current.length).toLocaleLowerCase()
             if (next.startsWith("/")) next = next.slice(1)
             console.log("next:", next)
             // const candidates = path.next.filter(e => `/${e}`.startsWith(next) || e.startsWith(next))
-            candidates = path.next.filter(e => e.name.toLocaleLowerCase().includes(next))
+            candidates = approvedPath.next.filter(e => e.name.toLocaleLowerCase().includes(next))
             console.log(candidates)
         }
 
         if (candidates.length > 0) {
             addSuggestions(candidates)
         } else {
-            addSuggestions(path?.next || [])
+            addSuggestions(approvedPath?.next || [])
         }
 
         input.className = candidates.length > 0 ? "almost" : "wrong"
     }
 })
 
-input.addEventListener("keydown", e => {
-    console.log(e.key)
-    if (e.key === "Enter" && isOk) {
-        const path = input.value.endsWith("/") ? input.value : input.value + "/"
-        initTree(path)
+function moveSelection(down: boolean) {
+    if (suggestions.classList.contains("hidden")) return
+
+    if (selected) {
+        selected.classList.remove("selected")
+        const next = down ? selected.nextElementSibling : selected.previousElementSibling
+        if (next) {
+            selected = next
+        } else if (!down) {
+            selected = null
+            input.matches(":focus") || input.focus()
+        }
+    } else if (down) {
+        selected = suggestions.firstElementChild
+    }
+
+    if (selected) selected.classList.add("selected")
+    console.log(approvedPath.current, selected?.textContent)
+}
+
+const inputPath = () => (input.value.endsWith("/") ? input.value : input.value + "/")
+
+// input.addEventListener("keydown", e => {
+document.addEventListener("keydown", e => {
+    // console.log(e.key)
+    // if (e.key === "Enter" && isOk) {
+    if (e.key === "Enter") {
+        let path: string
+        if (selected) {
+            const suggName = selected.textContent
+            const prePath =
+                approvedPath.current === "ok"
+                    ? inputPath()
+                    : approvedPath.current === "/"
+                      ? "/"
+                      : approvedPath.current + "/"
+            path = prePath + suggName
+            input.value = path
+        } else if (isOk) {
+            // path = input.value.endsWith("/") ? input.value : input.value + "/"
+            path = inputPath()
+        } else {
+            return
+        }
+
+        console.log("final path:", path)
+        // initTree(path)
         suggestions.classList.add("hidden")
     } else if (e.key === "Escape") {
         suggestions.classList.add("hidden")
     } else if (e.key === "ArrowDown") {
-        console.log(suggestions.firstChild)
-        if (selected === null) selected = suggestions.firstElementChild
+        e.preventDefault()
+        moveSelection(true)
     } else if (e.key === "ArrowUp") {
+        e.preventDefault()
+        moveSelection(false)
     }
 })

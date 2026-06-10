@@ -1,0 +1,165 @@
+/* input design */
+.path-plus {
+    display: flex;
+}
+
+#access-widged {
+    width: 0.9em;
+    color: #0f0;
+    font-weight: bold;
+}
+
+#access-widged::before {
+    content: "$";
+}
+
+#access-widged.root::before {
+    content: "#";
+    color: #f00;
+}
+
+#path.almost {
+    color: gray;
+}
+
+#path.wrong {
+    color: red;
+}
+
+#pre-suggestions {
+    white-space: nowrap;
+    opacity: 0;
+    margin-right: 1em;
+}
+
+.suggestions-block {
+    position: absolute;
+    display: flex;
+}
+
+.suggestions {
+    /* position: absolute; */
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background: white;
+
+    border: 2px solid #80808031;
+    border-top: none;
+    z-index: 1000;
+    max-height: 50vh;
+    overflow-y: auto;
+}
+
+.suggestion:nth-child(odd) {
+    background-color: aliceblue;
+}
+
+.suggestion.locked {
+    color: red;
+}
+
+.suggestion.selected {
+    background-color: aqua;
+}
+
+.tree-root {
+    display: flex;
+    gap: 0.5em;
+}
+
+.temp #total-size {
+    color: var(--temp-color);
+    /* animation: wave-pulse 2s infinite ease-in-out; */
+}
+
+.temp #total-size::after {
+    /* #total-size::after { */
+    content: "";
+    display: inline-block;
+    margin: 0 0.1em -0.1em;
+    width: 0.9em;
+    height: 0.9em;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    background-color: var(--temp-color);
+    /* mask-image: url("icons/clock.svg");
+    -webkit-mask-image: url("icons/clock.svg"); */
+    mask-image: url("icons/sync.svg");
+    -webkit-mask-image: url("icons/sync.svg");
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    /* animation: wave-pulse 2s infinite ease-in-out; */
+
+    transform-origin: center center;
+    /* animation: spin-counter 2s linear infinite; */
+}
+
+@keyframes spin-counter {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(-360deg);
+    }
+}
+
+.canceled #total-size::after {
+    animation: none;
+    mask-image: url("icons/refresh-cw-off.svg");
+    -webkit-mask-image: url("icons/refresh-cw-off.svg");
+}
+
+#lock-widget {
+    color: red;
+}
+
+#lock-widget::before {
+    content: "";
+    display: inline-block;
+    margin-bottom: -0.1em;
+    width: 1em;
+    height: 0.85em;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    background-color: red;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    mask-image: url("icons/lock.svg");
+    -webkit-mask-image: url("icons/lock.svg");
+}
+
+#cancel {
+    display: none;
+}
+
+.temp #cancel {
+    /* #cancel { */
+    display: block;
+    border: none;
+    /* background: none; */
+    border-radius: 5px;
+    background-color: #282828;
+    /* background-color: red; */
+    /* background-color: gray; */
+    color: white;
+    /* color: red; */
+    font-size: 0.9em;
+    height: 1.2em;
+    margin: 0.1em 0.5em 0;
+    padding-inline: 0.5em;
+    /* text-decoration: underline; */
+    /* animation: wave-pulse 3s infinite ease-in-out; */
+}
+
+.canceled #cancel {
+    display: none;
+}
+
+#cancel:hover {
+    background-color: red;
+}
+
+/* .suggestion.locked::before {
+    opacity: 0.4;
+} */

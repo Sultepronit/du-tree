@@ -7,7 +7,7 @@ const statePannel = totalSize.parentElement
 const treeBlock = document.getElementById("tree")!
 // const cancelButton = document.getElementById("cancel")
 
-let rootPath = ""
+// let rootPath = ""
 
 let max = 1
 
@@ -133,7 +133,7 @@ async function updateBranch(bNode: Node) {
         let ul: HTMLUListElement
         for (let i = 0; i < 22; i++) {
             ul = treeBlock.querySelector(`ul[data-path="${bNode.name}"]`)
-            if (ul) break;
+            if (ul) break
             await new Promise(res => setTimeout(res, 200))
         }
 
@@ -233,7 +233,7 @@ function updateTreeRoot(node: Node) {
 }
 
 export async function rebuildTree(data: Node, path: string) {
-    rootPath = path
+    // rootPath = path
 
     removeCanceled()
     treeBlock.innerHTML = ""
