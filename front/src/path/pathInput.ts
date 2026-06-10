@@ -57,13 +57,18 @@ function addSuggestions(sugg: nextDetails[]) {
     suggestions.innerHTML = html
 }
 
+function hideSuggesions() {
+    suggestions.classList.add("hidden")
+    selected = null
+}
+
 let approvedPath = null as pathHint
 let isOk = false
 input.addEventListener("input", async () => {
     updateAccessWidget()
     // console.log(input.value)
     if (!input.value) {
-        suggestions.classList.add("hidden")
+        hideSuggesions()
         return
     }
     // const re = await doFetch("/path", pathInpunt.value)
@@ -82,23 +87,38 @@ input.addEventListener("input", async () => {
         isOk = false
         pre.textContent = approvedPath?.current
 
-        let candidates = []
+        // let candidates = []
+        const sorted = []
         if (approvedPath?.next) {
             let next = input.value.slice(approvedPath.current.length).toLocaleLowerCase()
             if (next.startsWith("/")) next = next.slice(1)
             console.log("next:", next)
             // const candidates = path.next.filter(e => `/${e}`.startsWith(next) || e.startsWith(next))
-            candidates = approvedPath.next.filter(e => e.name.toLocaleLowerCase().includes(next))
-            console.log(candidates)
+            // candidates = approvedPath.next.filter(e => e.name.toLocaleLowerCase().includes(next))
+            // console.log(candidates)
+
+            const relevant = []
+            for (const e of approvedPath.next) {
+                const i = e.name.toLocaleLowerCase().indexOf(next)
+                if (i >= 0) relevant[i] ? relevant[i].push(e) : (relevant[i] = [e])
+            }
+            console.log(relevant)
+            // const sorted = []
+            for (const block of relevant) {
+                console.log(block)
+                if (block) sorted.push(...block)
+            }
+            console.log(sorted)
+            // console.log(candidates)
         }
 
-        if (candidates.length > 0) {
-            addSuggestions(candidates)
+        if (sorted.length > 0) {
+            addSuggestions(sorted)
         } else {
             addSuggestions(approvedPath?.next || [])
         }
 
-        input.className = candidates.length > 0 ? "almost" : "wrong"
+        input.className = sorted.length > 0 ? "almost" : "wrong"
     }
 })
 
@@ -140,18 +160,21 @@ document.addEventListener("keydown", e => {
                       : approvedPath.current + "/"
             path = prePath + suggName
             input.value = path
+            isOk = true
+            input.className = "ok"
         } else if (isOk) {
             // path = input.value.endsWith("/") ? input.value : input.value + "/"
             path = inputPath()
+            initTree(path)
         } else {
             return
         }
 
         console.log("final path:", path)
-        // initTree(path)
-        suggestions.classList.add("hidden")
+
+        hideSuggesions()
     } else if (e.key === "Escape") {
-        suggestions.classList.add("hidden")
+        hideSuggesions()
     } else if (e.key === "ArrowDown") {
         e.preventDefault()
         moveSelection(true)
