@@ -14,7 +14,8 @@ body {
     font-family: "Ubuntu Mono", monospace;
 }
 
-input, button {
+input,
+button {
     font: inherit;
 }
 
@@ -26,7 +27,7 @@ input, button {
     width: 100%;
 }
 
-.fd-vizual-size {
+.fd-sizebar {
     position: absolute;
     height: 1.11em;
     width: calc(var(--size) / var(--max-size));

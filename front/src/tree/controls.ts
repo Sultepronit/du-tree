@@ -1,6 +1,6 @@
 import { doFetch } from "../api/fetch"
 
-import type { Node } from "../types"
+import type { DataNode } from "../types"
 import { createBranch, rebuildTree, setCanceled, updateTree } from "./buildTree"
 
 let rootPath = ""
@@ -15,7 +15,7 @@ export async function initTree(path: string) {
         path,
         initDu: true,
         command
-    })) as Node
+    })) as DataNode
 
     console.log(data)
 
@@ -55,15 +55,16 @@ function initUpdate() {
     }, 1000)
 }
 
-function addUpdates(data: Node, path: string, dirname: string) {
+function addUpdates(data: DataNode, path: string, dirname: string) {
     console.log(updateInterval, data.sizeIsTemp)
     if (updateInterval > 0 && data.sizeIsTemp) {
         updateBranches.push(path ? `${path}/${dirname}` : dirname)
     }
 }
 
-function removeUpdates(results: Node[]) {
+function removeUpdates(results: DataNode[]) {
     updateBranches = updateBranches.filter((_, i) => !results[i + 1] || results[i + 1].sizeIsTemp)
+    // remove branch on DOM manipulations side!
 }
 
 document.getElementById("tree").addEventListener("click", async e => {
@@ -76,18 +77,15 @@ document.getElementById("tree").addEventListener("click", async e => {
 
     if (!dataset.nested) {
         const prePath = dataset.path ? `${rootPath}${dataset.path}/` : rootPath
-        const fullPath = prePath + dataset.dirname
+        const fullPath = prePath + dataset.name
         console.log(fullPath)
 
         target.classList.add("unfold")
 
-        const data = (await doFetch("/dir", { path: fullPath })) as Node
+        const data = (await doFetch("/dir", { path: fullPath })) as DataNode
         console.log(data)
-        // if (updateInterval > 0 && data.sizeIsTemp) {
-        //     const p = dataset.path ? `${dataset.path}/${dataset.dirname}` : dataset.dirname
-        //     updateBranches.push(p)
-        // }
-        addUpdates(data, dataset.path, dataset.dirname)
+
+        addUpdates(data, dataset.path, dataset.name)
 
         const branch = createBranch(data, dataset.path)
         if (branch) shoot.appendChild(branch)

@@ -1,11 +1,10 @@
 import handleBytes from "../helpers/handleBytes"
-import type { Branch, Node } from "../types"
+import type { Branch, DataNode, UpdateBranch } from "../types"
 
 const totalSize = document.getElementById("total-size") as HTMLDivElement
 const totalLocked = document.getElementById("lock-widget") as HTMLDivElement
 const statePannel = totalSize.parentElement
 const treeBlock = document.getElementById("tree")!
-// const cancelButton = document.getElementById("cancel")
 
 // let rootPath = ""
 
@@ -14,48 +13,50 @@ let max = 1
 let canceled = false
 
 let branches = {} as Record<string, Branch>
+let branches2 = {} as Record<string, UpdateBranch>
 
-function genLockedDetails(node: Node) {
+function genLockedDetails(node: DataNode) {
     const re = []
     if (node.locked === -1) {
         re.push(`You have no read rights for this dir`)
     } else {
         re.push(`Contains ${node.locked} nested dir(s) without access`)
     }
-    re.push(` run as root to get the full size.`)
+    re.push(`Run as root to get the full size.`)
 
     return re
 }
 
-function createLi(node: Node, prePath: string): string {
+function createLi(node: DataNode, prePath: string): string {
     let realPath: string
-    // let linkType: string
     if (node.type == "L") {
         const parts = node.name.split("/")
         node.name = parts[0]
         realPath = parts.slice(2).join("/")
-        // linkType = `<span class="t${parts[1]}"><span>`
         node.type += parts[1]
     }
-    const title = [
-        `Path: ${prePath ? prePath + "/" : "Root"}`,
-        `Name: ${node.name}`
-        // `${realPath ? "linked: " + realPath : ""}`
-    ]
+
+    const title = [`Path: ${prePath ? prePath + "/" : "Root"}`, `Name: ${node.name}`]
     if (realPath) {
         title.push("Link to: " + realPath)
     } else if (node.locked) {
         title.push(...genLockedDetails(node))
     }
-    // console.log(node.name, node.locked)
-    // title="path: ${prePath ? prePath + "/" : "root"}\nname: ${node.name}\n${realPath ? "linked: " + realPath : ""}"
-    //
+
+    const classes = ["shoot"]
+    if (node.locked) {
+        classes.push("locked")
+        if (node.locked === -1) classes.push("itself")
+    }
+    if (node.sizeIsTemp) classes.push("temp")
+
+    // class="shoot
+    //     ${node.locked > 0 ? "locked" : node.locked === -1 ? "locked itself" : ""}
+    //     ${node.sizeIsTemp ? "temp" : ""}"
     return `<li><div
-            class="shoot
-                ${node.locked > 0 ? "locked" : node.locked === -1 ? "locked itself" : ""}
-                ${node.sizeIsTemp ? "temp" : ""}"
+            class="${classes.join(" ")}"
             data-path="${prePath}" 
-            ${node.type === "d" ? 'data-dirname="' + node.name + '"' : ""}
+            data-name="${node.name}"
             data-size="${node.size}"
             style="--size: ${node.size}%"
         >
@@ -69,7 +70,7 @@ function createLi(node: Node, prePath: string): string {
                 >
                 </div>
                 <div class="fd-details">
-                    <div class="fd-vizual-size"></div>
+                    <div class="fd-sizebar"></div>
                     <div class="fd-size" title="${node.size} B">${handleBytes(node.size)}</div>
                     <div class="fd-name">${node.name}</div>
                 </div>
@@ -77,7 +78,7 @@ function createLi(node: Node, prePath: string): string {
     </div></li>`
 } // <div class="fd-name">${linkType ? linkType : ""}${node.name}</div>
 
-export function createBranch(node: Node, prePath: string): DocumentFragment {
+export function createBranch(node: DataNode, prePath: string): DocumentFragment {
     // if (!node.content) return
     if (!node.content) {
         const templ = document.createElement("template")
@@ -93,9 +94,18 @@ export function createBranch(node: Node, prePath: string): DocumentFragment {
         document.documentElement.style.setProperty("--max-size", (max / 100).toString())
     }
 
-    // const first1000 = node.content.slice(0, 1000)
-    const lis = node.content.map(entry => createLi(entry, path)).join("")
-    // const lis = first1000.map(entry => createLi(entry, path)).join("")
+    const first100 = node.content.slice(0, 100)
+
+    if (node.sizeIsTemp) {
+        branches2[path] = {
+            dataShoots: first100,
+            dataShootsMap: new Map(first100.map(s => [s.name, s]))
+        }
+        console.log("branches2", branches2)
+    }
+
+    // const lis = node.content.map(entry => createLi(entry, path)).join("")
+    const lis = first100.map(entry => createLi(entry, path)).join("")
     const templ = document.createElement("template")
     // console.log(templ)
     templ.innerHTML = `<ul class="dir-content" data-path="${path}">${lis}</ul>`
@@ -103,7 +113,7 @@ export function createBranch(node: Node, prePath: string): DocumentFragment {
     return templ.content
 }
 
-function updateSize(node: Node, display: HTMLDivElement, tempWidget: HTMLDivElement) {
+function updateSize(node: DataNode, display: HTMLDivElement, tempWidget: HTMLDivElement) {
     // if (!display.classList.contains("temp") && !node.sizeIsTemp) return false
     if (!tempWidget.classList.contains("temp") && !node.sizeIsTemp) return false
     // console.log(node, display, tempWidget)
@@ -125,87 +135,180 @@ function updateSize(node: Node, display: HTMLDivElement, tempWidget: HTMLDivElem
     return false
 }
 
-async function updateBranch(bNode: Node) {
-    if (!bNode.content) return
+const pageSize = 100
+async function updateBranch(branchData: DataNode) {
+    // if (!bNode.content) return // are there such cases?
 
-    console.log(bNode)
-    if (!branches[bNode.name]) {
-        let ul: HTMLUListElement
-        for (let i = 0; i < 22; i++) {
-            ul = treeBlock.querySelector(`ul[data-path="${bNode.name}"]`)
-            if (ul) break
-            await new Promise(res => setTimeout(res, 200))
-        }
+    console.log("branch update:", branchData)
 
-        const branch = {
-            // ul: treeBlock.querySelector(`ul[data-path="${bNode.name}"]`),
-            ul,
-            shoots: {}
-        } as Branch
+    const branch = branches2[branchData.name]
+    // console.log(branch)
+    const updates = branchData.content.sort((a, b) => b.size - a.size).slice(0, pageSize)
+    // const mixed = new Map<string, DataNode>()
+    // branch.dataShoots.forEach(u => mixed.set(u.name, u))
+    const mix = new Map(branch.dataShootsMap)
+    updates.forEach(s => mix.set(s.name, s))
+    // console.log("mixed", mixed)
+    // const mixed = [...mix.values()].sort((a, b) => b.size - a.size).slice(0, pageSize)
+    const mixed = [...mix.values()].sort((a, b) => b.size - a.size)
+    console.log("mixed", mixed)
+
+    if (!branch.ul) {
+        branch.ul = treeBlock.querySelector(`ul[data-path="${branchData.name}"]`)
+        branch.elNodes = new Map()
 
         const shootEls = branch.ul.querySelectorAll(
-            `.shoot[data-path="${bNode.name}"]`
+            `.shoot[data-path="${branchData.name}"]`
         ) as NodeListOf<HTMLDivElement>
-        console.log(shootEls)
-        shootEls.forEach((el, i) => {
-            branch.shoots[el.dataset.dirname || i] = { el }
+        // console.log(shootEls)
+        shootEls.forEach(shoot => {
+            branch.elNodes.set(shoot.dataset.name, { shoot })
         })
-        branches[bNode.name] = branch
     }
-    const branch = branches[bNode.name]
-    // console.log(branch)
-    for (const cNode of bNode.content) {
-        // console.log(cNode)
-        const shoot = branch.shoots[cNode.name]
-        // console.log(cNode.name, shoot)
-        if (cNode.locked) {
-            console.log("Locked!", cNode.name)
-            shoot.el.classList.add("locked")
-            // if (cNode.locked > 1) shoot.el.classList.add("itself")
-            const details = genLockedDetails(cNode).join("\n")
-            const element = shoot.el.querySelector(".fd-entry") as HTMLDivElement
-            if (cNode.locked === -1) {
-                shoot.el.classList.add("itself")
-                if (!element.title.includes("You have no")) {
-                    element.title += "\n" + details
-                }
-            } else {
-                const base = element.title.split("\nContains ")[0]
-                element.title = base + "\n" + details
-            }
-        }
+    console.log("branch:", branch)
 
-        if (!shoot.sizeDisplay) shoot.sizeDisplay = shoot.el.querySelector(".fd-size")
-        const updated = updateSize(cNode, shoot.sizeDisplay, shoot.el)
-        console.log(updated)
-        if (!updated) continue
+    const selected = mixed.slice(0, pageSize)
+    for (const node of selected) {
+        console.log(node)
+    }
 
-        const sizeStr = cNode.size.toString()
-        if (sizeStr !== shoot.el.dataset.size) {
-            shoot.el.dataset.size = sizeStr
-            shoot.el.style.setProperty("--size", `${sizeStr}%`)
+    branch.dataShootsMap =
+        mix.size === branch.dataShootsMap.size ? mix : new Map(selected.map(s => [s.name, s]))
+
+    for (let i = pageSize; i < mixed.length; i++) {
+        // if (branch.elNodes.has(mixed[i].name))
+        const elNode = branch.elNodes.get(mixed[i].name)
+        if (elNode) {
+            elNode.shoot.remove()
+            // elNode.size?.remove()
+            branch.elNodes.delete(mixed[i].name)
         }
     }
 
-    const shoots = Object.values(branch.shoots)
+    // for (const shootData of branchData.content) {
+    //     // console.log(cNode)
+    //     const shoot = branch.shoots[shootData.name]
+    //     // console.log(cNode.name, shoot)
+    //     if (shootData.locked) {
+    //         console.log("Locked!", shootData.name)
+    //         shoot.el.classList.add("locked")
+    //         // if (cNode.locked > 1) shoot.el.classList.add("itself")
+    //         const details = genLockedDetails(shootData).join("\n")
+    //         const element = shoot.el.querySelector(".fd-entry") as HTMLDivElement
+    //         if (shootData.locked === -1) {
+    //             shoot.el.classList.add("itself")
+    //             if (!element.title.includes("You have no")) {
+    //                 element.title += "\n" + details
+    //             }
+    //         } else {
+    //             const base = element.title.split("\nContains ")[0]
+    //             element.title = base + "\n" + details
+    //         }
+    //     }
 
-    shoots.sort((a, b) => Number(b.el.dataset.size) - Number(a.el.dataset.size))
-    // console.log(shoots)
+    //     if (!shoot.sizeDisplay) shoot.sizeDisplay = shoot.el.querySelector(".fd-size")
+    //     const updated = updateSize(shootData, shoot.sizeDisplay, shoot.el)
+    //     // console.log(updated)
+    //     if (!updated) continue
 
-    // const fragment = document.createDocumentFragment()
-    // shoots.forEach(e => fragment.appendChild(e.li))
-    // branch.ul.appendChild(fragment)
-    // console.log(branch)
-    shoots.forEach((shoot, i) => {
-        if (branch.ul.childNodes[i].childNodes[0] !== shoot.el) {
-            branch.ul.childNodes[i].appendChild(shoot.el)
-            // console.log("moved", shoot.li)
-            console.log("moved")
-        }
-    })
+    //     const sizeStr = shootData.size.toString()
+    //     if (sizeStr !== shoot.el.dataset.size) {
+    //         shoot.el.dataset.size = sizeStr
+    //         shoot.el.style.setProperty("--size", `${sizeStr}%`)
+    //     }
+    // }
+
+    // const shoots = Object.values(branch.shoots)
+
+    // shoots.sort((a, b) => Number(b.el.dataset.size) - Number(a.el.dataset.size))
+    // // console.log(shoots)
+
+    // shoots.forEach((shoot, i) => {
+    //     if (branch.ul.childNodes[i].childNodes[0] !== shoot.el) {
+    //         branch.ul.childNodes[i].appendChild(shoot.el)
+    //         // console.log("moved", shoot.li)
+    //         console.log("moved")
+    //     }
+    // })
 }
 
-export function updateTree(bNodes: Node[]) {
+// async function updateBranch0(bNode: DataNode) {
+//     if (!bNode.content) return
+
+//     console.log(bNode)
+//     if (!branches[bNode.name]) {
+//         let ul: HTMLUListElement
+//         for (let i = 0; i < 22; i++) {
+//             ul = treeBlock.querySelector(`ul[data-path="${bNode.name}"]`)
+//             if (ul) break
+//             await new Promise(res => setTimeout(res, 200))
+//         }
+
+//         const branch = {
+//             // ul: treeBlock.querySelector(`ul[data-path="${bNode.name}"]`),
+//             ul,
+//             shoots: {}
+//         } as Branch
+
+//         const shootEls = branch.ul.querySelectorAll(
+//             `.shoot[data-path="${bNode.name}"]`
+//         ) as NodeListOf<HTMLDivElement>
+//         console.log(shootEls)
+//         shootEls.forEach((el, i) => {
+//             branch.shoots[el.dataset.dirname || i] = { el }
+//         })
+//         branches[bNode.name] = branch
+//     }
+//     const branch = branches[bNode.name]
+//     // console.log(branch)
+//     for (const cNode of bNode.content) {
+//         // console.log(cNode)
+//         const shoot = branch.shoots[cNode.name]
+//         // console.log(cNode.name, shoot)
+//         if (cNode.locked) {
+//             console.log("Locked!", cNode.name)
+//             shoot.el.classList.add("locked")
+//             // if (cNode.locked > 1) shoot.el.classList.add("itself")
+//             const details = genLockedDetails(cNode).join("\n")
+//             const element = shoot.el.querySelector(".fd-entry") as HTMLDivElement
+//             if (cNode.locked === -1) {
+//                 shoot.el.classList.add("itself")
+//                 if (!element.title.includes("You have no")) {
+//                     element.title += "\n" + details
+//                 }
+//             } else {
+//                 const base = element.title.split("\nContains ")[0]
+//                 element.title = base + "\n" + details
+//             }
+//         }
+
+//         if (!shoot.sizeDisplay) shoot.sizeDisplay = shoot.el.querySelector(".fd-size")
+//         const updated = updateSize(cNode, shoot.sizeDisplay, shoot.el)
+//         // console.log(updated)
+//         if (!updated) continue
+
+//         const sizeStr = cNode.size.toString()
+//         if (sizeStr !== shoot.el.dataset.size) {
+//             shoot.el.dataset.size = sizeStr
+//             shoot.el.style.setProperty("--size", `${sizeStr}%`)
+//         }
+//     }
+
+//     const shoots = Object.values(branch.shoots)
+
+//     shoots.sort((a, b) => Number(b.el.dataset.size) - Number(a.el.dataset.size))
+//     // console.log(shoots)
+
+//     shoots.forEach((shoot, i) => {
+//         if (branch.ul.childNodes[i].childNodes[0] !== shoot.el) {
+//             branch.ul.childNodes[i].appendChild(shoot.el)
+//             // console.log("moved", shoot.li)
+//             console.log("moved")
+//         }
+//     })
+// }
+
+export function updateTree(bNodes: DataNode[]) {
     const root = bNodes[0]
     updateTreeRoot(root)
     if (!root.content) return
@@ -222,7 +325,7 @@ export function updateTree(bNodes: Node[]) {
     }
 }
 
-function updateTreeRoot(node: Node) {
+function updateTreeRoot(node: DataNode) {
     updateSize(node, totalSize, totalSize.parentElement as HTMLDivElement)
     if (node.locked) {
         totalLocked.classList.remove("hidden")
@@ -232,7 +335,7 @@ function updateTreeRoot(node: Node) {
     }
 }
 
-export async function rebuildTree(data: Node, path: string) {
+export async function rebuildTree(data: DataNode, path: string) {
     // rootPath = path
 
     removeCanceled()
@@ -240,6 +343,7 @@ export async function rebuildTree(data: Node, path: string) {
     totalSize.parentElement.classList.add("temp")
     max = 1
     branches = {}
+    branches2 = {}
 
     updateTreeRoot(data)
 
@@ -258,37 +362,3 @@ export function removeCanceled() {
     document.documentElement.style.removeProperty("--temp-dir-icon")
     statePannel.classList.remove("canceled")
 }
-
-// treeBlock.addEventListener("click", async e => {
-//     const target = e.target as HTMLDivElement
-//     console.log(target)
-//     // if (!target.classList.contains("interactive")) return
-//     // if (!target.classList.contains("td")) return
-//     if (!target.dataset.dir) return
-//     const shoot = target.closest("div.shoot") as HTMLDivElement
-//     // const dataset = target?.dataset
-//     const dataset = shoot?.dataset
-
-//     if (!dataset.nested) {
-//         // const prePath = dataset.path ? `${pathInpunt.value}${dataset.path}/` : pathInpunt.value
-//         const prePath = dataset.path ? `${rootPath}${dataset.path}/` : rootPath
-//         const fullPath = prePath + dataset.dirname
-//         // const path = target.dataset.path
-//         console.log(fullPath)
-
-//         target.classList.add("unfold")
-
-//         const data = await doFetch("/dir", { path: fullPath })
-//         // node.content = await doFetch("/dir", { path: fullPath })
-//         console.log(data)
-//         const branch = createBranch(data, dataset.path)
-//         if (branch) shoot.appendChild(branch)
-//         dataset.nested = "true"
-//         dataset.unfolded = "true"
-//         // target.classList.add("unfold")
-//     } else {
-//         target.classList.toggle("unfold")
-//         shoot.querySelector<HTMLDivElement>(".dir-content")!.hidden =
-//             !target.classList.contains("unfold")
-//     }
-// })

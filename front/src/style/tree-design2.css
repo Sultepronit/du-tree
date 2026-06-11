@@ -22,11 +22,15 @@ body {
     }
 }
 
+/* tree design */
+#total-size {
+    z-indxex: 100;
+}
+
 #tree {
     overflow: auto;
 }
 
-/* tree design */
 ul.dir-content {
     list-style-type: none;
     min-height: 0.9em;
