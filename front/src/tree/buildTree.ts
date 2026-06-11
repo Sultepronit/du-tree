@@ -168,9 +168,27 @@ async function updateBranch(branchData: DataNode) {
     console.log("branch:", branch)
 
     const selected = mixed.slice(0, pageSize)
-    for (const node of selected) {
-        console.log(node)
-    }
+    // for (const node of selected) {
+    //     console.log(node)
+    // }
+    const store = new DocumentFragment()
+    selected.forEach((node, i) => {
+        // console.log(node)
+        // branch.ul.childNodes[i]
+        let shootEl: HTMLElement
+        if (branch.dataShootsMap.has(node.name)) {
+            shootEl =
+                branch.elNodes.get(node.name).shoot ||
+                branch.ul.querySelector(`.shoot[data-name="${node.name}"]`)
+            if (branch.ul.childNodes[i].childNodes[0] !== shootEl) {
+                store.appendChild(branch.ul.childNodes[i].childNodes[0])
+                branch.ul.childNodes[i].appendChild(shootEl)
+                // console.log("moved", shoot.li)
+                console.log("moved")
+            }
+        }
+    })
+    console.log(store.childNodes)
 
     branch.dataShootsMap =
         mix.size === branch.dataShootsMap.size ? mix : new Map(selected.map(s => [s.name, s]))
