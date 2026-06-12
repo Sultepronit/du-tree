@@ -113,18 +113,14 @@ export function createBranch(node: DataNode, prePath: string): DocumentFragment 
     return templ.content
 }
 
-function updateSize(node: DataNode, display: HTMLDivElement, tempWidget: HTMLDivElement) {
-    // if (!display.classList.contains("temp") && !node.sizeIsTemp) return false
-    if (!tempWidget.classList.contains("temp") && !node.sizeIsTemp) return false
-    // console.log(node, display, tempWidget)
+function updateSize(data: DataNode, display: HTMLDivElement, tempWidget: HTMLDivElement) {
+    if (!tempWidget.classList.contains("temp") && !data.sizeIsTemp) return false
 
-    // if (node.sizeIsTemp) display.classList.add("temp")
-    // else display.classList.remove("temp")
-    if (node.sizeIsTemp) tempWidget.classList.add("temp")
+    if (data.sizeIsTemp) tempWidget.classList.add("temp")
     else tempWidget.classList.remove("temp")
 
-    const b = `${node.size} B`
-    const h = handleBytes(node.size)
+    const b = `${data.size} B`
+    const h = handleBytes(data.size)
     if (display.title !== b) {
         display.title = b
         display.textContent = h
@@ -136,29 +132,27 @@ function updateSize(node: DataNode, display: HTMLDivElement, tempWidget: HTMLDiv
 }
 
 const pageSize = 100
-async function updateBranch(branchData: DataNode) {
+async function updateBranch(branchUpdate: DataNode) {
     // if (!bNode.content) return // are there such cases?
 
-    console.log("branch update:", branchData)
+    console.log("branch update:", branchUpdate)
 
-    const branch = branches2[branchData.name]
-    // console.log(branch)
-    const updates = branchData.content.sort((a, b) => b.size - a.size).slice(0, pageSize)
-    // const mixed = new Map<string, DataNode>()
-    // branch.dataShoots.forEach(u => mixed.set(u.name, u))
+    const branch = branches2[branchUpdate.name]
+
+    const updates = branchUpdate.content.sort((a, b) => b.size - a.size).slice(0, pageSize)
+
     const mix = new Map(branch.dataShootsMap)
     updates.forEach(s => mix.set(s.name, s))
-    // console.log("mixed", mixed)
-    // const mixed = [...mix.values()].sort((a, b) => b.size - a.size).slice(0, pageSize)
-    const mixed = [...mix.values()].sort((a, b) => b.size - a.size)
-    console.log("mixed", mixed)
+
+    const actual = [...mix.values()].sort((a, b) => b.size - a.size).slice(0, pageSize)
+    console.log("actual", actual)
 
     if (!branch.ul) {
-        branch.ul = treeBlock.querySelector(`ul[data-path="${branchData.name}"]`)
+        branch.ul = treeBlock.querySelector(`ul[data-path="${branchUpdate.name}"]`)
         branch.elNodes = new Map()
 
         const shootEls = branch.ul.querySelectorAll(
-            `.shoot[data-path="${branchData.name}"]`
+            `.shoot[data-path="${branchUpdate.name}"]`
         ) as NodeListOf<HTMLDivElement>
         // console.log(shootEls)
         shootEls.forEach(shoot => {
@@ -167,41 +161,40 @@ async function updateBranch(branchData: DataNode) {
     }
     console.log("branch:", branch)
 
-    const selected = mixed.slice(0, pageSize)
-    // for (const node of selected) {
-    //     console.log(node)
-    // }
     const store = new DocumentFragment()
-    selected.forEach((node, i) => {
-        // console.log(node)
-        // branch.ul.childNodes[i]
-        let shootEl: HTMLElement
-        if (branch.dataShootsMap.has(node.name)) {
-            shootEl =
-                branch.elNodes.get(node.name).shoot ||
-                branch.ul.querySelector(`.shoot[data-name="${node.name}"]`)
-            if (branch.ul.childNodes[i].childNodes[0] !== shootEl) {
-                store.appendChild(branch.ul.childNodes[i].childNodes[0])
+    // update exhisting shoots
+    actual.forEach((data, i) => {
+        if (branch.dataShootsMap.has(data.name)) {
+            const shootEl = branch.elNodes.get(data.name).shoot
+            const liCont = branch.ul.childNodes[i].childNodes[0]
+            // if li does not contain the shoot we need
+            if (liCont !== shootEl) {
+                // if it contains wrong one - pull it out
+                if (liCont instanceof HTMLDivElement) store.appendChild(liCont)
+                // and add the right one
                 branch.ul.childNodes[i].appendChild(shootEl)
-                // console.log("moved", shoot.li)
                 console.log("moved")
             }
         }
     })
     console.log(store.childNodes)
+    // add new shoots
+    actual.forEach((data, i) => {
+        if (!branch.dataShootsMap.has(data.name)) {
+            let shootEl = branch.ul.childNodes[i].childNodes[0] as HTMLElement
+            if (!shootEl) {
+                shootEl = store.firstElementChild as HTMLElement
+                branch.ul.childNodes[i].appendChild(shootEl)
+            }
+            shootEl.dataset.name = data.name
+            shootEl.querySelector(".fd-name").textContent = data.name
+            console.log("reset")
+        }
+    })
+    console.log(store.childNodes)
 
     branch.dataShootsMap =
-        mix.size === branch.dataShootsMap.size ? mix : new Map(selected.map(s => [s.name, s]))
-
-    for (let i = pageSize; i < mixed.length; i++) {
-        // if (branch.elNodes.has(mixed[i].name))
-        const elNode = branch.elNodes.get(mixed[i].name)
-        if (elNode) {
-            elNode.shoot.remove()
-            // elNode.size?.remove()
-            branch.elNodes.delete(mixed[i].name)
-        }
-    }
+        mix.size === branch.dataShootsMap.size ? mix : new Map(actual.map(s => [s.name, s]))
 
     // for (const shootData of branchData.content) {
     //     // console.log(cNode)
@@ -235,19 +228,6 @@ async function updateBranch(branchData: DataNode) {
     //         shoot.el.style.setProperty("--size", `${sizeStr}%`)
     //     }
     // }
-
-    // const shoots = Object.values(branch.shoots)
-
-    // shoots.sort((a, b) => Number(b.el.dataset.size) - Number(a.el.dataset.size))
-    // // console.log(shoots)
-
-    // shoots.forEach((shoot, i) => {
-    //     if (branch.ul.childNodes[i].childNodes[0] !== shoot.el) {
-    //         branch.ul.childNodes[i].appendChild(shoot.el)
-    //         // console.log("moved", shoot.li)
-    //         console.log("moved")
-    //     }
-    // })
 }
 
 // async function updateBranch0(bNode: DataNode) {
