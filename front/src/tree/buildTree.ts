@@ -1,5 +1,5 @@
 import handleBytes from "../helpers/handleBytes"
-import type { Branch, DataNode, UpdateBranch } from "../types"
+import type { Branch, DataNode, ElNode, UpdateBranch } from "../types"
 
 const totalSize = document.getElementById("total-size") as HTMLDivElement
 const totalLocked = document.getElementById("lock-widget") as HTMLDivElement
@@ -53,6 +53,7 @@ function createLi(node: DataNode, prePath: string): string {
     // class="shoot
     //     ${node.locked > 0 ? "locked" : node.locked === -1 ? "locked itself" : ""}
     //     ${node.sizeIsTemp ? "temp" : ""}"
+    // remove: data-size, data-dir
     return `<li><div
             class="${classes.join(" ")}"
             data-path="${prePath}" 
@@ -60,10 +61,7 @@ function createLi(node: DataNode, prePath: string): string {
             data-size="${node.size}"
             style="--size: ${node.size}%"
         >
-            <div
-                class="fd-entry"
-                title="${title.join("\n")}"
-            >
+            <div class="fd-entry" title="${title.join("\n")}">
                 <div
                     class="fd-type t${node.type}"
                     ${node.type === "d" ? "data-dir='true'" : ""}
@@ -98,8 +96,7 @@ export function createBranch(node: DataNode, prePath: string): DocumentFragment 
 
     if (node.sizeIsTemp) {
         branches2[path] = {
-            dataShoots: first100,
-            dataShootsMap: new Map(first100.map(s => [s.name, s]))
+            dataShoots: new Map(first100.map(s => [s.name, s]))
         }
         console.log("branches2", branches2)
     }
@@ -131,6 +128,29 @@ function updateSize(data: DataNode, display: HTMLDivElement, tempWidget: HTMLDiv
     return false
 }
 
+function updateShoot(elNode: ElNode, oldD: DataNode | null, newD: DataNode) {
+    // console.log(oldD?.size, newD.size)
+    if (oldD?.size !== newD.size) {
+        elNode.shoot.style.setProperty("--size", `${newD.size}%`)
+        if (!elNode.size) elNode.size = elNode.shoot.querySelector(".fd-size")
+        elNode.size.title = `${newD.size} B`
+        elNode.size.textContent = handleBytes(newD.size)
+    }
+
+    if (newD.sizeIsTemp) elNode.shoot.classList.add("temp")
+    else elNode.shoot.classList.remove("temp")
+}
+
+function resetShoot(elNode: ElNode, data: DataNode) {
+    elNode.shoot.dataset.name = data.name
+    elNode.shoot.querySelector(".fd-name").textContent = data.name
+    // console.log(elNode.shoot.querySelector(".fd-type"))
+    // elNode.shoot.querySelector(".fd-type").textContent = `t${data.type}`
+    elNode.shoot.querySelector(".fd-type").className = `fd-type t${data.type}`
+
+    updateShoot(elNode, null, data)
+}
+
 const pageSize = 100
 async function updateBranch(branchUpdate: DataNode) {
     // if (!bNode.content) return // are there such cases?
@@ -141,7 +161,7 @@ async function updateBranch(branchUpdate: DataNode) {
 
     const updates = branchUpdate.content.sort((a, b) => b.size - a.size).slice(0, pageSize)
 
-    const mix = new Map(branch.dataShootsMap)
+    const mix = new Map(branch.dataShoots)
     updates.forEach(s => mix.set(s.name, s))
 
     const actual = [...mix.values()].sort((a, b) => b.size - a.size).slice(0, pageSize)
@@ -149,24 +169,31 @@ async function updateBranch(branchUpdate: DataNode) {
 
     if (!branch.ul) {
         branch.ul = treeBlock.querySelector(`ul[data-path="${branchUpdate.name}"]`)
-        branch.elNodes = new Map()
+        branch.elShoots = new Map()
 
         const shootEls = branch.ul.querySelectorAll(
             `.shoot[data-path="${branchUpdate.name}"]`
         ) as NodeListOf<HTMLDivElement>
         // console.log(shootEls)
         shootEls.forEach(shoot => {
-            branch.elNodes.set(shoot.dataset.name, { shoot })
+            branch.elShoots.set(shoot.dataset.name, { shoot })
         })
     }
     console.log("branch:", branch)
 
+    branch.ul.style.display = "none"
     const store = new DocumentFragment()
     // update exhisting shoots
     actual.forEach((data, i) => {
-        if (branch.dataShootsMap.has(data.name)) {
-            const shootEl = branch.elNodes.get(data.name).shoot
+        const old = branch.dataShoots.get(data.name)
+        if (old) {
+            // debug!
+            // if (!branch.elNodes.get(data.name)) {
+            //     console.log(data)
+            // }
+            const shootEl = branch.elShoots.get(data.name).shoot
             const liCont = branch.ul.childNodes[i].childNodes[0]
+
             // if li does not contain the shoot we need
             if (liCont !== shootEl) {
                 // if it contains wrong one - pull it out
@@ -175,26 +202,37 @@ async function updateBranch(branchUpdate: DataNode) {
                 branch.ul.childNodes[i].appendChild(shootEl)
                 console.log("moved")
             }
+
+            // updateShoot(shootEl, old, mix.get(data.name))
+            updateShoot(branch.elShoots.get(data.name), old, data)
         }
     })
     console.log(store.childNodes)
     // add new shoots
     actual.forEach((data, i) => {
-        if (!branch.dataShootsMap.has(data.name)) {
+        if (!branch.dataShoots.has(data.name)) {
             let shootEl = branch.ul.childNodes[i].childNodes[0] as HTMLElement
             if (!shootEl) {
                 shootEl = store.firstElementChild as HTMLElement
                 branch.ul.childNodes[i].appendChild(shootEl)
             }
-            shootEl.dataset.name = data.name
-            shootEl.querySelector(".fd-name").textContent = data.name
+            const elNode = branch.elShoots.get(shootEl.dataset.name)
+            branch.elShoots.delete(shootEl.dataset.name)
+            branch.elShoots.set(data.name, elNode)
+
+            resetShoot(elNode, data)
+            // shootEl.dataset.name = data.name
+            // shootEl.querySelector(".fd-name").textContent = data.name
+
+            // updateShoot(elNode, null, data)
             console.log("reset")
         }
     })
+    branch.ul.style.display = ""
     console.log(store.childNodes)
 
-    branch.dataShootsMap =
-        mix.size === branch.dataShootsMap.size ? mix : new Map(actual.map(s => [s.name, s]))
+    branch.dataShoots =
+        mix.size === branch.dataShoots.size ? mix : new Map(actual.map(s => [s.name, s]))
 
     // for (const shootData of branchData.content) {
     //     // console.log(cNode)
@@ -215,17 +253,6 @@ async function updateBranch(branchUpdate: DataNode) {
     //             const base = element.title.split("\nContains ")[0]
     //             element.title = base + "\n" + details
     //         }
-    //     }
-
-    //     if (!shoot.sizeDisplay) shoot.sizeDisplay = shoot.el.querySelector(".fd-size")
-    //     const updated = updateSize(shootData, shoot.sizeDisplay, shoot.el)
-    //     // console.log(updated)
-    //     if (!updated) continue
-
-    //     const sizeStr = shootData.size.toString()
-    //     if (sizeStr !== shoot.el.dataset.size) {
-    //         shoot.el.dataset.size = sizeStr
-    //         shoot.el.style.setProperty("--size", `${sizeStr}%`)
     //     }
     // }
 }

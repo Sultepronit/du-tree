@@ -17,18 +17,13 @@ export type Branch = {
     shoots: Record<string, Shoot>
 }
 
-export type elNode = {
+export type ElNode = {
     shoot: HTMLDivElement
     size?: HTMLDivElement
 }
 
 export type UpdateBranch = {
-    dataShoots: DataNode[]
-    dataShootsMap: Map<string, DataNode>
-    elNodes?: Map<string, elNode>
-    shoots?: {
-        data: DataNode
-        dom?: elNode
-    }[]
+    dataShoots: Map<string, DataNode>
+    elShoots?: Map<string, ElNode>
     ul?: HTMLUListElement
 }
