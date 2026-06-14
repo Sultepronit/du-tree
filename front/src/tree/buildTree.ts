@@ -86,23 +86,24 @@ export function createBranch(node: DataNode, prePath: string): DocumentFragment 
     }
     const path = prePath ? `${prePath}/${node.name}` : node.name
 
-    node.content.sort((a, b) => b.size - a.size)
+    // node.content.sort((a, b) => b.size - a.size)
     if (node.content[0].size > max) {
         max = node.content[0].size
         document.documentElement.style.setProperty("--max-size", (max / 100).toString())
     }
 
-    const first100 = node.content.slice(0, 100)
+    // const first100 = node.content.slice(0, 100)
 
     if (node.sizeIsTemp) {
         branches2[path] = {
-            dataShoots: new Map(first100.map(s => [s.name, s]))
+            // dataShoots: new Map(first100.map(s => [s.name, s]))
+            dataShoots: new Map(node.content.map(s => [s.name, s]))
         }
         console.log("branches2", branches2)
     }
 
-    // const lis = node.content.map(entry => createLi(entry, path)).join("")
-    const lis = first100.map(entry => createLi(entry, path)).join("")
+    const lis = node.content.map(entry => createLi(entry, path)).join("")
+    // const lis = first100.map(entry => createLi(entry, path)).join("")
     const templ = document.createElement("template")
     // console.log(templ)
     templ.innerHTML = `<ul class="dir-content" data-path="${path}">${lis}</ul>`
@@ -159,10 +160,11 @@ async function updateBranch(branchUpdate: DataNode) {
 
     const branch = branches2[branchUpdate.name]
 
-    const updates = branchUpdate.content.sort((a, b) => b.size - a.size).slice(0, pageSize)
+    // const updates = branchUpdate.content.sort((a, b) => b.size - a.size).slice(0, pageSize)
 
     const mix = new Map(branch.dataShoots)
-    updates.forEach(s => mix.set(s.name, s))
+    // updates.forEach(s => mix.set(s.name, s))
+    branchUpdate.content.forEach(s => mix.set(s.name, s))
 
     const actual = [...mix.values()].sort((a, b) => b.size - a.size).slice(0, pageSize)
     console.log("actual", actual)

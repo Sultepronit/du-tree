@@ -2,17 +2,14 @@ package du
 
 import (
 	"du-tree/explorer"
+	"du-tree/helpers"
 	"du-tree/models"
+	"sort"
 	"strings"
 )
 
-// var updatePaths = make(map[string]bool)
-// var updatePaths = make([]string, 0, 3)
-// var updatePaths []string
-
 func genfSizePath(basePath []string) []string {
 	if len(basePath) == 1 && basePath[0] == "" {
-		// updatePaths = make([]string, 0, 3)
 		return []string{"*files"}
 	}
 	fSizePath := make([]string, len(basePath)+1)
@@ -21,7 +18,6 @@ func genfSizePath(basePath []string) []string {
 	return fSizePath
 }
 
-// func GetDir(path string) ([]*models.Node, error) {
 func GetDir(path string) (*models.Node, error) {
 	baceCont, err := explorer.ReadDir(path)
 	if err != nil {
@@ -43,20 +39,17 @@ func GetDir(path string) (*models.Node, error) {
 	// log.Println(fSizePath)
 	tree.fill(fSizePath, fSize)
 
-	// updatePaths[strings.Join(parts, "/")] = true
-	// updatePaths = append(updatePaths, strings.Join(parts, "/"))
-	// fmt.Println(updatePaths)
-
 	dure := tree.getDir(strings.Join(parts, "/"))
 	// log.Println("du.GetDir: dure", dure)
 
-	if dure == nil {
-		return &models.Node{
-			Size:       0,
-			SizeIsTemp: true,
-			Content:    baceCont,
-		}, nil
-	}
+	// no need?
+	// if dure == nil {
+	// 	return &models.Node{
+	// 		Size:       0,
+	// 		SizeIsTemp: true,
+	// 		Content:    baceCont,
+	// 	}, nil
+	// }
 
 	dureCont := make(map[string]*models.Node, len(dure.Content))
 	for _, n := range dure.Content {
@@ -70,9 +63,13 @@ func GetDir(path string) (*models.Node, error) {
 		}
 	}
 
-	dure.Content = baceCont
+	sort.Slice(baceCont, func(i, j int) bool {
+		return baceCont[i].Size > baceCont[j].Size
+	})
 
-	// return baceCont, nil
+	// dure.Content = baceCont[:100]
+	dure.Content = helpers.LimitSlice(baceCont, 100)
+
 	return dure, nil
 }
 
@@ -87,7 +84,7 @@ func checkCancel() bool {
 
 // func GetUpdate() *models.Node {
 // func GetUpdate() []*models.Node {
-func GetUpdate(reqPaths []string) []*models.Node {
+func GetUpdate0(reqPaths []string) []*models.Node {
 	if checkCancel() {
 		return nil
 	}
@@ -101,6 +98,30 @@ func GetUpdate(reqPaths []string) []*models.Node {
 	for i, p := range reqPaths {
 		// fmt.Println(p)
 		re[i+1] = tree.getDir(p)
+	}
+
+	return re
+}
+
+func GetUpdate(reqPaths []string) []*models.Node {
+	if checkCancel() {
+		return nil
+	}
+
+	updatePaths := append([]string{""}, reqPaths...)
+	re := make([]*models.Node, len(updatePaths))
+	re[0] = tree.getDir("")
+	for i, p := range updatePaths {
+		// fmt.Println(p)
+		// re[i] = tree.getDir(p)
+		re[i] = tree.getDir(p)
+
+		sort.Slice(re[i].Content, func(a, b int) bool {
+			return re[i].Content[a].Size > re[i].Content[b].Size
+		})
+
+		// re[i].Content = re[i].Content[:100]
+		re[i].Content = helpers.LimitSlice(re[i].Content, 100)
 	}
 
 	return re

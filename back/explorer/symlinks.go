@@ -16,10 +16,9 @@ func getRealEntity(path string, name string) (typ string, realPath string) {
 			return "", ""
 		}
 		return info.Mode().Type().String()[0:1], realPath
-	} else {
-		log.Println(err)
 	}
 
+	// no such file or directory
 	target, err := os.Readlink(fullPath)
 	if err != nil {
 		return "brk", "?"

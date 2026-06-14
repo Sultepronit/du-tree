@@ -5,14 +5,9 @@ import (
 )
 
 func transformNode(raw *rawNode, name string) models.Node {
-	// t := "d"
-	// if raw.Locked {
-	// 	t = "-locked"
-	// }
 	return models.Node{
-		Name: name,
-		Type: "d",
-		// Type: t,
+		Name:       name,
+		Type:       "d",
 		Size:       raw.getSize(),
 		SizeIsTemp: raw.Temp,
 		Locked:     raw.Locked,
@@ -33,6 +28,10 @@ func parseNode(raw *rawNode, name string) models.Node {
 		cn := transformNode(cr, cn)
 		node.Content = append(node.Content, &cn)
 	}
+
+	// sort.Slice(node.Content, func(i, j int) bool {
+	// 	return node.Content[i].Size > node.Content[j].Size
+	// })
 
 	return node
 }
