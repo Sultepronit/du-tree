@@ -341,8 +341,8 @@ export function updateTree(bNodes: DataNode[]) {
     if (!root.content) return
 
     root.content.sort((a, b) => b.size - a.size)
-    // if (root.content[0].size != max) {
-    if (root.content[0].size > max) {
+    if (root.content[0].size != max) {
+        // if (root.content[0].size > max) { // works bad if recalculation gives less sum
         max = root.content[0].size
         document.documentElement.style.setProperty("--max-size", (max / 100).toString())
     }
