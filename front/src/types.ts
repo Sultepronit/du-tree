@@ -7,15 +7,15 @@ export type DataNode = {
     content?: DataNode[]
 }
 
-export type Shoot = {
-    el: HTMLDivElement
-    sizeDisplay?: HTMLDivElement
-}
+// export type Shoot = {
+//     el: HTMLDivElement
+//     sizeDisplay?: HTMLDivElement
+// }
 
-export type Branch = {
-    ul: HTMLUListElement
-    shoots: Record<string, Shoot>
-}
+// export type Branch = {
+//     ul: HTMLUListElement
+//     shoots: Record<string, Shoot>
+// }
 
 export type ElNode = {
     shoot: HTMLDivElement

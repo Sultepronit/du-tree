@@ -19,7 +19,7 @@ export async function initTree(path: string) {
 
     console.log(data)
 
-    rebuildTree(data, path)
+    rebuildTree(data)
 
     if (data.sizeIsTemp) initUpdate()
 }
@@ -70,7 +70,8 @@ function removeUpdates(results: DataNode[]) {
 document.getElementById("tree").addEventListener("click", async e => {
     const target = e.target as HTMLDivElement
     // console.log(target)
-    if (!target.dataset.dir) return
+    // if (!target.dataset.dir) return
+    if (!target.classList.contains("td")) return
 
     const shoot = target.closest("div.shoot") as HTMLDivElement
     const dataset = shoot?.dataset

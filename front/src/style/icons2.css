@@ -78,10 +78,7 @@
 
 .temp > * > .td {
     background-color: var(--temp-color);
-    /* mask-image: url("icons/folder-clock.svg");
-    -webkit-mask-image: url("icons/folder-clock.svg"); */
-    /* mask-image: url("icons/folder-sync.svg"); */
-    /* -webkit-mask-image: url("icons/folder-sync.svg"); */
+    mask-image: var(--temp-dir-icon);
     -webkit-mask-image: var(--temp-dir-icon);
 }
 

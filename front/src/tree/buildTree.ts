@@ -1,18 +1,15 @@
 import handleBytes from "../helpers/handleBytes"
-import type { Branch, DataNode, ElNode, UpdateBranch } from "../types"
+import type { DataNode, ElNode, UpdateBranch } from "../types"
 
 const totalSize = document.getElementById("total-size") as HTMLDivElement
 const totalLocked = document.getElementById("lock-widget") as HTMLDivElement
 const statePannel = totalSize.parentElement
 const treeBlock = document.getElementById("tree")!
 
-// let rootPath = ""
-
 let max = 1
 
 let canceled = false
 
-let branches = {} as Record<string, Branch>
 let branches2 = {} as Record<string, UpdateBranch>
 
 function genLockedDetails(node: DataNode) {
@@ -29,16 +26,18 @@ function genLockedDetails(node: DataNode) {
 
 function createLi(node: DataNode, prePath: string): string {
     let realPath: string
+    let isBrokenLink = false
     if (node.type == "L") {
         const parts = node.name.split("/")
         node.name = parts[0]
         realPath = parts.slice(2).join("/")
         node.type += parts[1]
+        if (parts[1] === "brk") isBrokenLink = true
     }
 
     const title = [`Path: ${prePath ? prePath + "/" : "Root"}`, `Name: ${node.name}`]
     if (realPath) {
-        title.push("Link to: " + realPath)
+        title.push(isBrokenLink ? "Broken link to: " + realPath : "Link to: " + realPath)
     } else if (node.locked) {
         title.push(...genLockedDetails(node))
     }
@@ -50,23 +49,14 @@ function createLi(node: DataNode, prePath: string): string {
     }
     if (node.sizeIsTemp) classes.push("temp")
 
-    // class="shoot
-    //     ${node.locked > 0 ? "locked" : node.locked === -1 ? "locked itself" : ""}
-    //     ${node.sizeIsTemp ? "temp" : ""}"
-    // remove: data-size, data-dir
     return `<li><div
             class="${classes.join(" ")}"
             data-path="${prePath}" 
             data-name="${node.name}"
-            data-size="${node.size}"
             style="--size: ${node.size}%"
         >
             <div class="fd-entry" title="${title.join("\n")}">
-                <div
-                    class="fd-type t${node.type}"
-                    ${node.type === "d" ? "data-dir='true'" : ""}
-                >
-                </div>
+                <div class="fd-type t${node.type}"></div>
                 <div class="fd-details">
                     <div class="fd-sizebar"></div>
                     <div class="fd-size" title="${node.size} B">${handleBytes(node.size)}</div>
@@ -74,7 +64,7 @@ function createLi(node: DataNode, prePath: string): string {
                 </div>
             </div>
     </div></li>`
-} // <div class="fd-name">${linkType ? linkType : ""}${node.name}</div>
+}
 
 export function createBranch(node: DataNode, prePath: string): DocumentFragment {
     // if (!node.content) return
@@ -145,8 +135,6 @@ function updateShoot(elNode: ElNode, oldD: DataNode | null, newD: DataNode) {
 function resetShoot(elNode: ElNode, data: DataNode) {
     elNode.shoot.dataset.name = data.name
     elNode.shoot.querySelector(".fd-name").textContent = data.name
-    // console.log(elNode.shoot.querySelector(".fd-type"))
-    // elNode.shoot.querySelector(".fd-type").textContent = `t${data.type}`
     elNode.shoot.querySelector(".fd-type").className = `fd-type t${data.type}`
 
     updateShoot(elNode, null, data)
@@ -154,16 +142,14 @@ function resetShoot(elNode: ElNode, data: DataNode) {
 
 const pageSize = 100
 async function updateBranch(branchUpdate: DataNode) {
-    // if (!bNode.content) return // are there such cases?
+    // if (!branchUpdate.content) return // are there such cases?
 
     console.log("branch update:", branchUpdate)
 
     const branch = branches2[branchUpdate.name]
-
-    // const updates = branchUpdate.content.sort((a, b) => b.size - a.size).slice(0, pageSize)
+    console.log("branch:", branch)
 
     const mix = new Map(branch.dataShoots)
-    // updates.forEach(s => mix.set(s.name, s))
     branchUpdate.content.forEach(s => mix.set(s.name, s))
 
     const actual = [...mix.values()].sort((a, b) => b.size - a.size).slice(0, pageSize)
@@ -181,7 +167,6 @@ async function updateBranch(branchUpdate: DataNode) {
             branch.elShoots.set(shoot.dataset.name, { shoot })
         })
     }
-    console.log("branch:", branch)
 
     branch.ul.style.display = "none"
     const store = new DocumentFragment()
@@ -200,16 +185,15 @@ async function updateBranch(branchUpdate: DataNode) {
             if (liCont !== shootEl) {
                 // if it contains wrong one - pull it out
                 if (liCont instanceof HTMLDivElement) store.appendChild(liCont)
-                // and add the right one
+                // add the right one
                 branch.ul.childNodes[i].appendChild(shootEl)
                 console.log("moved")
             }
 
-            // updateShoot(shootEl, old, mix.get(data.name))
             updateShoot(branch.elShoots.get(data.name), old, data)
         }
     })
-    console.log(store.childNodes)
+    // console.log(store.childNodes)
     // add new shoots
     actual.forEach((data, i) => {
         if (!branch.dataShoots.has(data.name)) {
@@ -223,15 +207,11 @@ async function updateBranch(branchUpdate: DataNode) {
             branch.elShoots.set(data.name, elNode)
 
             resetShoot(elNode, data)
-            // shootEl.dataset.name = data.name
-            // shootEl.querySelector(".fd-name").textContent = data.name
-
-            // updateShoot(elNode, null, data)
             console.log("reset")
         }
     })
     branch.ul.style.display = ""
-    console.log(store.childNodes)
+    // console.log(store.childNodes)
 
     branch.dataShoots =
         mix.size === branch.dataShoots.size ? mix : new Map(actual.map(s => [s.name, s]))
@@ -362,14 +342,11 @@ function updateTreeRoot(node: DataNode) {
     }
 }
 
-export async function rebuildTree(data: DataNode, path: string) {
-    // rootPath = path
-
+export async function rebuildTree(data: DataNode) {
     removeCanceled()
     treeBlock.innerHTML = ""
     totalSize.parentElement.classList.add("temp")
     max = 1
-    branches = {}
     branches2 = {}
 
     updateTreeRoot(data)
