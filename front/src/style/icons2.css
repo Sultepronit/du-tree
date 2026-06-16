@@ -13,10 +13,20 @@
     /* margin-left: -0.3em; */
     margin: 0.1em 0 0 -0.3em;
     background-color: red;
-    -webkit-mask-repeat: no-repeat;
+    mask-size: contain;
+    -webkit-mask-size: contain;
     mask-repeat: no-repeat;
+    -webkit-mask-repeat: no-repeat;
     mask-image: url("icons/lock.svg");
     -webkit-mask-image: url("icons/lock.svg");
+}
+
+#suggestions-box {
+    padding-left: 1.2em;
+}
+
+.suggestion {
+    position: relative;
 }
 
 .suggestion::before {
@@ -25,10 +35,17 @@
     width: 1.2em;
     height: 1em;
     background-color: black;
-    -webkit-mask-repeat: no-repeat;
+
     mask-repeat: no-repeat;
+    -webkit-mask-repeat: no-repeat;
+    mask-size: contain;
+    -webkit-mask-size: contain;
     mask-image: url("icons/folder.svg");
     -webkit-mask-image: url("icons/folder.svg");
+
+    position: absolute;
+    left: -1.1em;
+    z-index: 2;
 }
 
 .suggestion.locked::before {
@@ -60,8 +77,9 @@
 .fd-type {
     -webkit-mask-repeat: no-repeat;
     mask-repeat: no-repeat;
-    /* -webkit-mask-size: contain;
-    mask-size: contain; */
+    -webkit-mask-size: contain;
+    /* mask-size: contain; */
+    mask-size: 90% 90%;
 }
 
 .fd-type.td {
