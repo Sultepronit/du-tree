@@ -1,4 +1,5 @@
-const urlBase = "http://localhost:8088"
+// const urlBase = "http://localhost:8088"
+const urlBase = ""
 export async function doFetch(path: string, data = null) {
     const options = data
         ? {

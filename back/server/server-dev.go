@@ -33,7 +33,7 @@ func Start() {
 	})
 
 	// http.HandleFunc("/", handleHello)
-	port := "8088"
+	port := "51200"
 
 	log.Printf("Dev TS Server started at: %s\n", port)
 	err := http.ListenAndServe(":"+port, nil)
