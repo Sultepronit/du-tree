@@ -15,11 +15,11 @@ let branches2 = {} as Record<string, UpdateBranch>
 function genLockedDetails(node: DataNode) {
     const re = []
     if (node.locked === -1) {
-        re.push(`You have no read rights for this dir`)
+        re.push(` You have no read rights for this dir`)
     } else {
-        re.push(`Contains ${node.locked} nested dir(s) without access`)
+        re.push(` Contains ${node.locked} nested dir(s) without access`)
     }
-    re.push(`Run as root to get the full size.`)
+    re.push(` Run as root to get the full size.`)
 
     return re
 }
@@ -101,25 +101,25 @@ export function createBranch(node: DataNode, prePath: string): DocumentFragment 
     return templ.content
 }
 
-function updateSize(data: DataNode, display: HTMLDivElement, tempWidget: HTMLDivElement) {
-    if (!tempWidget.classList.contains("temp") && !data.sizeIsTemp) return false
+function updateShootTitle(elNode: ElNode, oldD: DataNode, newD: DataNode) {
+    if (oldD.locked === newD.locked) return
+    if (!elNode.entry) elNode.entry = elNode.shoot.querySelector(".fd-entry")
 
-    if (data.sizeIsTemp) tempWidget.classList.add("temp")
-    else tempWidget.classList.remove("temp")
-
-    const b = `${data.size} B`
-    const h = handleBytes(data.size)
-    if (display.title !== b) {
-        display.title = b
-        display.textContent = h
-
-        return true
+    elNode.shoot.classList.add("locked")
+    const details = genLockedDetails(newD).join("\n")
+    if (newD.locked === -1) {
+        elNode.shoot.classList.add("itself")
+        // if (!elNode.entry.title.includes("You have no")) {
+        //     elNode.entry.title += "\n" + details
+        // }
+        elNode.entry.title += "\n" + details
+    } else {
+        const base = elNode.entry.title.split("\nContains ")[0]
+        elNode.entry.title = base + "\n" + details
     }
-
-    return false
 }
 
-function updateShoot(elNode: ElNode, oldD: DataNode | null, newD: DataNode) {
+function updateShootSize(elNode: ElNode, oldD: DataNode | null, newD: DataNode) {
     // console.log(oldD?.size, newD.size)
     if (oldD?.size !== newD.size) {
         elNode.shoot.style.setProperty("--size", `${newD.size}%`)
@@ -133,11 +133,16 @@ function updateShoot(elNode: ElNode, oldD: DataNode | null, newD: DataNode) {
 }
 
 function resetShoot(elNode: ElNode, data: DataNode) {
+    delete elNode.shoot.dataset.nested
+    // delete elNode.shoot.dataset.unfolded
+    elNode.shoot.className = "shoot"
+    elNode.shoot.querySelector("ul")?.remove() // remove the branch too?
+
     elNode.shoot.dataset.name = data.name
     elNode.shoot.querySelector(".fd-name").textContent = data.name
     elNode.shoot.querySelector(".fd-type").className = `fd-type t${data.type}`
 
-    updateShoot(elNode, null, data)
+    updateShootSize(elNode, null, data)
 }
 
 const pageSize = 100
@@ -178,7 +183,8 @@ async function updateBranch(branchUpdate: DataNode) {
             // if (!branch.elNodes.get(data.name)) {
             //     console.log(data)
             // }
-            const shootEl = branch.elShoots.get(data.name).shoot
+            const elNode = branch.elShoots.get(data.name)
+            const shootEl = elNode.shoot
             const liCont = branch.ul.childNodes[i].childNodes[0]
 
             // if li does not contain the shoot we need
@@ -190,11 +196,12 @@ async function updateBranch(branchUpdate: DataNode) {
                 console.log("moved")
             }
 
-            updateShoot(branch.elShoots.get(data.name), old, data)
+            updateShootSize(elNode, old, data)
+            updateShootTitle(elNode, old, data)
         }
     })
     // console.log(store.childNodes)
-    // add new shoots
+    // reset shoots
     actual.forEach((data, i) => {
         if (!branch.dataShoots.has(data.name)) {
             let shootEl = branch.ul.childNodes[i].childNodes[0] as HTMLElement
@@ -215,105 +222,7 @@ async function updateBranch(branchUpdate: DataNode) {
 
     branch.dataShoots =
         mix.size === branch.dataShoots.size ? mix : new Map(actual.map(s => [s.name, s]))
-
-    // for (const shootData of branchData.content) {
-    //     // console.log(cNode)
-    //     const shoot = branch.shoots[shootData.name]
-    //     // console.log(cNode.name, shoot)
-    //     if (shootData.locked) {
-    //         console.log("Locked!", shootData.name)
-    //         shoot.el.classList.add("locked")
-    //         // if (cNode.locked > 1) shoot.el.classList.add("itself")
-    //         const details = genLockedDetails(shootData).join("\n")
-    //         const element = shoot.el.querySelector(".fd-entry") as HTMLDivElement
-    //         if (shootData.locked === -1) {
-    //             shoot.el.classList.add("itself")
-    //             if (!element.title.includes("You have no")) {
-    //                 element.title += "\n" + details
-    //             }
-    //         } else {
-    //             const base = element.title.split("\nContains ")[0]
-    //             element.title = base + "\n" + details
-    //         }
-    //     }
-    // }
 }
-
-// async function updateBranch0(bNode: DataNode) {
-//     if (!bNode.content) return
-
-//     console.log(bNode)
-//     if (!branches[bNode.name]) {
-//         let ul: HTMLUListElement
-//         for (let i = 0; i < 22; i++) {
-//             ul = treeBlock.querySelector(`ul[data-path="${bNode.name}"]`)
-//             if (ul) break
-//             await new Promise(res => setTimeout(res, 200))
-//         }
-
-//         const branch = {
-//             // ul: treeBlock.querySelector(`ul[data-path="${bNode.name}"]`),
-//             ul,
-//             shoots: {}
-//         } as Branch
-
-//         const shootEls = branch.ul.querySelectorAll(
-//             `.shoot[data-path="${bNode.name}"]`
-//         ) as NodeListOf<HTMLDivElement>
-//         console.log(shootEls)
-//         shootEls.forEach((el, i) => {
-//             branch.shoots[el.dataset.dirname || i] = { el }
-//         })
-//         branches[bNode.name] = branch
-//     }
-//     const branch = branches[bNode.name]
-//     // console.log(branch)
-//     for (const cNode of bNode.content) {
-//         // console.log(cNode)
-//         const shoot = branch.shoots[cNode.name]
-//         // console.log(cNode.name, shoot)
-//         if (cNode.locked) {
-//             console.log("Locked!", cNode.name)
-//             shoot.el.classList.add("locked")
-//             // if (cNode.locked > 1) shoot.el.classList.add("itself")
-//             const details = genLockedDetails(cNode).join("\n")
-//             const element = shoot.el.querySelector(".fd-entry") as HTMLDivElement
-//             if (cNode.locked === -1) {
-//                 shoot.el.classList.add("itself")
-//                 if (!element.title.includes("You have no")) {
-//                     element.title += "\n" + details
-//                 }
-//             } else {
-//                 const base = element.title.split("\nContains ")[0]
-//                 element.title = base + "\n" + details
-//             }
-//         }
-
-//         if (!shoot.sizeDisplay) shoot.sizeDisplay = shoot.el.querySelector(".fd-size")
-//         const updated = updateSize(cNode, shoot.sizeDisplay, shoot.el)
-//         // console.log(updated)
-//         if (!updated) continue
-
-//         const sizeStr = cNode.size.toString()
-//         if (sizeStr !== shoot.el.dataset.size) {
-//             shoot.el.dataset.size = sizeStr
-//             shoot.el.style.setProperty("--size", `${sizeStr}%`)
-//         }
-//     }
-
-//     const shoots = Object.values(branch.shoots)
-
-//     shoots.sort((a, b) => Number(b.el.dataset.size) - Number(a.el.dataset.size))
-//     // console.log(shoots)
-
-//     shoots.forEach((shoot, i) => {
-//         if (branch.ul.childNodes[i].childNodes[0] !== shoot.el) {
-//             branch.ul.childNodes[i].appendChild(shoot.el)
-//             // console.log("moved", shoot.li)
-//             console.log("moved")
-//         }
-//     })
-// }
 
 export function updateTree(bNodes: DataNode[]) {
     const root = bNodes[0]
@@ -332,11 +241,20 @@ export function updateTree(bNodes: DataNode[]) {
     }
 }
 
-function updateTreeRoot(node: DataNode) {
-    updateSize(node, totalSize, totalSize.parentElement as HTMLDivElement)
-    if (node.locked) {
+let totalSizeVal = 0
+function updateTreeRoot(data: DataNode) {
+    // updateSize(node, totalSize, totalSize.parentElement as HTMLDivElement)
+    if (data?.size !== totalSizeVal) {
+        totalSize.title = `${data.size} B`
+        totalSize.textContent = handleBytes(data.size)
+    }
+
+    if (data.sizeIsTemp) totalSize.parentElement.classList.add("temp")
+    else totalSize.parentElement.classList.remove("temp")
+
+    if (data.locked) {
         totalLocked.classList.remove("hidden")
-        totalLocked.textContent = node.locked.toString()
+        totalLocked.textContent = data.locked.toString()
     } else {
         totalLocked.classList.add("hidden")
     }
@@ -345,7 +263,7 @@ function updateTreeRoot(node: DataNode) {
 export async function rebuildTree(data: DataNode) {
     removeCanceled()
     treeBlock.innerHTML = ""
-    totalSize.parentElement.classList.add("temp")
+    // totalSize.parentElement.classList.add("temp")
     max = 1
     branches2 = {}
 

@@ -91,7 +91,7 @@ document.getElementById("tree").addEventListener("click", async e => {
         const branch = createBranch(data, dataset.path)
         if (branch) shoot.appendChild(branch)
         dataset.nested = "true"
-        dataset.unfolded = "true"
+        // dataset.unfolded = "true"
     } else {
         target.classList.toggle("unfold")
         shoot.querySelector<HTMLDivElement>(".dir-content")!.hidden =
