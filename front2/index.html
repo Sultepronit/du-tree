@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <link rel="icon" type="image/png" href="/icon.png" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Disk Usage Tree 0.2.14</title>
+        <link rel="stylesheet" href="style/main.css" />
+        <link rel="stylesheet" href="style/input-design.css" />
+        <link rel="stylesheet" href="style/tree-design.css" />
+        <link rel="stylesheet" href="style/icons2.css" />
+
+        <script type="module" src="main.js"></script>
+    </head>
+    <body>
+        <div class="header">
+            <div class="search-container" style="position: relative">
+                <div class="path-plus">
+                    <div id="access-widged"></div>
+                    <input type="text" name="path" id="path" autocomplete="off" />
+                </div>
+
+                <div class="suggestions-block">
+                    <div id="pre-suggestions"></div>
+                    <div id="suggestions-box" class="suggestions"></div>
+                </div>
+            </div>
+
+            <div class="tree-root" class="temp">
+                <div id="total-size"></div>
+                <div id="lock-widget" class="hidden"></div>
+                <button id="cancel">Abort</button>
+            </div>
+        </div>
+
+        <div id="tree"></div>
+    </body>
+</html>

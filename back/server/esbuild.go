@@ -18,6 +18,7 @@ func useEsbuild(w http.ResponseWriter, r *http.Request) {
 		Bundle:      true,
 		Write:       false,
 		Target:      api.ESNext,
+		Sourcemap:   api.SourceMapInline,
 	})
 
 	if len(result.Errors) > 0 {

@@ -1,0 +1,78 @@
+:root {
+    /* --temp-color: #00f; */
+    --temp-color: #666;
+}
+
+body {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    /* gap: 0.1em; */
+    height: 100vh;
+}
+
+@keyframes wave-pulse {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.2;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+/* tree design */
+#total-size {
+    z-index: 100;
+}
+
+#tree {
+    overflow: auto;
+}
+
+ul.dir-content {
+    list-style-type: none;
+    min-height: 0.9em;
+    padding: 0.2em 0 1px;
+    /* max-height: 150vh;
+    overflow: auto;
+    overflow: hidden; */
+}
+
+.dir-content .dir-content {
+    margin-left: 0.9em;
+}
+
+li {
+    border: none;
+    position: relative;
+    margin: 0 0 0.2em 0;
+}
+
+.fd-entry {
+    display: grid;
+    grid-template-columns: 1.3em auto;
+    gap: 0;
+    /* background-color: aliceblue; */
+}
+
+/* .fd-type {
+    text-align: center;
+    background-color: white;
+} */
+
+.fd-details {
+    display: grid;
+    grid-template-columns: 4em auto;
+    gap: 1em;
+    position: relative;
+    background-color: aliceblue;
+}
+
+/* .temp { */
+.temp > * > * > .fd-size {
+    /* animation: wave-pulse 2s infinite ease-in-out; */
+    /* opacity: 0.4; */
+    color: var(--temp-color);
+}

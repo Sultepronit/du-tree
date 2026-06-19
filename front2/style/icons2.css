@@ -1,0 +1,137 @@
+:root {
+    --temp-dir-icon: url("icons/folder-sync.svg");
+    /* --temp-dir-icon: url("icons/folder-x.svg"); */
+}
+
+/* path iput -------------------- */
+
+#access-widged.locked::before {
+    content: "";
+    display: inline-block;
+    width: 1.2em;
+    height: 1em;
+    /* margin-left: -0.3em; */
+    margin: 0.1em 0 0 -0.3em;
+    background-color: red;
+    mask-size: contain;
+    -webkit-mask-size: contain;
+    mask-repeat: no-repeat;
+    -webkit-mask-repeat: no-repeat;
+    mask-image: url("icons/lock.svg");
+    -webkit-mask-image: url("icons/lock.svg");
+}
+
+#suggestions-box {
+    padding-left: 1.2em;
+}
+
+.suggestion {
+    position: relative;
+}
+
+.suggestion::before {
+    content: "";
+    display: inline-block;
+    width: 1.2em;
+    height: 1em;
+    background-color: black;
+
+    mask-repeat: no-repeat;
+    -webkit-mask-repeat: no-repeat;
+    mask-size: contain;
+    -webkit-mask-size: contain;
+    mask-image: url("icons/folder.svg");
+    -webkit-mask-image: url("icons/folder.svg");
+
+    position: absolute;
+    left: -1.1em;
+    z-index: 2;
+}
+
+.suggestion.locked::before {
+    background-color: red;
+    mask-image: url("icons/folder-lock.svg");
+    -webkit-mask-image: url("icons/folder-lock.svg");
+}
+
+.suggestion.link::before {
+    background-color: #00acff;
+    mask-image: url("icons/folder-link.svg");
+    -webkit-mask-image: url("icons/folder-link.svg");
+}
+
+.suggestion.locked.link::before {
+    background-color: red;
+}
+
+/* tree design ----------------------- */
+
+.locked.itself {
+    color: red;
+}
+
+.locked.itself .td {
+    background-color: red;
+}
+
+.fd-type {
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: contain;
+    /* mask-size: contain; */
+    mask-size: 90% 90%;
+}
+
+.fd-type.td {
+    cursor: pointer;
+}
+
+.td {
+    background-color: black;
+    /* background-color: yellow; */
+    mask-image: url("icons/folder.svg");
+    -webkit-mask-image: url("icons/folder.svg");
+    /* background: url("icons/folder.svg") no-repeat center; */
+}
+
+.temp > * > .td {
+    background-color: var(--temp-color);
+    mask-image: var(--temp-dir-icon);
+    -webkit-mask-image: var(--temp-dir-icon);
+}
+
+.locked > * > .td {
+    mask-image: url("icons/folder-lock.svg");
+    -webkit-mask-image: url("icons/folder-lock.svg");
+}
+
+.td.unfold {
+    mask-image: url("icons/folder-open.svg");
+    -webkit-mask-image: url("icons/folder-open.svg");
+}
+
+.t- {
+    background-color: gray;
+    mask-image: url("icons/file.svg");
+    -webkit-mask-image: url("icons/file.svg");
+    /* color: gray; */
+    /* background: url("icons/file.svg") no-repeat center; */
+}
+
+.tL- {
+    background-color: #00acff;
+    mask-image: url("icons/file-link.svg");
+    -webkit-mask-image: url("icons/file-link.svg");
+}
+
+.tLd {
+    background-color: #00acff;
+    mask-image: url("icons/folder-link.svg");
+    -webkit-mask-image: url("icons/folder-link.svg");
+}
+
+.tLbrk {
+    background-color: #ff71c7;
+    mask-image: url("icons/link-2-off.svg");
+    -webkit-mask-image: url("icons/link-2-off.svg");
+}
