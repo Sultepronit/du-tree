@@ -4,6 +4,7 @@ export type DataNode = {
     size: number
     sizeIsTemp?: boolean
     locked?: number
+    linkPath?: string
     content?: DataNode[]
 }
 

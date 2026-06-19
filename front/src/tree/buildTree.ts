@@ -24,75 +24,74 @@ function genLockedDetails(node: DataNode) {
     return re
 }
 
-function createLi(node: DataNode, prePath: string): string {
-    let realPath: string
-    let isBrokenLink = false
-    if (node.type == "L") {
-        const parts = node.name.split("/")
-        node.name = parts[0]
-        realPath = parts.slice(2).join("/")
-        node.type += parts[1]
-        if (parts[1] === "brk") isBrokenLink = true
+function genTitle(data: DataNode, path: string) {
+    if (data.type[0] === "L" && !data.linkPath) {
+        const split = data.name.indexOf("/")
+        data.linkPath = data.name.slice(split + 1)
+        data.name = data.name.slice(0, split)
     }
 
-    const title = [`Path: ${prePath ? prePath + "/" : "Root"}`, `Name: ${node.name}`]
-    if (realPath) {
-        title.push(isBrokenLink ? "Broken link to: " + realPath : "Link to: " + realPath)
-    } else if (node.locked) {
-        title.push(...genLockedDetails(node))
+    const title = [`Path: ${path ? path + "/" : "Root"}`, `Name: ${data.name}`]
+    if (data.linkPath) {
+        title.push(`${data.type === "Lbrk" ? "Broken link to:" : "Link to:"} ${data.linkPath}`)
+    } else if (data.locked) {
+        title.push(...genLockedDetails(data))
     }
+    return title.join("\n")
+}
 
+function createLi(data: DataNode, path: string): string {
     const classes = ["shoot"]
-    if (node.locked) {
+    if (data.locked) {
         classes.push("locked")
-        if (node.locked === -1) classes.push("itself")
+        if (data.locked === -1) classes.push("itself")
     }
-    if (node.sizeIsTemp) classes.push("temp")
+    if (data.sizeIsTemp) classes.push("temp")
 
     return `<li><div
             class="${classes.join(" ")}"
-            data-path="${prePath}" 
-            data-name="${node.name}"
-            style="--size: ${node.size}%"
+            data-path="${path}" 
+            data-name="${data.name}"
+            style="--size: ${data.size}%"
         >
-            <div class="fd-entry" title="${title.join("\n")}">
-                <div class="fd-type t${node.type}"></div>
+            <div class="fd-entry" title="${genTitle(data, path)}">
+                <div class="fd-type t${data.type}"></div>
                 <div class="fd-details">
                     <div class="fd-sizebar"></div>
-                    <div class="fd-size" title="${node.size} B">${handleBytes(node.size)}</div>
-                    <div class="fd-name">${node.name}</div>
+                    <div class="fd-size" title="${data.size} B">${handleBytes(data.size)}</div>
+                    <div class="fd-name">${data.name}</div>
                 </div>
             </div>
     </div></li>`
 }
 
-export function createBranch(node: DataNode, prePath: string): DocumentFragment {
+export function createBranch(data: DataNode, prePath: string): DocumentFragment {
     // if (!node.content) return
-    if (!node.content) {
+    if (!data.content) {
         const templ = document.createElement("template")
         templ.innerHTML = `<ul class="dir-content"></ul>`
 
         return templ.content
     }
-    const path = prePath ? `${prePath}/${node.name}` : node.name
+    const path = prePath ? `${prePath}/${data.name}` : data.name
 
     // node.content.sort((a, b) => b.size - a.size)
-    if (node.content[0].size > max) {
-        max = node.content[0].size
+    if (data.content[0].size > max) {
+        max = data.content[0].size
         document.documentElement.style.setProperty("--max-size", (max / 100).toString())
     }
 
     // const first100 = node.content.slice(0, 100)
 
-    if (node.sizeIsTemp) {
+    if (data.sizeIsTemp) {
         branches2[path] = {
             // dataShoots: new Map(first100.map(s => [s.name, s]))
-            dataShoots: new Map(node.content.map(s => [s.name, s]))
+            dataShoots: new Map(data.content.map(s => [s.name, s]))
         }
         console.log("branches2", branches2)
     }
 
-    const lis = node.content.map(entry => createLi(entry, path)).join("")
+    const lis = data.content.map(entry => createLi(entry, path)).join("")
     // const lis = first100.map(entry => createLi(entry, path)).join("")
     const templ = document.createElement("template")
     // console.log(templ)
@@ -101,7 +100,7 @@ export function createBranch(node: DataNode, prePath: string): DocumentFragment 
     return templ.content
 }
 
-function updateShootTitle(elNode: ElNode, oldD: DataNode, newD: DataNode) {
+function updateLocked(elNode: ElNode, oldD: DataNode, newD: DataNode) {
     if (oldD.locked === newD.locked) return
     if (!elNode.entry) elNode.entry = elNode.shoot.querySelector(".fd-entry")
 
@@ -109,13 +108,11 @@ function updateShootTitle(elNode: ElNode, oldD: DataNode, newD: DataNode) {
     const details = genLockedDetails(newD).join("\n")
     if (newD.locked === -1) {
         elNode.shoot.classList.add("itself")
-        // if (!elNode.entry.title.includes("You have no")) {
-        //     elNode.entry.title += "\n" + details
-        // }
         elNode.entry.title += "\n" + details
     } else {
-        const base = elNode.entry.title.split("\nContains ")[0]
-        elNode.entry.title = base + "\n" + details
+        // const base = elNode.entry.title.split("\nContains ")[0]
+        // elNode.entry.title = base + "\n" + details
+        elNode.entry.title = genTitle(newD, elNode.shoot.dataset.path)
     }
 }
 
@@ -132,17 +129,24 @@ function updateShootSize(elNode: ElNode, oldD: DataNode | null, newD: DataNode) 
     else elNode.shoot.classList.remove("temp")
 }
 
+function resetTitle(elNode: ElNode, data: DataNode) {
+    if (!elNode.entry) elNode.entry = elNode.shoot.querySelector(".fd-entry")
+    elNode.entry.title = genTitle(data, elNode.shoot.dataset.path)
+}
+
 function resetShoot(elNode: ElNode, data: DataNode) {
     delete elNode.shoot.dataset.nested
     // delete elNode.shoot.dataset.unfolded
     elNode.shoot.className = "shoot"
     elNode.shoot.querySelector("ul")?.remove() // remove the branch too?
 
+    if (data.locked) elNode.shoot.classList.add("locked")
     elNode.shoot.dataset.name = data.name
     elNode.shoot.querySelector(".fd-name").textContent = data.name
     elNode.shoot.querySelector(".fd-type").className = `fd-type t${data.type}`
 
     updateShootSize(elNode, null, data)
+    resetTitle(elNode, data)
 }
 
 const pageSize = 100
@@ -197,13 +201,14 @@ async function updateBranch(branchUpdate: DataNode) {
             }
 
             updateShootSize(elNode, old, data)
-            updateShootTitle(elNode, old, data)
+            updateLocked(elNode, old, data)
         }
     })
     // console.log(store.childNodes)
     // reset shoots
     actual.forEach((data, i) => {
         if (!branch.dataShoots.has(data.name)) {
+            console.log("reset:", data.name)
             let shootEl = branch.ul.childNodes[i].childNodes[0] as HTMLElement
             if (!shootEl) {
                 shootEl = store.firstElementChild as HTMLElement
@@ -214,7 +219,7 @@ async function updateBranch(branchUpdate: DataNode) {
             branch.elShoots.set(data.name, elNode)
 
             resetShoot(elNode, data)
-            console.log("reset")
+            // console.log("reset")
         }
     })
     branch.ul.style.display = ""

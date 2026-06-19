@@ -1,2 +1,4 @@
 work with the hard links
 make sure that reset of shoot is total & clean!
+refactor symlinks structure
+make unfolded dirs persistent in the output
