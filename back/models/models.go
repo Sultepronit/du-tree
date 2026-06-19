@@ -7,10 +7,8 @@ type PathDetail struct {
 }
 
 type Path struct {
-	Current string `json:"current"`
-	// Next    []string `json:"next"`
-	Next []PathDetail `json:"next"`
-	// Msg  string       `json:"msg"`
+	Current string       `json:"current"`
+	Next    []PathDetail `json:"next"`
 }
 
 type Request struct {
@@ -25,5 +23,6 @@ type Node struct {
 	Size       int64   `json:"size"`
 	SizeIsTemp bool    `json:"sizeIsTemp,omitempty"`
 	Locked     int     `json:"locked,omitempty"`
+	LinkPath   string  `json:"linkPath,omitempty"`
 	Content    []*Node `json:"content,omitempty"`
 }

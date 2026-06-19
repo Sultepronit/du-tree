@@ -24,7 +24,8 @@ func ReadDir(path string) ([]*models.Node, error) {
 			typ, realPath := getRealEntity(path, node.Name)
 			// node.Name += "/" + typ + "/" + realPath
 			node.Type += typ
-			node.Name += "/" + realPath
+			// node.Name += "/" + realPath
+			node.LinkPath = realPath
 		}
 		info, err := e.Info()
 		if err != nil {

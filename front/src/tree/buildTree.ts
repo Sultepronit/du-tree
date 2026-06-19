@@ -25,12 +25,6 @@ function genLockedDetails(node: DataNode) {
 }
 
 function genTitle(data: DataNode, path: string) {
-    if (data.type[0] === "L" && !data.linkPath) {
-        const split = data.name.indexOf("/")
-        data.linkPath = data.name.slice(split + 1)
-        data.name = data.name.slice(0, split)
-    }
-
     const title = [`Path: ${path ? path + "/" : "Root"}`, `Name: ${data.name}`]
     if (data.linkPath) {
         title.push(`${data.type === "Lbrk" ? "Broken link to:" : "Link to:"} ${data.linkPath}`)
@@ -81,18 +75,14 @@ export function createBranch(data: DataNode, prePath: string): DocumentFragment 
         document.documentElement.style.setProperty("--max-size", (max / 100).toString())
     }
 
-    // const first100 = node.content.slice(0, 100)
-
     if (data.sizeIsTemp) {
         branches2[path] = {
-            // dataShoots: new Map(first100.map(s => [s.name, s]))
             dataShoots: new Map(data.content.map(s => [s.name, s]))
         }
         console.log("branches2", branches2)
     }
 
     const lis = data.content.map(entry => createLi(entry, path)).join("")
-    // const lis = first100.map(entry => createLi(entry, path)).join("")
     const templ = document.createElement("template")
     // console.log(templ)
     templ.innerHTML = `<ul class="dir-content" data-path="${path}">${lis}</ul>`
@@ -110,8 +100,6 @@ function updateLocked(elNode: ElNode, oldD: DataNode, newD: DataNode) {
         elNode.shoot.classList.add("itself")
         elNode.entry.title += "\n" + details
     } else {
-        // const base = elNode.entry.title.split("\nContains ")[0]
-        // elNode.entry.title = base + "\n" + details
         elNode.entry.title = genTitle(newD, elNode.shoot.dataset.path)
     }
 }
@@ -140,7 +128,11 @@ function resetShoot(elNode: ElNode, data: DataNode) {
     elNode.shoot.className = "shoot"
     elNode.shoot.querySelector("ul")?.remove() // remove the branch too?
 
-    if (data.locked) elNode.shoot.classList.add("locked")
+    if (data.locked) {
+        elNode.shoot.classList.add("locked")
+        if (data.locked === -1) elNode.shoot.classList.add("itself")
+    }
+
     elNode.shoot.dataset.name = data.name
     elNode.shoot.querySelector(".fd-name").textContent = data.name
     elNode.shoot.querySelector(".fd-type").className = `fd-type t${data.type}`
@@ -163,6 +155,14 @@ async function updateBranch(branchUpdate: DataNode) {
 
     const actual = [...mix.values()].sort((a, b) => b.size - a.size).slice(0, pageSize)
     console.log("actual", actual)
+
+    if (branchUpdate.name === "") {
+        if (actual[0].size != max) {
+            // if (actual[0].size > max) { // works bad if recalculation gives less sum
+            max = actual[0].size
+            document.documentElement.style.setProperty("--max-size", (max / 100).toString())
+        }
+    }
 
     if (!branch.ul) {
         branch.ul = treeBlock.querySelector(`ul[data-path="${branchUpdate.name}"]`)
@@ -230,16 +230,8 @@ async function updateBranch(branchUpdate: DataNode) {
 }
 
 export function updateTree(bNodes: DataNode[]) {
-    const root = bNodes[0]
-    updateTreeRoot(root)
-    if (!root.content) return
-
-    root.content.sort((a, b) => b.size - a.size)
-    if (root.content[0].size != max) {
-        // if (root.content[0].size > max) { // works bad if recalculation gives less sum
-        max = root.content[0].size
-        document.documentElement.style.setProperty("--max-size", (max / 100).toString())
-    }
+    updateTreeRoot(bNodes[0])
+    if (!bNodes[0].content) return
 
     for (const b of bNodes) {
         updateBranch(b)
@@ -268,7 +260,6 @@ function updateTreeRoot(data: DataNode) {
 export async function rebuildTree(data: DataNode) {
     removeCanceled()
     treeBlock.innerHTML = ""
-    // totalSize.parentElement.classList.add("temp")
     max = 1
     branches2 = {}
 
