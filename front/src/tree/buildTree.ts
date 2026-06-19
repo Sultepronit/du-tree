@@ -6,6 +6,8 @@ const totalLocked = document.getElementById("lock-widget") as HTMLDivElement
 const statePannel = totalSize.parentElement
 const treeBlock = document.getElementById("tree")!
 
+const pageSize = 100
+
 let max = 1
 
 let canceled = false
@@ -82,10 +84,13 @@ export function createBranch(data: DataNode, prePath: string): DocumentFragment 
         console.log("branches2", branches2)
     }
 
-    const lis = data.content.map(entry => createLi(entry, path)).join("")
+    const lis = data.content.map(entry => createLi(entry, path))
+    if (data.contentCount) {
+        lis.push(`<li class="fd-more">Next ${pageSize} of ${data.contentCount}</li>`)
+    }
     const templ = document.createElement("template")
     // console.log(templ)
-    templ.innerHTML = `<ul class="dir-content" data-path="${path}">${lis}</ul>`
+    templ.innerHTML = `<ul class="dir-content" data-path="${path}">${lis.join("")}</ul>`
 
     return templ.content
 }
@@ -141,7 +146,6 @@ function resetShoot(elNode: ElNode, data: DataNode) {
     resetTitle(elNode, data)
 }
 
-const pageSize = 100
 async function updateBranch(branchUpdate: DataNode) {
     // if (!branchUpdate.content) return // are there such cases?
 

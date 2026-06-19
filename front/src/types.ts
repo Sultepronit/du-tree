@@ -6,6 +6,7 @@ export type DataNode = {
     locked?: number
     linkPath?: string
     content?: DataNode[]
+    contentCount?: number
 }
 
 export type ElNode = {

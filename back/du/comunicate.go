@@ -68,7 +68,13 @@ func GetDir(path string) (*models.Node, error) {
 	})
 
 	// dure.Content = baceCont[:100]
-	dure.Content = helpers.LimitSlice(baceCont, 100)
+	// dure.Content = helpers.LimitSlice(baceCont, 100)
+	if len(baceCont) > 100 {
+		dure.Content = baceCont[:100]
+		dure.ContentCount = len(baceCont)
+	} else {
+		dure.Content = baceCont
+	}
 
 	return dure, nil
 }

@@ -18,11 +18,12 @@ type Request struct {
 }
 
 type Node struct {
-	Name       string  `json:"name"`
-	Type       string  `json:"type"`
-	Size       int64   `json:"size"`
-	SizeIsTemp bool    `json:"sizeIsTemp,omitempty"`
-	Locked     int     `json:"locked,omitempty"`
-	LinkPath   string  `json:"linkPath,omitempty"`
-	Content    []*Node `json:"content,omitempty"`
+	Name         string  `json:"name"`
+	Type         string  `json:"type"`
+	Size         int64   `json:"size"`
+	SizeIsTemp   bool    `json:"sizeIsTemp,omitempty"`
+	Locked       int     `json:"locked,omitempty"`
+	LinkPath     string  `json:"linkPath,omitempty"`
+	Content      []*Node `json:"content,omitempty"`
+	ContentCount int     `json:"contentCount,omitempty"`
 }
