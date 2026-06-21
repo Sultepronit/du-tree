@@ -15,6 +15,7 @@ type Request struct {
 	Path   string   `json:"path"`
 	InitDu bool     `json:"initDu"`
 	Comm   []string `json:"command"`
+	Pages  int      `json:"pages"`
 }
 
 type Node struct {

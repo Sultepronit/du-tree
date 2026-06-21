@@ -19,4 +19,5 @@ export type UpdateBranch = {
     dataShoots: Map<string, DataNode>
     elShoots?: Map<string, ElNode>
     ul?: HTMLUListElement
+    pages?: number
 }

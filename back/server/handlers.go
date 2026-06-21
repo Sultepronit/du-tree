@@ -59,7 +59,7 @@ func handleDir(w http.ResponseWriter, r *http.Request) {
 
 	// sendResult(w, req)
 	// re, err := explorer.ReadDir(req.Path)
-	re, err := du.GetDir(req.Path)
+	re, err := du.GetDir(req.Path, req.Pages)
 	if err != nil { // temp!
 		// log.Fatal(err)
 		log.Println(err)

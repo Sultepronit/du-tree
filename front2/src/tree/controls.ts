@@ -1,7 +1,7 @@
 import { doFetch } from "../api/fetch"
 
 import type { DataNode } from "../types"
-import { createBranch, rebuildTree, setCanceled, updateTree } from "./buildTree"
+import { appendBranch, createBranch, rebuildTree, setCanceled, updateTree } from "./buildTree"
 
 let rootPath = ""
 
@@ -14,7 +14,8 @@ export async function initTree(path: string) {
     const data = (await doFetch("/dir", {
         path,
         initDu: true,
-        command
+        command,
+        pages: 1
     })) as DataNode
 
     console.log(data)
@@ -56,7 +57,7 @@ function initUpdate() {
 }
 
 function addUpdates(data: DataNode, path: string, dirname: string) {
-    console.log(updateInterval, data.sizeIsTemp)
+    // console.log(updateInterval, data.sizeIsTemp)
     if (updateInterval > 0 && data.sizeIsTemp) {
         updateBranches.push(path ? `${path}/${dirname}` : dirname)
     }
@@ -67,10 +68,25 @@ function removeUpdates(results: DataNode[]) {
     // remove branch on DOM manipulations side!
 }
 
+async function addMore(button: HTMLButtonElement) {
+    console.log(button)
+    // const path = button.dataset.path ? `${rootPath}${button.dataset.path}/` : rootPath
+    const path = rootPath + button.dataset.path
+    const pages = Number(button.dataset.pages) + 1
+    const data = (await doFetch("/dir", { path, pages })) as DataNode
+    console.log(data)
+    // button.insertAdjacentHTML
+    // const oldNodesCount = (pages - 1 ) * page
+    // const newNodes = data.content.slice()
+    appendBranch(data, button, pages)
+}
+
 document.getElementById("tree").addEventListener("click", async e => {
-    const target = e.target as HTMLDivElement
+    const target = e.target as HTMLDivElement | HTMLButtonElement
     // console.log(target)
     // if (!target.dataset.dir) return
+    if (target instanceof HTMLButtonElement && target.name === "add-more") addMore(target)
+
     if (!target.classList.contains("td")) return
 
     const shoot = target.closest("div.shoot") as HTMLDivElement
@@ -83,7 +99,7 @@ document.getElementById("tree").addEventListener("click", async e => {
 
         target.classList.add("unfold")
 
-        const data = (await doFetch("/dir", { path: fullPath })) as DataNode
+        const data = (await doFetch("/dir", { path: fullPath, pages: 1 })) as DataNode
         console.log(data)
 
         addUpdates(data, dataset.path, dataset.name)

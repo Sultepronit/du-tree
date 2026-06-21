@@ -79,20 +79,49 @@ export function createBranch(data: DataNode, prePath: string): DocumentFragment 
 
     if (data.sizeIsTemp) {
         branches2[path] = {
-            dataShoots: new Map(data.content.map(s => [s.name, s]))
+            dataShoots: new Map(data.content.map(s => [s.name, s])),
+            pages: 1
         }
         console.log("branches2", branches2)
     }
 
     const lis = data.content.map(entry => createLi(entry, path))
     if (data.contentCount) {
-        lis.push(`<li class="fd-more">Next ${pageSize} of ${data.contentCount}</li>`)
+        lis.push(`<li class="fd-more" title="${path ? path + "/" : "Root"}">
+            <span class="so-far">${data.content.length}</span>/${data.contentCount}
+            <button name="add-more" data-path="${path}" data-pages="1">
+                Show more
+            </button>
+        </li>`)
     }
     const templ = document.createElement("template")
     // console.log(templ)
     templ.innerHTML = `<ul class="dir-content" data-path="${path}">${lis.join("")}</ul>`
 
     return templ.content
+}
+
+export function appendBranch(data: DataNode, button: HTMLButtonElement, pages: number) {
+    const oldNodesCount = (pages - 1) * pageSize
+    const newNodes = data.content.slice(oldNodesCount)
+    console.log(oldNodesCount, newNodes)
+
+    const shortPath = button.dataset.path
+    const lis = newNodes.map(entry => createLi(entry, shortPath))
+
+    const li = button.closest("li") as HTMLLIElement
+
+    updateBranch(data) // update old pages
+    li.insertAdjacentHTML("beforebegin", lis.join("")) // add new one
+    branches2[shortPath].pages = pages
+
+    if (!data.contentCount) {
+        li.remove()
+        return
+    }
+    button.dataset.pages = pages.toString()
+    const soFar = li.querySelector(".so-far")
+    soFar.textContent = (pages * pageSize).toString()
 }
 
 function updateLocked(elNode: ElNode, oldD: DataNode, newD: DataNode) {
@@ -157,7 +186,8 @@ async function updateBranch(branchUpdate: DataNode) {
     const mix = new Map(branch.dataShoots)
     branchUpdate.content.forEach(s => mix.set(s.name, s))
 
-    const actual = [...mix.values()].sort((a, b) => b.size - a.size).slice(0, pageSize)
+    const count = pageSize * branch.pages
+    const actual = [...mix.values()].sort((a, b) => b.size - a.size).slice(0, count)
     console.log("actual", actual)
 
     if (branchUpdate.name === "") {
@@ -191,7 +221,15 @@ async function updateBranch(branchUpdate: DataNode) {
             // if (!branch.elNodes.get(data.name)) {
             //     console.log(data)
             // }
-            const elNode = branch.elShoots.get(data.name)
+            let elNode = branch.elShoots.get(data.name)
+            if (!elNode) {
+                const shoot = branch.ul.querySelector(
+                    `.shoot[data-name="${data.name}"]`
+                ) as HTMLDivElement
+                console.log(shoot)
+                elNode = { shoot }
+                branch.elShoots.set(data.name, elNode)
+            }
             const shootEl = elNode.shoot
             const liCont = branch.ul.childNodes[i].childNodes[0]
 
@@ -212,18 +250,22 @@ async function updateBranch(branchUpdate: DataNode) {
     // reset shoots
     actual.forEach((data, i) => {
         if (!branch.dataShoots.has(data.name)) {
-            console.log("reset:", data.name)
+            // console.log("reset:", data.name)
             let shootEl = branch.ul.childNodes[i].childNodes[0] as HTMLElement
             if (!shootEl) {
-                shootEl = store.firstElementChild as HTMLElement
+                shootEl = store.firstElementChild as HTMLDivElement
                 branch.ul.childNodes[i].appendChild(shootEl)
             }
-            const elNode = branch.elShoots.get(shootEl.dataset.name)
+            const elNode =
+                branch.elShoots.get(shootEl.dataset.name) ||
+                ({
+                    shoot: shootEl
+                } as ElNode)
             branch.elShoots.delete(shootEl.dataset.name)
             branch.elShoots.set(data.name, elNode)
 
             resetShoot(elNode, data)
-            // console.log("reset")
+            console.log("reset")
         }
     })
     branch.ul.style.display = ""

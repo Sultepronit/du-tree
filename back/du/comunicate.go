@@ -18,7 +18,9 @@ func genfSizePath(basePath []string) []string {
 	return fSizePath
 }
 
-func GetDir(path string) (*models.Node, error) {
+var pageSize = 100
+
+func GetDir(path string, pages int) (*models.Node, error) {
 	baceCont, err := explorer.ReadDir(path)
 	if err != nil {
 		return nil, err
@@ -69,8 +71,9 @@ func GetDir(path string) (*models.Node, error) {
 
 	// dure.Content = baceCont[:100]
 	// dure.Content = helpers.LimitSlice(baceCont, 100)
-	if len(baceCont) > 100 {
-		dure.Content = baceCont[:100]
+	contLen := pageSize * pages
+	if len(baceCont) > contLen {
+		dure.Content = baceCont[:contLen]
 		dure.ContentCount = len(baceCont)
 	} else {
 		dure.Content = baceCont
