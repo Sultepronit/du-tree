@@ -93,24 +93,24 @@ func checkCancel() bool {
 
 // func GetUpdate() *models.Node {
 // func GetUpdate() []*models.Node {
-func GetUpdate0(reqPaths []string) []*models.Node {
-	if checkCancel() {
-		return nil
-	}
-	// re := make([]*models.Node, len(updatePaths))
-	re := make([]*models.Node, len(reqPaths)+1)
-	// updatePaths := make([]string, 0, len(reqPaths)+1)
-	// updatePaths[0] = "",
-	// updatePaths = append(updatePaths, )
-	re[0] = tree.getDir("")
-	// for i, p := range updatePaths {
-	for i, p := range reqPaths {
-		// fmt.Println(p)
-		re[i+1] = tree.getDir(p)
-	}
+// func GetUpdate0(reqPaths []string) []*models.Node {
+// 	if checkCancel() {
+// 		return nil
+// 	}
+// 	// re := make([]*models.Node, len(updatePaths))
+// 	re := make([]*models.Node, len(reqPaths)+1)
+// 	// updatePaths := make([]string, 0, len(reqPaths)+1)
+// 	// updatePaths[0] = "",
+// 	// updatePaths = append(updatePaths, )
+// 	re[0] = tree.getDir("")
+// 	// for i, p := range updatePaths {
+// 	for i, p := range reqPaths {
+// 		// fmt.Println(p)
+// 		re[i+1] = tree.getDir(p)
+// 	}
 
-	return re
-}
+// 	return re
+// }
 
 func GetUpdate(reqPaths []string) []*models.Node {
 	if checkCancel() {
@@ -119,11 +119,11 @@ func GetUpdate(reqPaths []string) []*models.Node {
 
 	updatePaths := append([]string{""}, reqPaths...)
 	re := make([]*models.Node, len(updatePaths))
-	re[0] = tree.getDir("")
+	// re[0] = tree.getDir("")
 	for i, p := range updatePaths {
 		// fmt.Println(p)
-		// re[i] = tree.getDir(p)
 		re[i] = tree.getDir(p)
+		re[i].Name = p
 
 		sort.Slice(re[i].Content, func(a, b int) bool {
 			return re[i].Content[a].Size > re[i].Content[b].Size

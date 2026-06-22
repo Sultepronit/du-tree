@@ -75,9 +75,7 @@ async function addMore(button: HTMLButtonElement) {
     const pages = Number(button.dataset.pages) + 1
     const data = (await doFetch("/dir", { path, pages })) as DataNode
     console.log(data)
-    // button.insertAdjacentHTML
-    // const oldNodesCount = (pages - 1 ) * page
-    // const newNodes = data.content.slice()
+
     appendBranch(data, button, pages)
 }
 
