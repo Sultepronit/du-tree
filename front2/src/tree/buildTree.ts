@@ -77,7 +77,7 @@ export function createBranch(data: DataNode, prePath: string): DocumentFragment 
         document.documentElement.style.setProperty("--max-size", (max / 100).toString())
     }
 
-    if (data.sizeIsTemp) {
+    if (data.sizeIsTemp || data.contentCount) {
         branches2[path] = {
             dataShoots: new Map(data.content.map(s => [s.name, s])),
             pages: 1
@@ -113,7 +113,12 @@ export function appendBranch(data: DataNode, button: HTMLButtonElement, pages: n
 
     updateBranch(data) // update old pages
     li.insertAdjacentHTML("beforebegin", lis.join("")) // add new one
-    if (branches2[shortPath]) branches2[shortPath].pages = pages // for next updates
+    // if (branches2[shortPath]) branches2[shortPath].pages = pages // for next updates
+    const branch = branches2[shortPath]
+    if (branch) {
+        branch.pages = pages // for next updates
+        newNodes.forEach(d => branch.dataShoots.set(d.name, d))
+    }
 
     if (!data.contentCount) {
         li.remove()
@@ -226,7 +231,7 @@ async function updateBranch(branchUpdate: DataNode) {
                 const shoot = branch.ul.querySelector(
                     `.shoot[data-name="${data.name}"]`
                 ) as HTMLDivElement
-                console.log(shoot)
+                // console.log(shoot)
                 elNode = { shoot }
                 branch.elShoots.set(data.name, elNode)
             }

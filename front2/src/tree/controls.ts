@@ -10,6 +10,7 @@ export async function initTree(path: string) {
 
     const command = ["du", "-B", "1", "--exclude=/proc"]
     // const command = ["du", "-b", "--exclude=/proc"]
+    // const command = ["uutils-du", "-B", "1", "--exclude=/proc"]
 
     const data = (await doFetch("/dir", {
         path,
