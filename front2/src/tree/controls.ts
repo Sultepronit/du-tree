@@ -36,7 +36,8 @@ let updateInterval = 0
 // let updateBranches = [] as string[]
 let updateBranches = [] as { path: string; pages: number }[]
 function initUpdate() {
-    updateBranches = []
+    // updateBranches = []
+    updateBranches = [{ path: "", pages: 1 }]
     updateInterval = setInterval(async () => {
         const updates = await doFetch("/update", updateBranches)
         console.log(updates)
@@ -68,7 +69,8 @@ function addUpdates(data: DataNode, prePath: string, dirname: string) {
 }
 
 function removeUpdates(results: DataNode[]) {
-    updateBranches = updateBranches.filter((_, i) => !results[i + 1] || results[i + 1].sizeIsTemp)
+    // updateBranches = updateBranches.filter((_, i) => !results[i + 1] || results[i + 1].sizeIsTemp)
+    updateBranches = updateBranches.filter((_, i) => !results[i] || results[i].sizeIsTemp)
     // remove branch on DOM manipulations side!
 }
 
@@ -81,6 +83,12 @@ async function addMore(button: HTMLButtonElement) {
     console.log(data)
 
     appendBranch(data, button, pages)
+
+    const branch = updateBranches.find(b => b.path === button.dataset.path)
+    if (branch) branch.pages = pages
+    console.log(updateBranches)
+    console.log(branch)
+    console.log(path)
 }
 
 document.getElementById("tree").addEventListener("click", async e => {
