@@ -3,9 +3,10 @@ package explorer
 import (
 	"du-tree/models"
 	"os"
+	"syscall"
 )
 
-func ReadDir(path string) ([]*models.Node, error) {
+func ReadDir(path string, blockSizeReq bool) ([]*models.Node, error) {
 	re := make([]*models.Node, 0, 10)
 	entries, err := os.ReadDir(path)
 	if err != nil {
@@ -22,16 +23,23 @@ func ReadDir(path string) ([]*models.Node, error) {
 			continue
 		} else if node.Type == "L" {
 			typ, realPath := getRealEntity(path, node.Name)
-			// node.Name += "/" + typ + "/" + realPath
 			node.Type += typ
-			// node.Name += "/" + realPath
 			node.LinkPath = realPath
 		}
 		info, err := e.Info()
 		if err != nil {
 			return nil, err
 		}
-		node.Size = info.Size()
+		// node.Size = info.Size()
+		if blockSizeReq {
+			if stat, ok := info.Sys().(*syscall.Stat_t); ok {
+				// node.Size = stat.Blksize
+				node.Size = stat.Blocks * 512
+				// fmt.Println(stat.Blocks, stat.Blksize)
+			}
+		} else {
+			node.Size = info.Size()
+		}
 	}
 
 	return re, nil

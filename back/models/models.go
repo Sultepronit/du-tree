@@ -18,6 +18,11 @@ type Request struct {
 	Pages  int      `json:"pages"`
 }
 
+// type updateReq struct {
+// 	Path  string `json:"path"`
+// 	Pages int    `json:"pages"`
+// }
+
 type Node struct {
 	Name         string  `json:"name"`
 	Type         string  `json:"type"`

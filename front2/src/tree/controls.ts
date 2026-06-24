@@ -33,7 +33,8 @@ document.getElementById("cancel").addEventListener("click", async () => {
 })
 
 let updateInterval = 0
-let updateBranches = [] as string[]
+// let updateBranches = [] as string[]
+let updateBranches = [] as { path: string; pages: number }[]
 function initUpdate() {
     updateBranches = []
     updateInterval = setInterval(async () => {
@@ -57,10 +58,12 @@ function initUpdate() {
     }, 1000)
 }
 
-function addUpdates(data: DataNode, path: string, dirname: string) {
+function addUpdates(data: DataNode, prePath: string, dirname: string) {
     // console.log(updateInterval, data.sizeIsTemp)
     if (updateInterval > 0 && data.sizeIsTemp) {
-        updateBranches.push(path ? `${path}/${dirname}` : dirname)
+        const path = prePath ? `${prePath}/${dirname}` : dirname
+        // updateBranches.push(prePath ? `${prePath}/${dirname}` : dirname)
+        updateBranches.push({ path, pages: 1 })
     }
 }
 

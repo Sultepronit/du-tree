@@ -21,7 +21,8 @@ func genfSizePath(basePath []string) []string {
 var pageSize = 100
 
 func GetDir(path string, pages int) (*models.Node, error) {
-	baceCont, err := explorer.ReadDir(path)
+	baceCont, err := explorer.ReadDir(path, true)
+	// baceCont, err := explorer.ReadDir(path, false)
 	if err != nil {
 		return nil, err
 	}
