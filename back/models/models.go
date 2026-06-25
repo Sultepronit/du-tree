@@ -30,6 +30,7 @@ type Node struct {
 	SizeIsTemp   bool    `json:"sizeIsTemp,omitempty"`
 	Locked       int     `json:"locked,omitempty"`
 	LinkPath     string  `json:"linkPath,omitempty"`
+	Nlink        uint64  `json:"nlink,omitempty"`
 	Content      []*Node `json:"content,omitempty"`
 	ContentCount int     `json:"contentCount,omitempty"`
 }

@@ -2,6 +2,7 @@ package explorer
 
 import (
 	"du-tree/models"
+	"errors"
 	"os"
 	"syscall"
 )
@@ -30,13 +31,21 @@ func ReadDir(path string, blockSizeReq bool) ([]*models.Node, error) {
 		if err != nil {
 			return nil, err
 		}
-		// node.Size = info.Size()
+
+		stat, ok := info.Sys().(*syscall.Stat_t)
+		if !ok {
+			return nil, errors.New("no file info")
+		}
+		// fmt.Println(stat.Nlink, stat.Ino)
+		if stat.Nlink > 1 {
+			node.Nlink = stat.Nlink
+		}
+
 		if blockSizeReq {
-			if stat, ok := info.Sys().(*syscall.Stat_t); ok {
-				// node.Size = stat.Blksize
-				node.Size = stat.Blocks * 512
-				// fmt.Println(stat.Blocks, stat.Blksize)
-			}
+			// if stat, ok := info.Sys().(*syscall.Stat_t); ok {
+			// 	node.Size = stat.Blocks * 512
+			// }
+			node.Size = stat.Blocks * 512
 		} else {
 			node.Size = info.Size()
 		}
