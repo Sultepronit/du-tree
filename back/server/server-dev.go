@@ -3,19 +3,15 @@
 package server
 
 import (
-	"fmt"
+	"du-tree/jscss"
 	"log"
 	"net/http"
 )
 
-func handleHello(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.URL.Path, "as /")
-	fmt.Fprintln(w, "Hello there!")
-}
-
 func Start() {
-	prepareProxy()
-
+	// prepareProxy()
+	go jscss.StartCSSWhatcher("../front2/style")
+	http.HandleFunc("/sse-css", jscss.SseHandler)
 	http.HandleFunc("/user", checkUser)
 	http.HandleFunc("POST /path", checkPath)
 	http.HandleFunc("POST /dir", handleDir)
@@ -29,13 +25,11 @@ func Start() {
 	// 	proxy.ServeHTTP(w, r)
 	// })
 
-	http.HandleFunc("/main.js", useEsbuild)
-	http.HandleFunc("/main.ts", useEsbuild)
+	http.HandleFunc("/main.js", jscss.UseEsbuild)
+	// http.HandleFunc("/main.ts", useEsbuild)
 	fs := http.FileServer(http.Dir("../front2"))
-	// http.Handle("/dev", fs)
 	http.Handle("/", fs)
 
-	// http.HandleFunc("/", handleHello)
 	port := "51200"
 
 	log.Printf("Dev TS Server started at: %s\n", port)

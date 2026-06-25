@@ -75,6 +75,7 @@
 }
 
 .fd-type {
+    background-color: black;
     -webkit-mask-repeat: no-repeat;
     mask-repeat: no-repeat;
     -webkit-mask-size: contain;
@@ -87,11 +88,8 @@
 }
 
 .td {
-    background-color: black;
-    /* background-color: yellow; */
     mask-image: url("icons/folder.svg");
     -webkit-mask-image: url("icons/folder.svg");
-    /* background: url("icons/folder.svg") no-repeat center; */
 }
 
 .temp > * > .td {
@@ -111,11 +109,9 @@
 }
 
 .t- {
-    background-color: gray;
+    /* background-color: gray; */
     mask-image: url("icons/file.svg");
     -webkit-mask-image: url("icons/file.svg");
-    /* color: gray; */
-    /* background: url("icons/file.svg") no-repeat center; */
 }
 
 .tL- {

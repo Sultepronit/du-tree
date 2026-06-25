@@ -111,6 +111,7 @@ export function appendBranch(data: DataNode, button: HTMLButtonElement, pages: n
 
     const li = button.closest("li") as HTMLLIElement
 
+    data.name = shortPath
     updateBranch(data) // update old pages
     li.insertAdjacentHTML("beforebegin", lis.join("")) // add new one
     // if (branches2[shortPath]) branches2[shortPath].pages = pages // for next updates

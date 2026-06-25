@@ -86,9 +86,9 @@ async function addMore(button: HTMLButtonElement) {
 
     const branch = updateBranches.find(b => b.path === button.dataset.path)
     if (branch) branch.pages = pages
-    console.log(updateBranches)
-    console.log(branch)
-    console.log(path)
+    // console.log(updateBranches)
+    // console.log(branch)
+    // console.log(path)
 }
 
 document.getElementById("tree").addEventListener("click", async e => {

@@ -1,4 +1,4 @@
-package server
+package jscss
 
 import (
 	"fmt"
@@ -7,14 +7,14 @@ import (
 	"github.com/evanw/esbuild/pkg/api"
 )
 
-func useEsbuild(w http.ResponseWriter, r *http.Request) {
+func UseEsbuild(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
 	w.Header().Set("Pragma", "no-cache")
 	w.Header().Set("Expires", "0")
 	w.Header().Set("Content-Type", "application/javascript")
 
 	result := api.Build(api.BuildOptions{
-		EntryPoints: []string{"../front2/src/main.ts"},
+		EntryPoints: []string{"../front2/src/main-dev.ts"},
 		Bundle:      true,
 		Write:       false,
 		Target:      api.ESNext,
