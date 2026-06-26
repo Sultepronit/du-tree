@@ -30,6 +30,10 @@ function genTitle(data: DataNode, path: string) {
     const title = [`Path: ${path ? path + "/" : "Root"}`, `Name: ${data.name}`]
     if (data.linkPath) {
         title.push(`${data.type === "Lbrk" ? "Broken link to:" : "Link to:"} ${data.linkPath}`)
+    } else if (data.nlink) {
+        title.push(
+            `Shared inode: ${data.nlink} hard links exist. Size counted once to reflect actual disk usage.`
+        )
     } else if (data.locked) {
         title.push(...genLockedDetails(data))
     }
@@ -43,6 +47,7 @@ function createLi(data: DataNode, path: string): string {
         if (data.locked === -1) classes.push("itself")
     }
     if (data.sizeIsTemp) classes.push("temp")
+    if (data.nlink) classes.push("hardlink")
 
     return `<li><div
             class="${classes.join(" ")}"

@@ -131,3 +131,7 @@
     mask-image: url("icons/link-2-off.svg");
     -webkit-mask-image: url("icons/link-2-off.svg");
 }
+
+.hardlink .fd-type {
+    background-color: #00acff;
+}

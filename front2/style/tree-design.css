@@ -70,9 +70,16 @@ li {
     background-color: aliceblue;
 }
 
-/* .temp { */
 .temp > * > * > .fd-size {
     /* animation: wave-pulse 2s infinite ease-in-out; */
     /* opacity: 0.4; */
     color: var(--temp-color);
+}
+
+/* .hardlink > * > * > .fd-size {
+    color: #00acff;
+} */
+
+.hardlink .fd-size {
+    color: #00acff;
 }
