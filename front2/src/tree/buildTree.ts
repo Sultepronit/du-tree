@@ -32,7 +32,7 @@ function genTitle(data: DataNode, path: string) {
         title.push(`${data.type === "Lbrk" ? "Broken link to:" : "Link to:"} ${data.linkPath}`)
     } else if (data.nlink) {
         title.push(
-            `Shared inode: ${data.nlink} hard links exist. Size counted once to reflect actual disk usage.`
+            ` Shared inode: ${data.nlink} hard links exist.\n Size counted once to reflect actual disk usage.`
         )
     } else if (data.locked) {
         title.push(...genLockedDetails(data))

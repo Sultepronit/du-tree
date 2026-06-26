@@ -21,8 +21,15 @@ func genfSizePath(basePath []string) []string {
 var pageSize = 100
 
 func GetDir(path string, pages int) (*models.Node, error) {
-	baceCont, err := explorer.ReadDir(path, true)
+	// tree.mu.RLock()
+	// defer tree.mu.RUnlock()
+
+	// baceCont, err := explorer.ReadDir(path, true)
 	// baceCont, err := explorer.ReadDir(path, false)
+	tree.mu.RLock()
+	baceCont, err := explorer.ReadDir(path, tree.getBlockSize)
+	tree.mu.RUnlock()
+	// baceCont, err := explorer.ReadDir(path, getBlockSize)
 	if err != nil {
 		return nil, err
 	}
@@ -38,9 +45,10 @@ func GetDir(path string, pages int) (*models.Node, error) {
 	allParts := strings.Split(path, "/")
 	parts := allParts[discardIndex:]
 
-	fSizePath := genfSizePath(parts)
-	// log.Println(fSizePath)
-	tree.fill(fSizePath, fSize)
+	if fSize > 0 {
+		fSizePath := genfSizePath(parts)
+		tree.fill(fSizePath, fSize)
+	}
 
 	dure := tree.getDir(strings.Join(parts, "/"))
 	// log.Println("du.GetDir: dure", dure)

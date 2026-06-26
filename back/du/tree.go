@@ -8,9 +8,8 @@ import (
 )
 
 type rawNode struct {
-	Size int64 `json:"size"`
-	Temp bool  `json:"temp,omitempty"`
-	// Locked  bool                `json:"locked,omitempty"`
+	Size    int64               `json:"size"`
+	Temp    bool                `json:"temp,omitempty"`
 	Locked  int                 `json:"locked,omitempty"`
 	Content map[string]*rawNode `json:"content,omitempty"`
 }
@@ -26,21 +25,18 @@ func (n *rawNode) getSize() int64 {
 	return n.Size
 }
 
+var getBlockSize bool
+
 type treeStr struct {
-	mu sync.RWMutex
-	// cancel *context.CancelFunc
-	cancel context.CancelFunc
-	root   *rawNode
+	mu           sync.RWMutex
+	cancel       context.CancelFunc
+	getBlockSize bool
+	root         *rawNode
 }
 
 var tree treeStr
 
 func ResetTree() {
-	// tree = treeStr{
-	// 	root: &rawNode{
-	// 		Temp:    true,
-	// 		Content: make(map[string]*rawNode)},
-	// }
 	tree.mu.Lock()
 	defer tree.mu.Unlock()
 	tree.root = &rawNode{

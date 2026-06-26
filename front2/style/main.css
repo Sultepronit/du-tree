@@ -21,6 +21,12 @@ button {
     font: inherit;
 }
 
+input[type="checkbox"] {
+    /* height: 0.8em;
+    width: 0.8em; */
+    margin-right: -0.3em;
+}
+
 .hidden {
     display: none;
 }

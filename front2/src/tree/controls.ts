@@ -8,15 +8,17 @@ let rootPath = ""
 export async function initTree(path: string) {
     rootPath = path
 
-    const command = ["du", "-B", "1", "--exclude=/proc"]
-    // const command = ["du", "-b", "--exclude=/proc"]
+    // const command = ["du", "-B", "1", "--exclude=/proc"]
+    // const options = ["block-size"]
+    const command = ["du", "-b", "--exclude=/proc"]
+    const options = []
     // const command = ["uutils-du", "-B", "1", "--exclude=/proc"]
 
     const data = (await doFetch("/dir", {
         path,
-        initDu: true,
+        pages: 1,
         command,
-        pages: 1
+        options
     })) as DataNode
 
     console.log(data)

@@ -133,5 +133,5 @@
 }
 
 .hardlink .fd-type {
-    background-color: #00acff;
+    background-color: var(--hardlink-color);
 }

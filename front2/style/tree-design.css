@@ -1,6 +1,7 @@
 :root {
     /* --temp-color: #00f; */
     --temp-color: #666;
+    --hardlink-color: #00f;
 }
 
 body {
@@ -8,6 +9,11 @@ body {
     grid-template-rows: auto 1fr;
     /* gap: 0.1em; */
     height: 100vh;
+}
+
+.flex1 {
+    display: flex;
+    justify-content: space-between;
 }
 
 @keyframes wave-pulse {
@@ -81,5 +87,5 @@ li {
 } */
 
 .hardlink .fd-size {
-    color: #00acff;
+    color: var(--hardlink-color);
 }

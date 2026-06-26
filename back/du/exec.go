@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"os/exec"
+	"slices"
 	"strings"
 )
 
@@ -13,15 +14,11 @@ import (
 func doStart(path string, comm []string, ctx context.Context) error {
 	ResetTree()
 
-	// ctx, cancel := context.WithCancel(context.Background())
-	// defer cancel()
-
 	discardIndex = len(strings.Split(path, "/")) - 1
 
 	args := comm[1:]
 	args = append(args, path)
 
-	// cmd := exec.Command(comm[0], args...)
 	cmd := exec.CommandContext(ctx, comm[0], args...)
 	cmd.Env = append(cmd.Env, "LC_ALL=C")
 	// cmd.Env = append(os.Environ(), "LC_ALL=es_ES.UTF-8")
@@ -65,14 +62,7 @@ func doStart(path string, comm []string, ctx context.Context) error {
 	return nil
 }
 
-// var manager struct {
-// 	mu     sync.Mutex
-// 	cancel context.CancelFunc
-// }
-
-func Start(path string, comm []string) {
-	// manager.mu.Lock()
-	// defer manager.mu.Unlock()
+func Start(path string, comm []string, options []string) {
 	tree.mu.Lock()
 	defer tree.mu.Unlock()
 
@@ -81,10 +71,10 @@ func Start(path string, comm []string) {
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
-	// manager.cancel = cancel
 	tree.cancel = cancel
 
-	// if manager.cancel != nil {
+	tree.getBlockSize = slices.Contains(options, "block-size")
+	// getBlockSize = slices.Contains(options, "block-size")
 
 	go doStart(path, comm, ctx)
 }

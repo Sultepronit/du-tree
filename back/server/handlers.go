@@ -50,11 +50,10 @@ func handleDir(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Println(req)
 
-	if req.InitDu {
-		// go du.Init(req.Path)
-		// go du.Start(req.Path, req.Comm)
-		du.Start(req.Path, req.Comm)
-		time.Sleep(time.Millisecond * 100)
+	// if req.InitDu {
+	if req.Command != nil {
+		du.Start(req.Path, req.Command, req.Options)
+		time.Sleep(time.Millisecond * 10)
 	}
 
 	// sendResult(w, req)

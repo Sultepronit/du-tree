@@ -12,8 +12,10 @@ func Start() {
 	// prepareProxy()
 	go jscss.StartCSSWhatcher("../front2/style")
 	http.HandleFunc("/sse-css", jscss.SseHandler)
+
 	http.HandleFunc("/user", checkUser)
 	http.HandleFunc("POST /path", checkPath)
+	http.HandleFunc("POST /scan", handleDir)
 	http.HandleFunc("POST /dir", handleDir)
 	http.HandleFunc("POST /update", handleUpdate)
 	http.HandleFunc("/cancel", handleCancel)

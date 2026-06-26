@@ -12,10 +12,11 @@ type Path struct {
 }
 
 type Request struct {
-	Path   string   `json:"path"`
-	InitDu bool     `json:"initDu"`
-	Comm   []string `json:"command"`
-	Pages  int      `json:"pages"`
+	Path  string `json:"path"`
+	Pages int    `json:"pages"`
+	// InitDu bool     `json:"initDu"`
+	Command []string `json:"command"`
+	Options []string `json:"options"`
 }
 
 // type updateReq struct {
