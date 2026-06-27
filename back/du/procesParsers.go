@@ -1,7 +1,6 @@
 package du
 
 import (
-	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -10,7 +9,7 @@ import (
 var discardIndex int
 
 func parseErr(line string) {
-	fmt.Println("Unexpected line format:", line)
+	// fmt.Println("Unexpected line format:", line)
 	if strings.HasSuffix(line, "Permission denied") {
 		// log.Println(line)
 		startIdx := strings.Index(line, "'")

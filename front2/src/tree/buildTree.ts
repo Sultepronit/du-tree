@@ -170,13 +170,15 @@ function resetTitle(elNode: ElNode, data: DataNode) {
 function resetShoot(elNode: ElNode, data: DataNode) {
     delete elNode.shoot.dataset.nested
     // delete elNode.shoot.dataset.unfolded
-    elNode.shoot.className = "shoot"
+    // elNode.shoot.className = "shoot"
     elNode.shoot.querySelector("ul")?.remove() // remove the branch too?
 
+    const classes = ["shoot"]
     if (data.locked) {
-        elNode.shoot.classList.add("locked")
-        if (data.locked === -1) elNode.shoot.classList.add("itself")
-    }
+        classes.push("locked")
+        if (data.locked === -1) classes.push("itself")
+    } else if (data.nlink) classes.push("hardlink")
+    elNode.shoot.className = classes.join(" ")
 
     elNode.shoot.dataset.name = data.name
     elNode.shoot.querySelector(".fd-name").textContent = data.name

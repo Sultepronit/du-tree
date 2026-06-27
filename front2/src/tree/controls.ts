@@ -3,6 +3,8 @@ import { doFetch } from "../api/fetch"
 import type { DataNode } from "../types"
 import { appendBranch, createBranch, rebuildTree, setCanceled, updateTree } from "./buildTree"
 
+const useBlockSize = document.getElementById("use-block-size") as HTMLInputElement
+
 let rootPath = ""
 
 export async function initTree(path: string) {
@@ -10,9 +12,17 @@ export async function initTree(path: string) {
 
     // const command = ["du", "-B", "1", "--exclude=/proc"]
     // const options = ["block-size"]
-    const command = ["du", "-b", "--exclude=/proc"]
-    const options = []
+    // const command = ["du", "-b", "--exclude=/proc"]
+    // const options = []
     // const command = ["uutils-du", "-B", "1", "--exclude=/proc"]
+    const command = ["du", "--exclude=/proc"]
+    const options = []
+    if (useBlockSize.checked) {
+        command.push("-B", "1")
+        options.push("block-size")
+    } else {
+        command.push("-b")
+    }
 
     const data = (await doFetch("/dir", {
         path,
