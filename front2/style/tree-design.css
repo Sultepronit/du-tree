@@ -1,6 +1,7 @@
 :root {
     /* --temp-color: #00f; */
     --temp-color: #666;
+    --locked-color: brown;
     --hardlink-color: #00f;
 }
 
@@ -82,10 +83,26 @@ li {
     color: var(--temp-color);
 }
 
+.locked > * > * > .fd-size {
+    color: var(--locked-color);
+}
+
+.locked.itself > * > * > .fd-size {
+    color: red;
+}
+
+.locked.itself {
+    color: red;
+}
+
 /* .hardlink > * > * > .fd-size {
     color: #00acff;
 } */
 
 .hardlink .fd-size {
     color: var(--hardlink-color);
+}
+
+.hardlink .fd-type {
+    background-color: var(--hardlink-color);
 }

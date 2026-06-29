@@ -66,9 +66,9 @@
 
 /* tree design ----------------------- */
 
-.locked.itself {
-    color: red;
-}
+/* .locked .td {
+    background-color: brown;
+} */
 
 .locked.itself .td {
     background-color: red;
@@ -99,6 +99,7 @@
 }
 
 .locked > * > .td {
+    background-color: var(--locked-color);
     mask-image: url("icons/folder-lock.svg");
     -webkit-mask-image: url("icons/folder-lock.svg");
 }
@@ -130,8 +131,4 @@
     background-color: #ff71c7;
     mask-image: url("icons/link-2-off.svg");
     -webkit-mask-image: url("icons/link-2-off.svg");
-}
-
-.hardlink .fd-type {
-    background-color: var(--hardlink-color);
 }
