@@ -1,7 +1,7 @@
 import { doFetch } from "../api/fetch"
 
 import type { DataNode } from "../types"
-import { appendBranch, createBranch, rebuildTree, setCanceled, updateTree } from "./buildTree"
+import { appendBranch, createBranch, rebuildTree, setCanceled, updateTree } from "./builder"
 
 const useBlockSize = document.getElementById("use-block-size") as HTMLInputElement
 
