@@ -65,56 +65,129 @@
 }
 
 /* tree design ----------------------- */
-
-/* .locked .td {
-    background-color: brown;
-} */
-
-.locked.itself .td {
-    background-color: red;
+.shoot {
+    position: relative;
+    padding-left: 1.25em;
 }
 
-.fd-type {
-    background-color: black;
+.shoot::before {
+    content: "";
+    display: inline-block;
+    width: 1.1em;
+    height: 1.1em;
+    /* margin: 0.1em 0 0; */
+    /* background-color: black; */
+
     -webkit-mask-repeat: no-repeat;
     mask-repeat: no-repeat;
-    -webkit-mask-size: 90% 90%;
-    mask-size: 90% 90%;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+
+    position: absolute;
+    left: 0;
 }
 
-.fd-type.td {
+/* .td {
     cursor: pointer;
-}
+} */
 
-.td {
-    mask-image: url("icons/folder.svg");
+.td::before {
+    cursor: pointer;
+    background-color: black;
     -webkit-mask-image: url("icons/folder.svg");
+    mask-image: url("icons/folder.svg");
 }
 
-.temp > * > .td {
-    background-color: var(--temp-color);
-    mask-image: var(--temp-dir-icon);
-    -webkit-mask-image: var(--temp-dir-icon);
-}
-
-.locked > * > .td {
+.td.locked::before {
     background-color: var(--locked-color);
     mask-image: url("icons/folder-lock.svg");
     -webkit-mask-image: url("icons/folder-lock.svg");
 }
 
-.td.unfold {
+.td.locked.itself::before {
+    cursor: auto;
+    background-color: red;
+}
+
+.td.temp::before {
+    background-color: var(--temp-color);
+    -webkit-mask-image: var(--temp-dir-icon);
+    mask-image: var(--temp-dir-icon);
+}
+
+.td.unfold::before {
+    -webkit-mask-image: url("icons/folder-open.svg");
+    mask-image: url("icons/folder-open.svg");
+}
+
+.t-::before {
+    background-color: black;
+    -webkit-mask-image: url("icons/file.svg");
+    mask-image: url("icons/file.svg");
+}
+
+.tL-::before {
+    background-color: #00acff;
+    mask-image: url("icons/file-link.svg");
+    -webkit-mask-image: url("icons/file-link.svg");
+}
+
+.tLd::before {
+    background-color: #00acff;
+    mask-image: url("icons/folder-link.svg");
+    -webkit-mask-image: url("icons/folder-link.svg");
+}
+
+.tLbrk::before {
+    background-color: #ff71c7;
+    mask-image: url("icons/link-2.svg");
+    -webkit-mask-image: url("icons/link-2.svg");
+}
+
+.hardlink::before {
+    background-color: var(--hardlink-color);
+}
+
+/* .fd-type {
+    background-color: black;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: 90% 90%;
+    mask-size: 90% 90%;
+} */
+
+/* .fd-type.td {
+    cursor: pointer;
+} */
+
+/* .td {
+    mask-image: url("icons/folder.svg");
+    -webkit-mask-image: url("icons/folder.svg");
+} */
+
+/* .temp > * > .td {
+    background-color: var(--temp-color);
+    mask-image: var(--temp-dir-icon);
+    -webkit-mask-image: var(--temp-dir-icon);
+} */
+
+/* .locked > * > .td {
+    background-color: var(--locked-color);
+    mask-image: url("icons/folder-lock.svg");
+    -webkit-mask-image: url("icons/folder-lock.svg");
+} */
+
+/* .td.unfold {
     mask-image: url("icons/folder-open.svg");
     -webkit-mask-image: url("icons/folder-open.svg");
-}
+} */
 
-.t- {
-    /* background-color: gray; */
+/* .t- {
     mask-image: url("icons/file.svg");
     -webkit-mask-image: url("icons/file.svg");
-}
+} */
 
-.tL- {
+/* .tL- {
     background-color: #00acff;
     mask-image: url("icons/file-link.svg");
     -webkit-mask-image: url("icons/file-link.svg");
@@ -128,8 +201,6 @@
 
 .tLbrk {
     background-color: #ff71c7;
-    /* mask-image: url("icons/link-2-off.svg");
-    -webkit-mask-image: url("icons/link-2-off.svg"); */
     mask-image: url("icons/link-2.svg");
     -webkit-mask-image: url("icons/link-2.svg");
-}
+} */

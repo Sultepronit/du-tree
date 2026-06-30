@@ -105,7 +105,7 @@ async function addMore(button: HTMLButtonElement) {
 
 document.getElementById("tree").addEventListener("click", async e => {
     const target = e.target as HTMLDivElement | HTMLButtonElement
-    // console.log(target)
+    console.log(target)
     // if (!target.dataset.dir) return
     if (target instanceof HTMLButtonElement && target.name === "add-more") addMore(target)
 

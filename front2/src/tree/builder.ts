@@ -41,7 +41,7 @@ function genTitle(data: DataNode, path: string) {
 }
 
 function createLi(data: DataNode, path: string): string {
-    const classes = ["shoot"]
+    const classes = [`shoot t${data.type}`]
     if (data.locked) {
         classes.push("locked")
         if (data.locked === -1) classes.push("itself")
@@ -49,6 +49,8 @@ function createLi(data: DataNode, path: string): string {
     if (data.sizeIsTemp) classes.push("temp")
     if (data.nlink) classes.push("hardlink")
 
+    // <div class="fd-type t${data.type}"></div>
+    // <div class="fd-details"></div>
     return `<li><div
             class="${classes.join(" ")}"
             data-path="${path}" 
@@ -56,12 +58,9 @@ function createLi(data: DataNode, path: string): string {
             style="--size: ${data.size}%"
         >
             <div class="fd-entry" title="${genTitle(data, path)}">
-                <div class="fd-type t${data.type}"></div>
-                <div class="fd-details">
-                    <div class="fd-sizebar"></div>
-                    <div class="fd-size" title="${data.size} B">${handleBytes(data.size)}</div>
-                    <div class="fd-name">${data.name}</div>
-                </div>
+                <div class="fd-sizebar"></div>
+                <div class="fd-size" title="${data.size} B">${handleBytes(data.size)}</div>
+                <div class="fd-name">${data.name}</div>
             </div>
     </div></li>`
 }
@@ -173,7 +172,7 @@ function resetShoot(elNode: ElNode, data: DataNode) {
     // elNode.shoot.className = "shoot"
     elNode.shoot.querySelector("ul")?.remove() // remove the branch too?
 
-    const classes = ["shoot"]
+    const classes = [`shoot t${data.type}`]
     if (data.locked) {
         classes.push("locked")
         if (data.locked === -1) classes.push("itself")
@@ -182,7 +181,7 @@ function resetShoot(elNode: ElNode, data: DataNode) {
 
     elNode.shoot.dataset.name = data.name
     elNode.shoot.querySelector(".fd-name").textContent = data.name
-    elNode.shoot.querySelector(".fd-type").className = `fd-type t${data.type}`
+    // elNode.shoot.querySelector(".fd-type").className = `fd-type t${data.type}`
 
     updateShootSize(elNode, null, data)
     resetTitle(elNode, data)
