@@ -105,11 +105,12 @@ async function addMore(button: HTMLButtonElement) {
 
 document.getElementById("tree").addEventListener("click", async e => {
     const target = e.target as HTMLDivElement | HTMLButtonElement
-    console.log(target)
+    // console.log(target)
     // if (!target.dataset.dir) return
     if (target instanceof HTMLButtonElement && target.name === "add-more") addMore(target)
 
     if (!target.classList.contains("td")) return
+    if (target.classList.contains("itself")) return
 
     const shoot = target.closest("div.shoot") as HTMLDivElement
     const dataset = shoot?.dataset
