@@ -76,7 +76,6 @@ export function createBranch(data: DataNode, prePath: string): DocumentFragment 
     }
     const path = prePath ? `${prePath}/${data.name}` : data.name
 
-    // node.content.sort((a, b) => b.size - a.size)
     if (data.content[0].size > max) {
         max = data.content[0].size
         document.documentElement.style.setProperty("--max-size", (max / 100).toString())
@@ -200,7 +199,15 @@ async function updateBranch(branchUpdate: DataNode) {
     branchUpdate.content.forEach(s => mix.set(s.name, s))
 
     const count = pageSize * branch.pages
-    const actual = [...mix.values()].sort((a, b) => b.size - a.size).slice(0, count)
+    // const actual = [...mix.values()].sort((a, b) => b.size - a.size).slice(0, count)
+    const actual = [...mix.values()]
+        .sort((a, b) => {
+            if (b.size === a.size) {
+                return a.name.localeCompare(b.name)
+            }
+            return b.size - a.size
+        })
+        .slice(0, count)
     console.log("actual", actual)
 
     if (branchUpdate.name === "") {
@@ -303,6 +310,7 @@ function updateTreeRoot(data: DataNode) {
     if (data?.size !== totalSizeVal) {
         totalSize.title = `${data.size} B`
         totalSize.textContent = handleBytes(data.size)
+        totalSizeVal = data.size
     }
 
     if (data.sizeIsTemp) totalSize.parentElement.classList.add("temp")

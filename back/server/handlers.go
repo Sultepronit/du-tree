@@ -5,12 +5,12 @@ import (
 	"du-tree/explorer"
 	"du-tree/models"
 	"os"
+	"time"
 
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
-	"time"
 )
 
 func sendResult(w http.ResponseWriter, res any) {

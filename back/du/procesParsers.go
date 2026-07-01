@@ -1,7 +1,6 @@
 package du
 
 import (
-	"log"
 	"strconv"
 	"strings"
 )
@@ -17,7 +16,7 @@ func parseErr(line string) {
 
 		if startIdx != -1 && endIdx != -1 && startIdx < endIdx {
 			pathlLine := line[startIdx+1 : endIdx]
-			log.Println("locked:", pathlLine)
+			// log.Println("locked:", pathlLine)
 
 			// DRY!
 			wholePath := strings.Split(pathlLine, "/")

@@ -1,12 +1,22 @@
 package du
 
 import (
+	"cmp"
 	"du-tree/explorer"
 	"du-tree/helpers"
 	"du-tree/models"
-	"sort"
+	"slices"
 	"strings"
 )
+
+func sortContent(nodes []*models.Node) {
+	slices.SortFunc(nodes, func(a, b *models.Node) int {
+		if a.Size != b.Size {
+			return cmp.Compare(b.Size, a.Size)
+		}
+		return cmp.Compare(a.Name, b.Name)
+	})
+}
 
 func genfSizePath(basePath []string) []string {
 	if len(basePath) == 1 && basePath[0] == "" {
@@ -21,15 +31,10 @@ func genfSizePath(basePath []string) []string {
 var pageSize = 100
 
 func GetDir(path string, pages int) (*models.Node, error) {
-	// tree.mu.RLock()
-	// defer tree.mu.RUnlock()
-
-	// baceCont, err := explorer.ReadDir(path, true)
-	// baceCont, err := explorer.ReadDir(path, false)
 	tree.mu.RLock()
 	baceCont, err := explorer.ReadDir(path, tree.getBlockSize)
 	tree.mu.RUnlock()
-	// baceCont, err := explorer.ReadDir(path, getBlockSize)
+
 	if err != nil {
 		return nil, err
 	}
@@ -53,14 +58,13 @@ func GetDir(path string, pages int) (*models.Node, error) {
 	dure := tree.getDir(strings.Join(parts, "/"))
 	// log.Println("du.GetDir: dure", dure)
 
-	// no need?
-	// if dure == nil {
-	// 	return &models.Node{
-	// 		Size:       0,
-	// 		SizeIsTemp: true,
-	// 		Content:    baceCont,
-	// 	}, nil
-	// }
+	if dure == nil {
+		dure = &models.Node{
+			Size:       fSize,
+			SizeIsTemp: true,
+			Content:    []*models.Node{},
+		}
+	}
 
 	dureCont := make(map[string]*models.Node, len(dure.Content))
 	for _, n := range dure.Content {
@@ -74,12 +78,11 @@ func GetDir(path string, pages int) (*models.Node, error) {
 		}
 	}
 
-	sort.Slice(baceCont, func(i, j int) bool {
-		return baceCont[i].Size > baceCont[j].Size
-	})
+	// sort.Slice(baceCont, func(i, j int) bool {
+	// 	return baceCont[i].Size > baceCont[j].Size
+	// })
+	sortContent(baceCont)
 
-	// dure.Content = baceCont[:100]
-	// dure.Content = helpers.LimitSlice(baceCont, 100)
 	contLen := pageSize * pages
 	if len(baceCont) > contLen {
 		dure.Content = baceCont[:contLen]
@@ -100,28 +103,27 @@ func checkCancel() bool {
 	return tree.cancel == nil && tree.root.Temp
 }
 
-// func GetUpdate(reqPaths []string) []*models.Node {
 func GetUpdate(req []models.Request) []*models.Node {
 	if checkCancel() {
 		return nil
 	}
 
-	// updatePaths := append([]string{""}, reqPaths...)
-	// re := make([]*models.Node, len(updatePaths))
 	re := make([]*models.Node, len(req))
-	// for i, p := range updatePaths {
 	for i, r := range req {
-		// fmt.Println(p)
 		re[i] = tree.getDir(r.Path)
 		re[i].Name = r.Path
 
-		sort.Slice(re[i].Content, func(a, b int) bool {
-			return re[i].Content[a].Size > re[i].Content[b].Size
-		})
+		// sort.Slice(re[i].Content, func(a, b int) bool {
+		// 	return re[i].Content[a].Size > re[i].Content[b].Size
+		// })
 
-		// re[i].Content = re[i].Content[:100]
-		// re[i].Content = helpers.LimitSlice(re[i].Content, 100)
+		sortContent(re[i].Content)
+
 		re[i].Content = helpers.LimitSlice(re[i].Content, pageSize*r.Pages)
+
+		// slices.SortFunc(re[i].Content, func(a, b *models.Node) int {
+		// 	return cmp.Compare(a.Name, b.Name)
+		// })
 	}
 
 	return re
