@@ -60,6 +60,7 @@ func GetDir(path string, pages int) (*models.Node, error) {
 
 	if dure == nil {
 		dure = &models.Node{
+			Name:       parts[len(parts)-1],
 			Size:       fSize,
 			SizeIsTemp: true,
 			Content:    []*models.Node{},
@@ -111,6 +112,10 @@ func GetUpdate(req []models.Request) []*models.Node {
 	re := make([]*models.Node, len(req))
 	for i, r := range req {
 		re[i] = tree.getDir(r.Path)
+		if re[i] == nil {
+			continue
+		}
+		// fmt.Println(re[i], r)
 		re[i].Name = r.Path
 
 		// sort.Slice(re[i].Content, func(a, b int) bool {

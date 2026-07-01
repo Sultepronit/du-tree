@@ -71,7 +71,7 @@ function initUpdate() {
     }, 1000)
 }
 
-function addUpdates(data: DataNode, prePath: string, dirname: string) {
+function populateUpdates(data: DataNode, prePath: string, dirname: string) {
     // console.log(updateInterval, data.sizeIsTemp)
     if (updateInterval > 0 && data.sizeIsTemp) {
         const path = prePath ? `${prePath}/${dirname}` : dirname
@@ -125,7 +125,7 @@ document.getElementById("tree").addEventListener("click", async e => {
         const data = (await doFetch("/dir", { path: fullPath, pages: 1 })) as DataNode
         console.log(data)
 
-        addUpdates(data, dataset.path, dataset.name)
+        populateUpdates(data, dataset.path, dataset.name)
 
         const branch = createBranch(data, dataset.path)
         if (branch) shoot.appendChild(branch)

@@ -188,7 +188,7 @@ function resetShoot(elNode: ElNode, data: DataNode) {
 }
 
 async function updateBranch(branchUpdate: DataNode) {
-    // if (!branchUpdate.content) return // are there such cases?
+    if (!branchUpdate?.content) return // user navigates dirs before scan
 
     console.log("branch update:", branchUpdate)
 
