@@ -14,6 +14,8 @@ let canceled = false
 
 let branches2 = {} as Record<string, UpdateBranch>
 
+let rootPath = ""
+
 function genLockedDetails(node: DataNode) {
     const re = []
     if (node.locked === -1) {
@@ -27,7 +29,7 @@ function genLockedDetails(node: DataNode) {
 }
 
 function genTitle(data: DataNode, path: string) {
-    const title = [`Path: ${path ? path + "/" : "Root"}`, `Name: ${data.name}`]
+    const title = [`Path: ${rootPath}${path}`, `Name: ${data.name}`]
     if (data.linkPath) {
         title.push(`${data.type === "Lbrk" ? "Broken link to:" : "Link to:"} ${data.linkPath}`)
     } else if (data.locked) {
@@ -324,7 +326,9 @@ function updateTreeRoot(data: DataNode) {
     }
 }
 
-export async function rebuildTree(data: DataNode) {
+export async function rebuildTree(data: DataNode, path: string) {
+    rootPath = path
+
     removeCanceled()
     treeBlock.innerHTML = ""
     max = 1

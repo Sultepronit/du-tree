@@ -33,7 +33,7 @@ export async function initTree(path: string) {
 
     console.log(data)
 
-    rebuildTree(data)
+    rebuildTree(data, path)
 
     if (data.sizeIsTemp) initUpdate()
 }
