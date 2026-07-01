@@ -44,31 +44,47 @@ document.getElementById("cancel").addEventListener("click", async () => {
     if (re?.status === "canceled") setCanceled()
 })
 
+async function update() {
+    const updates = await doFetch("/update", updateBranches)
+    console.log(updates)
+    if (!updates) {
+        setCanceled()
+        return
+    }
+
+    updateTree(updates)
+    sanitizeUpdates(updates)
+
+    if (!updates[0].sizeIsTemp) return
+
+    setTimeout(update, 900)
+}
+
 let updateInterval = 0
-// let updateBranches = [] as string[]
 let updateBranches = [] as { path: string; pages: number }[]
 function initUpdate() {
-    // updateBranches = []
     updateBranches = [{ path: "", pages: 1 }]
-    updateInterval = setInterval(async () => {
-        const updates = await doFetch("/update", updateBranches)
-        console.log(updates)
-        if (!updates) {
-            clearInterval(updateInterval)
-            updateInterval = 0
-            setCanceled()
-            return
-        }
 
-        if (!updates[0].sizeIsTemp) {
-            clearInterval(updateInterval)
-            updateInterval = 0
-            // console.timeEnd("t1")
-        } else {
-            removeUpdates(updates)
-        }
-        updateTree(updates)
-    }, 1000)
+    update()
+    // updateInterval = setInterval(async () => {
+    //     const updates = await doFetch("/update", updateBranches)
+    //     console.log(updates)
+    //     if (!updates) {
+    //         clearInterval(updateInterval)
+    //         updateInterval = 0
+    //         setCanceled()
+    //         return
+    //     }
+
+    //     if (!updates[0].sizeIsTemp) {
+    //         clearInterval(updateInterval)
+    //         updateInterval = 0
+    //         // console.timeEnd("t1")
+    //     } else {
+    //         sanitizeUpdates(updates)
+    //     }
+    //     updateTree(updates)
+    // }, 1000)
 }
 
 function populateUpdates(data: DataNode, prePath: string, dirname: string) {
@@ -80,7 +96,7 @@ function populateUpdates(data: DataNode, prePath: string, dirname: string) {
     }
 }
 
-function removeUpdates(results: DataNode[]) {
+function sanitizeUpdates(results: DataNode[]) {
     // updateBranches = updateBranches.filter((_, i) => !results[i + 1] || results[i + 1].sizeIsTemp)
     updateBranches = updateBranches.filter((_, i) => !results[i] || results[i].sizeIsTemp)
     // remove branch on DOM manipulations side!
