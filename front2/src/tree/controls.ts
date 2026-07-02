@@ -66,25 +66,6 @@ function initUpdate() {
     updateBranches = [{ path: "", pages: 1 }]
 
     update()
-    // updateInterval = setInterval(async () => {
-    //     const updates = await doFetch("/update", updateBranches)
-    //     console.log(updates)
-    //     if (!updates) {
-    //         clearInterval(updateInterval)
-    //         updateInterval = 0
-    //         setCanceled()
-    //         return
-    //     }
-
-    //     if (!updates[0].sizeIsTemp) {
-    //         clearInterval(updateInterval)
-    //         updateInterval = 0
-    //         // console.timeEnd("t1")
-    //     } else {
-    //         sanitizeUpdates(updates)
-    //     }
-    //     updateTree(updates)
-    // }, 1000)
 }
 
 function populateUpdates(data: DataNode, prePath: string, dirname: string) {
