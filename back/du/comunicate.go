@@ -11,10 +11,10 @@ import (
 
 func sortContent(nodes []*models.Node) {
 	slices.SortFunc(nodes, func(a, b *models.Node) int {
-		if a.Size != b.Size {
-			return cmp.Compare(b.Size, a.Size)
+		if a.Size == b.Size {
+			return cmp.Compare(strings.ToLower(a.Name), strings.ToLower(b.Name))
 		}
-		return cmp.Compare(a.Name, b.Name)
+		return cmp.Compare(b.Size, a.Size)
 	})
 }
 

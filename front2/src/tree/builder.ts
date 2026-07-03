@@ -236,7 +236,6 @@ async function updateBranch(branchUpdate: DataNode) {
     // branch.ul.style.display = "none"
     const store = new DocumentFragment()
     // update exhisting shoots
-    // IS IT OK THIS WAY? NO, IT'S WRONG!
     actual.forEach((data, i) => {
         const old = branch.dataShoots.get(data.name)
         if (old) {
@@ -271,6 +270,7 @@ async function updateBranch(branchUpdate: DataNode) {
                 // console.log(elNode)
                 // console.log(i, branch.ul.childNodes[i], shootEl)
                 branch.ul.childNodes[i].appendChild(shootEl)
+                // console.log("moved", data.name)
                 console.log("moved")
             }
 
