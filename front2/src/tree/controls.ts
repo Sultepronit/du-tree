@@ -15,7 +15,8 @@ export async function initTree(path: string) {
     // const command = ["du", "-b", "--exclude=/proc"]
     // const options = []
     // const command = ["uutils-du", "-B", "1", "--exclude=/proc"]
-    const command = ["du", "--exclude=/proc"]
+    // const command = ["du", "--exclude=/proc"]
+    const command = ["uutils-du", "--exclude=/proc"]
     const options = []
     if (useBlockSize.checked) {
         command.push("-B", "1")

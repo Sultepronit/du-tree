@@ -44,7 +44,10 @@ function genTitle(data: DataNode, path: string) {
 }
 
 function createLi(data: DataNode, path: string): string {
-    const classes = [`shoot t${data.type}`]
+    // if (data.type[0] === "L")
+    const type = data.type[0] === "L" ? `link t${data.type.slice(1)}` : `t${data.type}`
+    // const classes = [`shoot t${data.type}`]
+    const classes = [`shoot ${type}`]
     if (data.locked) {
         classes.push("locked")
         if (data.locked === -1) classes.push("itself")
