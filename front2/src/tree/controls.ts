@@ -15,7 +15,8 @@ export async function initTree(path: string) {
     // const command = ["du", "-b", "--exclude=/proc"]
     // const options = []
     // const command = ["uutils-du", "-B", "1", "--exclude=/proc"]
-    const command = ["du", "--exclude=/proc"]
+    // const command = ["du", "--exclude=/proc"]
+    const command = ["uutils-du", "--exclude=/proc"]
     const options = []
     if (useBlockSize.checked) {
         command.push("-B", "1")
@@ -35,7 +36,7 @@ export async function initTree(path: string) {
 
     rebuildTree(data, path)
 
-    if (data.sizeIsTemp) initUpdate()
+    if (data.sizeIsTemp) initUpdates()
 }
 
 document.getElementById("cancel").addEventListener("click", async () => {
@@ -44,6 +45,7 @@ document.getElementById("cancel").addEventListener("click", async () => {
     if (re?.status === "canceled") setCanceled()
 })
 
+let syncing = false
 async function update() {
     const updates = await doFetch("/update", updateBranches)
     console.log(updates)
@@ -55,22 +57,25 @@ async function update() {
     updateTree(updates)
     sanitizeUpdates(updates)
 
-    if (!updates[0].sizeIsTemp) return
+    if (!updates[0].sizeIsTemp) {
+        syncing = false
+        return
+    }
 
     setTimeout(update, 900)
 }
 
-let updateInterval = 0
+// let updateInterval = 0
 let updateBranches = [] as { path: string; pages: number }[]
-function initUpdate() {
+function initUpdates() {
     updateBranches = [{ path: "", pages: 1 }]
-
+    syncing = true
     update()
 }
 
 function populateUpdates(data: DataNode, prePath: string, dirname: string) {
     // console.log(updateInterval, data.sizeIsTemp)
-    if (updateInterval > 0 && data.sizeIsTemp) {
+    if (syncing && data.sizeIsTemp) {
         const path = prePath ? `${prePath}/${dirname}` : dirname
         // updateBranches.push(prePath ? `${prePath}/${dirname}` : dirname)
         updateBranches.push({ path, pages: 1 })

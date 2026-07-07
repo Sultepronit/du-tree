@@ -44,7 +44,10 @@ function genTitle(data: DataNode, path: string) {
 }
 
 function createLi(data: DataNode, path: string): string {
-    const classes = [`shoot t${data.type}`]
+    // if (data.type[0] === "L")
+    const type = data.type[0] === "L" ? `link t${data.type.slice(1)}` : `t${data.type}`
+    // const classes = [`shoot t${data.type}`]
+    const classes = [`shoot ${type}`]
     if (data.locked) {
         classes.push("locked")
         if (data.locked === -1) classes.push("itself")
@@ -236,7 +239,6 @@ async function updateBranch(branchUpdate: DataNode) {
     // branch.ul.style.display = "none"
     const store = new DocumentFragment()
     // update exhisting shoots
-    // IS IT OK THIS WAY? NO, IT'S WRONG!
     actual.forEach((data, i) => {
         const old = branch.dataShoots.get(data.name)
         if (old) {
@@ -271,6 +273,7 @@ async function updateBranch(branchUpdate: DataNode) {
                 // console.log(elNode)
                 // console.log(i, branch.ul.childNodes[i], shootEl)
                 branch.ul.childNodes[i].appendChild(shootEl)
+                // console.log("moved", data.name)
                 console.log("moved")
             }
 

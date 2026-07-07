@@ -71,6 +71,7 @@
 }
 
 .shoot::before {
+    background-color: black;
     content: "";
     display: inline-block;
     width: 1.1em;
@@ -93,7 +94,7 @@
 
 .td::before {
     cursor: pointer;
-    background-color: black;
+    /* background-color: black; */
     -webkit-mask-image: url("icons/folder.svg");
     mask-image: url("icons/folder.svg");
 }
@@ -121,86 +122,53 @@
 }
 
 .t-::before {
-    background-color: black;
+    /* background-color: black; */
     -webkit-mask-image: url("icons/file.svg");
     mask-image: url("icons/file.svg");
-}
-
-.tL-::before {
-    background-color: #00acff;
-    mask-image: url("icons/file-link.svg");
-    -webkit-mask-image: url("icons/file-link.svg");
-}
-
-.tLd::before {
-    background-color: #00acff;
-    mask-image: url("icons/folder-link.svg");
-    -webkit-mask-image: url("icons/folder-link.svg");
-}
-
-.tLbrk::before {
-    background-color: #ff71c7;
-    mask-image: url("icons/link-2.svg");
-    -webkit-mask-image: url("icons/link-2.svg");
 }
 
 .hardlink::before {
     background-color: var(--hardlink-color);
 }
 
-/* .fd-type {
-    background-color: black;
-    -webkit-mask-repeat: no-repeat;
-    mask-repeat: no-repeat;
-    -webkit-mask-size: 90% 90%;
-    mask-size: 90% 90%;
-} */
-
-/* .fd-type.td {
-    cursor: pointer;
-} */
-
-/* .td {
-    mask-image: url("icons/folder.svg");
-    -webkit-mask-image: url("icons/folder.svg");
-} */
-
-/* .temp > * > .td {
-    background-color: var(--temp-color);
-    mask-image: var(--temp-dir-icon);
-    -webkit-mask-image: var(--temp-dir-icon);
-} */
-
-/* .locked > * > .td {
-    background-color: var(--locked-color);
-    mask-image: url("icons/folder-lock.svg");
-    -webkit-mask-image: url("icons/folder-lock.svg");
-} */
-
-/* .td.unfold {
-    mask-image: url("icons/folder-open.svg");
-    -webkit-mask-image: url("icons/folder-open.svg");
-} */
-
-/* .t- {
-    mask-image: url("icons/file.svg");
-    -webkit-mask-image: url("icons/file.svg");
-} */
-
-/* .tL- {
+.link::before {
     background-color: #00acff;
+}
+
+/* .tLbrk::before { */
+.tbrk::before {
+    background-color: #ff71c7;
+    mask-image: url("icons/link-2.svg");
+    -webkit-mask-image: url("icons/link-2.svg");
+}
+
+/* .tL-::before { */
+.link.t-::before {
+    /* background-color: #00acff; */
     mask-image: url("icons/file-link.svg");
     -webkit-mask-image: url("icons/file-link.svg");
 }
 
-.tLd {
-    background-color: #00acff;
+/* .tLd::before { */
+.link.td::before {
+    /* background-color: #00acff; */
     mask-image: url("icons/folder-link.svg");
     -webkit-mask-image: url("icons/folder-link.svg");
 }
 
-.tLbrk {
-    background-color: #ff71c7;
-    mask-image: url("icons/link-2.svg");
-    -webkit-mask-image: url("icons/link-2.svg");
-} */
+.tD::before {
+    -webkit-mask-image: url("icons/database-zap.svg");
+    mask-image: url("icons/database-zap.svg");
+}
+
+.tS::before {
+    /* background-color: black; */
+    -webkit-mask-image: url("icons/unplug.svg");
+    mask-image: url("icons/unplug.svg");
+}
+
+.tp::before {
+    /* background-color: black; */
+    -webkit-mask-image: url("icons/waypoints.svg");
+    mask-image: url("icons/waypoints.svg");
+}
