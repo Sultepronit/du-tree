@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-func tempPrinAsJson(input any) {
+func TempPrinAsJson(input any) {
 	j, err := json.MarshalIndent(input, "", "  ")
 	if err != nil {
 		panic(err)
