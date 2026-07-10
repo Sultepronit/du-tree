@@ -1,29 +1,32 @@
-package explorer
+package scan
 
 import (
-	"du-tree/models"
+	"du-tree/explorer"
 	"errors"
 	"os"
 	"syscall"
 )
 
-func ReadDir(path string, blockSizeReq bool) ([]*models.Node, error) {
-	re := make([]*models.Node, 0, 10)
+func getFiles(path string, blockSizeReq bool) ([]*fileNode, error) {
 	entries, err := os.ReadDir(path)
 	if err != nil {
 		return nil, err
 	}
+	inflated := make([]*fileNode, 0, len(entries))
 
 	for _, e := range entries {
-		var node models.Node
-		re = append(re, &node)
-		node.Name = e.Name()
-		node.Type = e.Type().String()[0:1]
-		if node.Type == "d" {
-			node.SizeIsTemp = true
+		if e.IsDir() {
 			continue
-		} else if node.Type == "L" {
-			typ, realPath := GetRealEntity(path, node.Name)
+		}
+
+		node := &fileNode{
+			Name: e.Name(),
+			Type: e.Type().String()[0:1],
+		}
+		inflated = append(inflated, node)
+
+		if node.Type == "L" {
+			typ, realPath := explorer.GetRealEntity(path, node.Name)
 			node.Type += typ
 			node.LinkPath = realPath
 		}
@@ -47,6 +50,9 @@ func ReadDir(path string, blockSizeReq bool) ([]*models.Node, error) {
 			node.Size = info.Size()
 		}
 	}
+
+	re := make([]*fileNode, len(inflated))
+	copy(re, inflated)
 
 	return re, nil
 }

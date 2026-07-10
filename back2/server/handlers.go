@@ -58,13 +58,12 @@ func handleDir(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// sendResult(w, req)
-	// re, err := explorer.ReadDir(req.Path)
 	// re, err := du.GetDir(req.Path, req.Pages)
-	// if err != nil { // temp!
-	// 	// log.Fatal(err)
-	// 	log.Println(err)
-	// }
-	// sendResult(w, re)
+	re, err := scan.GetDir("", req.Pages)
+	if err != nil {
+		log.Println(err)
+	}
+	sendResult(w, re)
 }
 
 func handleUpdate(w http.ResponseWriter, r *http.Request) {

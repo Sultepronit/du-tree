@@ -24,16 +24,16 @@ func getRootBlockSize(target string) (int64, error) {
 	return 0, errors.New("no file info")
 }
 
-// func calcSize(ctx context.Context, path string, node *models.Node, entry os.DirEntry) error {
-func calcSize(entry os.DirEntry) (int64, error) {
+// func handleEntry(ctx context.Context, path string, node *models.Node, entry os.DirEntry) error {
+func handleEntry(ctx context.Context, path string, node *dirNode, entry os.DirEntry) error {
 	info, err := entry.Info()
 	if err != nil {
-		return 0, err
+		return err
 	}
 
 	sysStat, ok := info.Sys().(*syscall.Stat_t)
 	if !ok {
-		return 0, nil
+		return nil
 	}
 
 	var size int64
@@ -43,14 +43,48 @@ func calcSize(entry os.DirEntry) (int64, error) {
 		size = info.Size()
 	}
 
+	// data.mu.Lock()
 	if sysStat.Nlink > 1 {
 		if data.inodes[sysStat.Ino] {
+			// data.mu.Unlock()
+			// continue
 			size = 0
 		}
 		data.inodes[sysStat.Ino] = true
 	}
 
-	return size, nil
+	for n := node; n != nil; n = n.Parent {
+		n.Size += size
+	}
+
+	// if entry.IsDir() {
+	// 	child := &models.Node{
+	// 		Parent:  node,
+	// 		Name:    entry.Name(),
+	// 		Type:    "d",
+	// 		Size:    size,
+	// 		Content: make([]*models.Node, 0, 10),
+	// 	}
+	// 	node.Content = append(node.Content, child)
+
+	// 	data.mu.Unlock()
+
+	// 	fullPath := filepath.Join(path, entry.Name())
+	// 	err := scanDir(ctx, fullPath, child)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// } else {
+	// 	// child := &models.Node{
+	// 	// 	Name: entry.Name(),
+	// 	// 	Type: "-",
+	// 	// 	Size: size,
+	// 	// }
+	// 	// node.Content = append(node.Content, child)
+	// 	data.mu.Unlock()
+	// }
+
+	return nil
 }
 
 // func scanDir(ctx context.Context, path string, node *models.Node) error {
@@ -69,36 +103,35 @@ func scanDir(ctx context.Context, path string, node *dirNode) error {
 	}
 
 	data.mu.Lock()
-
-	dirs := make([]*dirNode, 0, len(entries))
+	// node.Temp = 1
+	dirCount := 0
 
 	for _, entry := range entries {
-		size, err := calcSize(entry)
+		if entry.IsDir() {
+			dirCount++
+		}
+
+		err := handleEntry(ctx, path, node, entry)
 		if err != nil {
 			fmt.Println(err)
 		}
-
-		for n := node; n != nil; n = n.Parent {
-			n.Size += size
-		}
-
+	}
+	node.Content = make([]*dirNode, dirCount)
+	i := 0
+	for _, entry := range entries {
 		if entry.IsDir() {
-			dirs = append(dirs, &dirNode{
+			node.Content[i] = &dirNode{
 				Parent: node,
 				Name:   entry.Name(),
-				Size:   size,
 				Temp:   2,
-			})
+			}
+			i++
 		}
 	}
-
-	node.Dirs = make([]*dirNode, len(dirs))
-	copy(node.Dirs, dirs)
-
 	node.Temp = 1
-
+	// node.Temp = 0
 	data.mu.Unlock()
-	for _, child := range node.Dirs {
+	for _, child := range node.Content {
 		fullPath := filepath.Join(path, child.Name)
 		err := scanDir(ctx, fullPath, child)
 		if err != nil {
@@ -130,11 +163,10 @@ func Init(req models.Request) {
 		Temp: 2,
 		// Content: make([]*dirNode, 0, 10),
 	}
-	// data.viewTree = &viewNode{
-	// 	dirNode:  data.scanTree,
-	// 	Branches: make(map[string]*viewNode),
-	// }
-	data.viewTree = nil
+	data.viewTree = &viewNode{
+		dirNode:  *data.scanTree,
+		Branches: make(map[string]viewNode),
+	}
 
 	rootSize, err := getRootBlockSize(data.request.Path)
 	if err != nil {

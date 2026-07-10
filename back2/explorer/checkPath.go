@@ -50,7 +50,7 @@ func CheckPath(path string) *models.Path {
 					re.Next = append(re.Next, next)
 
 				} else if e.Type().String()[0:1] == "L" {
-					typ, realPath := getRealEntity(path, e.Name())
+					typ, realPath := GetRealEntity(path, e.Name())
 					if typ == "d" {
 						next := models.PathDetail{Name: e.Name(), Link: realPath}
 						if !checkAccess(realPath, "") {

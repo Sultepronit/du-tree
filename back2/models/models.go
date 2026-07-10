@@ -19,14 +19,14 @@ type Request struct {
 }
 
 type Node struct {
-	Parent       *Node   `json:"-"`
 	Name         string  `json:"name"`
 	Type         string  `json:"type"`
 	Size         int64   `json:"size"`
-	SizeIsTemp   bool    `json:"sizeIsTemp,omitempty"`
 	Locked       int     `json:"locked,omitempty"`
 	LinkPath     string  `json:"linkPath,omitempty"`
 	Nlink        uint64  `json:"nlink,omitempty"`
 	Content      []*Node `json:"content,omitempty"`
 	ContentCount int     `json:"contentCount,omitempty"`
+	SizeIsTemp   bool    `json:"sizeIsTemp,omitempty"`
+	Temp         int8    `json:"temp,omitempty"`
 }

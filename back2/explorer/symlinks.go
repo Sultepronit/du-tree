@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 )
 
-func getRealEntity(path string, name string) (typ string, realPath string) {
+func GetRealEntity(path string, name string) (typ string, realPath string) {
 	fullPath := path + "/" + name
 	target, err := os.Readlink(fullPath)
 	if err != nil {
