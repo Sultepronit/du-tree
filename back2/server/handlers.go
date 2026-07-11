@@ -6,6 +6,7 @@ import (
 	"du-tree/models"
 	"du-tree/scan"
 	"os"
+	"time"
 
 	"encoding/json"
 	"fmt"
@@ -40,26 +41,35 @@ func checkPath(w http.ResponseWriter, r *http.Request) {
 	sendResult(w, explorer.CheckPath(req.Path))
 }
 
-func handleDir(w http.ResponseWriter, r *http.Request) {
+func handleScan(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.URL.Path)
 	var req models.Request
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		log.Println("Bad JSON:", err)
 		http.Error(w, "Bad JSON", 400)
 		return
 	}
 	fmt.Println(req)
 
-	// if req.InitDu {
-	if req.Command != nil {
-		// du.Start(req.Path, req.Command, req.Options)
-		// time.Sleep(time.Millisecond * 10)
-		scan.Init(req)
-	}
+	scan.Init(req)
+	time.Sleep(time.Millisecond * 10)
 
-	// sendResult(w, req)
-	// re, err := du.GetDir(req.Path, req.Pages)
 	re, err := scan.GetDir("", req.Pages)
+	if err != nil {
+		log.Println(err)
+	}
+	sendResult(w, re)
+}
+
+func handleDir(w http.ResponseWriter, r *http.Request) {
+	log.Println(r.URL.Path)
+	var req models.Request
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Bad JSON", 400)
+		return
+	}
+	fmt.Println(req)
+
+	re, err := scan.GetDir(req.Path, req.Pages)
 	if err != nil {
 		log.Println(err)
 	}

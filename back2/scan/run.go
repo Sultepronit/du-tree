@@ -2,7 +2,6 @@ package scan
 
 import (
 	"context"
-	"du-tree/helpers"
 	"du-tree/models"
 	"errors"
 	"fmt"
@@ -149,5 +148,5 @@ func Init(req models.Request) {
 	fmt.Println(err)
 
 	fmt.Println("ended!!!")
-	helpers.TempPrinAsJson(data.scanTree)
+	// helpers.TempPrinAsJson(data.scanTree)
 }

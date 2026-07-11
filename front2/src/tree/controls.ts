@@ -25,10 +25,11 @@ export async function initTree(path: string) {
         command.push("-b")
     }
 
-    const data = (await doFetch("/dir", {
+    // const data = (await doFetch("/dir", {
+    const data = (await doFetch("/scan", {
         path,
         pages: 1,
-        command,
+        // command,
         options
     })) as DataNode
 
@@ -118,13 +119,16 @@ document.getElementById("tree").addEventListener("click", async e => {
     const dataset = shoot?.dataset
 
     if (!dataset.nested) {
-        const prePath = dataset.path ? `${rootPath}${dataset.path}/` : rootPath
-        const fullPath = prePath + dataset.name
-        console.log(fullPath)
+        // const prePath = dataset.path ? `${rootPath}${dataset.path}/` : rootPath
+        // const fullPath = prePath + dataset.name
+        // console.log(fullPath)
+        // const path =`${dataset.path}/${dataset.name}`
+        const path = dataset.path ? `${dataset.path}/${dataset.name}` : dataset.name
 
         target.classList.add("unfold")
 
-        const data = (await doFetch("/dir", { path: fullPath, pages: 1 })) as DataNode
+        // const data = (await doFetch("/dir", { path: fullPath, pages: 1 })) as DataNode
+        const data = (await doFetch("/dir", { path, pages: 1 })) as DataNode
         console.log(data)
 
         populateUpdates(data, dataset.path, dataset.name)

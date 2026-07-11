@@ -1,62 +1,73 @@
 package scan
 
 import (
+	"cmp"
 	"du-tree/models"
 	"fmt"
+	"slices"
 	"strings"
 )
 
-// func getBranch(path []string) *viewNode {
-func getBranch(path string, prePath string) (*viewNode, error) {
+func sortContent(nodes []*models.Node) {
+	slices.SortFunc(nodes, func(a, b *models.Node) int {
+		if a.Size == b.Size {
+			return cmp.Compare(strings.ToLower(a.Name), strings.ToLower(b.Name))
+		}
+		return cmp.Compare(b.Size, a.Size)
+	})
+}
+
+func getBranch(path string) (*viewNode, error) {
 	parts := strings.Split(path, "/")
-	data.mu.Lock()
-	defer data.mu.Unlock()
-	// fmt.Println(path, path[0])
+	// data.mu.Lock()
+	// defer data.mu.Unlock()
 	target := data.viewTree
-	fmt.Println("target 0:", target)
-	// if path == nil {
-	// 	return target
-	// }
+
 	if target == nil {
-		files, err := getFiles(prePath+path, true)
-		if err != nil {
-			return nil, err
-		}
-
-		data.viewTree = &viewNode{
-			dirNode: data.scanTree,
-			Files:   files,
-		}
-
+		data.viewTree = &viewNode{dirNode: data.scanTree}
 		return data.viewTree, nil
 	}
 
-	for _, br := range parts {
-		if next, prs := target.Branches[br]; prs {
+	for _, name := range parts {
+		fmt.Println(name)
+		if next, prs := target.Branches[name]; prs {
 			target = next
 		} else {
-			// create the branch!
+			for _, dir := range target.Dirs {
+				if dir.Name == name {
+					if target.Branches == nil {
+						target.Branches = make(map[string]*viewNode)
+					}
+					target.Branches[name] = &viewNode{
+						dirNode: dir,
+					}
+					target = target.Branches[name]
+					break
+				}
+			}
 		}
 	}
-	fmt.Println("target 1:", target)
 	return target, nil
 }
 
 var pageSize = 100
 
-// func GetDir(path string, pages int) (*viewNode, error) {
 func GetDir(path string, pages int) (*models.Node, error) {
-	data.mu.RLock()
+	data.mu.Lock()
 	request := data.request
-	data.mu.RUnlock()
-	// parts := strings.Split(path, "/")
-	branch, err := getBranch(path, request.Path)
+
+	branch, err := getBranch(path)
 	if err != nil {
 		return nil, err
 	}
 
-	data.mu.RLock()
-	defer data.mu.RUnlock()
+	if branch.Files == nil {
+		files, err := getFiles(request.Path+path, true)
+		if err != nil {
+			return nil, err
+		}
+		branch.Files = files
+	}
 
 	re := parseDirNode(branch.dirNode)
 	re.Content = make([]*models.Node, 0, pageSize*pages)
@@ -66,7 +77,9 @@ func GetDir(path string, pages int) (*models.Node, error) {
 	for _, n := range branch.Files {
 		re.Content = append(re.Content, parseFileNode(n))
 	}
+	data.mu.Unlock()
 
-	// return branch, nil
+	sortContent(re.Content)
+
 	return re, nil
 }
