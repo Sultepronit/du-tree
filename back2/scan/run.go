@@ -54,7 +54,7 @@ func calcSize(entry os.DirEntry) (int64, error) {
 
 // func scanDir(ctx context.Context, path string, node *models.Node) error {
 func scanDir(ctx context.Context, path string, node *dirNode) error {
-	fmt.Println("scan:", path)
+	// fmt.Println("scan:", path)
 	select {
 	case <-ctx.Done():
 		return ctx.Err()
@@ -144,8 +144,12 @@ func Init(req models.Request) {
 	data.mu.Unlock()
 
 	// go scanDir(ctx, data.request.Path, data.result)
-	err = scanDir(ctx, data.request.Path, data.scanTree)
-	fmt.Println(err)
+	// err = scanDir(ctx, data.request.Path, data.scanTree)
+	// fmt.Println(err)
+	go func() {
+		err = scanDir(ctx, data.request.Path, data.scanTree)
+		fmt.Println(err)
+	}()
 
 	fmt.Println("ended!!!")
 	// helpers.TempPrinAsJson(data.scanTree)
