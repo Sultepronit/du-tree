@@ -2,6 +2,7 @@ package scan
 
 import (
 	"cmp"
+	"du-tree/helpers"
 	"du-tree/models"
 	"fmt"
 	"slices"
@@ -17,7 +18,7 @@ func sortContent(nodes []*models.Node) {
 	})
 }
 
-func getBranch(path string) (*viewNode, error) {
+func getBranch(path string) *viewNode {
 	parts := strings.Split(path, "/")
 	// data.mu.Lock()
 	// defer data.mu.Unlock()
@@ -25,7 +26,7 @@ func getBranch(path string) (*viewNode, error) {
 
 	if target == nil {
 		data.viewTree = &viewNode{dirNode: data.scanTree}
-		return data.viewTree, nil
+		return data.viewTree
 	}
 
 	for _, name := range parts {
@@ -47,7 +48,7 @@ func getBranch(path string) (*viewNode, error) {
 			}
 		}
 	}
-	return target, nil
+	return target
 }
 
 var pageSize = 100
@@ -56,10 +57,7 @@ func GetDir(path string, pages int) (*models.Node, error) {
 	data.mu.Lock()
 	request := data.request
 
-	branch, err := getBranch(path)
-	if err != nil {
-		return nil, err
-	}
+	branch := getBranch(path)
 
 	if branch.Files == nil {
 		files, err := getFiles(request.Path+path, true)
@@ -81,5 +79,29 @@ func GetDir(path string, pages int) (*models.Node, error) {
 
 	sortContent(re.Content)
 
+	contLen := pageSize * pages
+	if len(re.Content) > contLen {
+		re.ContentCount = len(re.Content)
+		re.Content = re.Content[:contLen]
+	}
+
 	return re, nil
+}
+
+func GetUpdate(req []models.Request) []*models.Node {
+	re := make([]*models.Node, len(req))
+	data.mu.Lock()
+	for i, r := range req {
+		b := getBranch(r.Path)
+		re[i] = parseDirNode(b.dirNode)
+		re[i].Name = r.Path
+		for _, n := range b.Dirs {
+			re[i].Content = append(re[i].Content, parseDirNode(n))
+		}
+
+		sortContent(re[i].Content)
+		re[i].Content = helpers.LimitSlice(re[i].Content, pageSize*r.Pages)
+	}
+	data.mu.Unlock()
+	return re
 }

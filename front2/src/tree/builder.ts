@@ -52,7 +52,7 @@ function createLi(data: DataNode, path: string): string {
         classes.push("locked")
         if (data.locked === -1) classes.push("itself")
     }
-    if (data.sizeIsTemp) classes.push("temp")
+    if (data.temp) classes.push("temp")
     if (data.nlink) classes.push("hardlink")
 
     // <div class="fd-type t${data.type}"></div>
@@ -86,7 +86,7 @@ export function createBranch(data: DataNode, prePath: string): DocumentFragment 
         document.documentElement.style.setProperty("--max-size", (max / 100).toString())
     }
 
-    if (data.sizeIsTemp || data.contentCount) {
+    if (data.temp || data.contentCount) {
         branches2[path] = {
             dataShoots: new Map(data.content.map(s => [s.name, s])),
             pages: 1
@@ -162,7 +162,7 @@ function updateShootSize(elNode: ElNode, oldD: DataNode | null, newD: DataNode) 
         elNode.size.textContent = handleBytes(newD.size)
     }
 
-    if (newD.sizeIsTemp) elNode.shoot.classList.add("temp")
+    if (newD.temp) elNode.shoot.classList.add("temp")
     else elNode.shoot.classList.remove("temp")
 }
 
@@ -328,7 +328,7 @@ function updateTreeRoot(data: DataNode) {
         totalSizeVal = data.size
     }
 
-    if (data.sizeIsTemp) totalSize.parentElement.classList.add("temp")
+    if (data.temp) totalSize.parentElement.classList.add("temp")
     else totalSize.parentElement.classList.remove("temp")
 
     if (data.locked) {

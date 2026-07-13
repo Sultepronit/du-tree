@@ -2,6 +2,7 @@ package scan
 
 import (
 	"context"
+	"du-tree/explorer"
 	"du-tree/models"
 	"errors"
 	"fmt"
@@ -82,12 +83,24 @@ func scanDir(ctx context.Context, path string, node *dirNode) error {
 		}
 
 		if entry.IsDir() {
-			dirs = append(dirs, &dirNode{
+			child := dirNode{
 				Parent: node,
 				Name:   entry.Name(),
 				Size:   size,
 				Temp:   2,
-			})
+			}
+
+			locked := !explorer.IsAccessible(path, entry.Name())
+			if locked {
+				child.Locked = -1
+				child.Temp = 0
+
+				for p := node; p != nil; p = p.Parent {
+					p.Locked++
+					// fmt.Println(p)
+				}
+			}
+			dirs = append(dirs, &child)
 		}
 	}
 
@@ -98,6 +111,10 @@ func scanDir(ctx context.Context, path string, node *dirNode) error {
 
 	data.mu.Unlock()
 	for _, child := range node.Dirs {
+		if child.Locked == -1 {
+			continue
+		}
+
 		fullPath := filepath.Join(path, child.Name)
 		err := scanDir(ctx, fullPath, child)
 		if err != nil {
@@ -122,12 +139,8 @@ func Init(req models.Request) {
 	data.request = req
 
 	data.inodes = make(map[uint64]bool)
-	// data.scanTree = &models.Node{
-	// 	Content: make([]*models.Node, 0, 10),
-	// }
 	data.scanTree = &dirNode{
 		Temp: 2,
-		// Content: make([]*dirNode, 0, 10),
 	}
 	// data.viewTree = &viewNode{
 	// 	dirNode:  data.scanTree,
@@ -143,7 +156,6 @@ func Init(req models.Request) {
 	data.scanTree.Size = rootSize
 	data.mu.Unlock()
 
-	// go scanDir(ctx, data.request.Path, data.result)
 	// err = scanDir(ctx, data.request.Path, data.scanTree)
 	// fmt.Println(err)
 	go func() {

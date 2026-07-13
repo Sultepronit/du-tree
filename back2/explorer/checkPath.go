@@ -7,15 +7,7 @@ import (
 
 	"os"
 	"path/filepath"
-
-	"golang.org/x/sys/unix"
 )
-
-func checkAccess(path string, name string) bool {
-	fullP := filepath.Join(path, name)
-	err := unix.Access(fullP, unix.R_OK|unix.X_OK)
-	return err == nil
-}
 
 func CheckPath(path string) *models.Path {
 	fmt.Println("path:", path)
@@ -44,7 +36,7 @@ func CheckPath(path string) *models.Path {
 			for _, e := range entries {
 				if e.IsDir() {
 					next := models.PathDetail{Name: e.Name()}
-					if !checkAccess(path, e.Name()) {
+					if !IsAccessible(path, e.Name()) {
 						next.IsLocked = true
 					}
 					re.Next = append(re.Next, next)
@@ -53,7 +45,7 @@ func CheckPath(path string) *models.Path {
 					typ, realPath := GetRealEntity(path, e.Name())
 					if typ == "d" {
 						next := models.PathDetail{Name: e.Name(), Link: realPath}
-						if !checkAccess(realPath, "") {
+						if !IsAccessible(realPath, "") {
 							next.IsLocked = true
 						}
 						re.Next = append(re.Next, next)

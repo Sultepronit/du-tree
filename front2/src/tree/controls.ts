@@ -37,7 +37,7 @@ export async function initTree(path: string) {
 
     rebuildTree(data, path)
 
-    if (data.sizeIsTemp) initUpdates()
+    if (data.temp) initUpdates()
 }
 
 document.getElementById("cancel").addEventListener("click", async () => {
@@ -48,6 +48,7 @@ document.getElementById("cancel").addEventListener("click", async () => {
 
 let syncing = false
 async function update() {
+    await new Promise(resolve => setTimeout(resolve, 900))
     const updates = await doFetch("/update", updateBranches)
     console.log(updates)
     if (!updates) {
@@ -58,12 +59,12 @@ async function update() {
     updateTree(updates)
     sanitizeUpdates(updates)
 
-    if (!updates[0].sizeIsTemp) {
+    if (!updates[0].temp) {
         syncing = false
         return
     }
 
-    setTimeout(update, 900)
+    update()
 }
 
 // let updateInterval = 0
@@ -75,8 +76,8 @@ function initUpdates() {
 }
 
 function populateUpdates(data: DataNode, prePath: string, dirname: string) {
-    // console.log(updateInterval, data.sizeIsTemp)
-    if (syncing && data.sizeIsTemp) {
+    // console.log(updateInterval, data.temp)
+    if (syncing && data.temp) {
         const path = prePath ? `${prePath}/${dirname}` : dirname
         // updateBranches.push(prePath ? `${prePath}/${dirname}` : dirname)
         updateBranches.push({ path, pages: 1 })
@@ -84,8 +85,8 @@ function populateUpdates(data: DataNode, prePath: string, dirname: string) {
 }
 
 function sanitizeUpdates(results: DataNode[]) {
-    // updateBranches = updateBranches.filter((_, i) => !results[i + 1] || results[i + 1].sizeIsTemp)
-    updateBranches = updateBranches.filter((_, i) => !results[i] || results[i].sizeIsTemp)
+    // updateBranches = updateBranches.filter((_, i) => !results[i + 1] || results[i + 1].temp)
+    updateBranches = updateBranches.filter((_, i) => !results[i] || results[i].temp)
     // remove branch on DOM manipulations side!
 }
 
