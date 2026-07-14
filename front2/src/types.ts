@@ -2,7 +2,7 @@ export type DataNode = {
     name: string
     type: string
     size: number
-    temp?: boolean
+    temp?: number
     locked?: number
     linkPath?: string
     nlink?: number

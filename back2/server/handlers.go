@@ -1,7 +1,6 @@
 package server
 
 import (
-	"du-tree/du"
 	"du-tree/explorer"
 	"du-tree/models"
 	"du-tree/scan"
@@ -90,6 +89,7 @@ func handleUpdate(w http.ResponseWriter, r *http.Request) {
 
 func handleCancel(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.URL.Path)
-	du.Stop()
+	// du.Stop()
+	scan.Stop()
 	sendResult(w, map[string]string{"status": "canceled"})
 }

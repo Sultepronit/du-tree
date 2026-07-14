@@ -1,6 +1,6 @@
 :root {
     --temp-dir-icon: url("icons/folder-sync.svg");
-    /* --temp-dir-icon: url("icons/folder-x.svg"); */
+    --unavailable-dir-icon: url("icons/folder-clock.svg");
 }
 
 /* path iput -------------------- */
@@ -65,11 +65,6 @@
 }
 
 /* tree design ----------------------- */
-.shoot {
-    position: relative;
-    padding-left: 1.25em;
-}
-
 .shoot::before {
     background-color: black;
     content: "";
@@ -93,7 +88,7 @@
 } */
 
 .td::before {
-    cursor: pointer;
+    /* cursor: pointer; */
     /* background-color: black; */
     -webkit-mask-image: url("icons/folder.svg");
     mask-image: url("icons/folder.svg");
@@ -106,14 +101,24 @@
 }
 
 .td.locked.itself::before {
-    cursor: auto;
+    cursor: no-drop;
     background-color: red;
+}
+
+.td.unavailable::before {
+    cursor: progress;
 }
 
 .td.temp::before {
     background-color: var(--temp-color);
     -webkit-mask-image: var(--temp-dir-icon);
     mask-image: var(--temp-dir-icon);
+}
+
+.td.unavailable::before {
+    background-color: var(--temp-color);
+    -webkit-mask-image: var(--temp-dir-icon);
+    mask-image: var(--unavailable-dir-icon);
 }
 
 .td.unfold::before {
@@ -151,6 +156,7 @@
 
 /* .tLd::before { */
 .link.td::before {
+    cursor: auto;
     /* background-color: #00acff; */
     mask-image: url("icons/folder-link.svg");
     -webkit-mask-image: url("icons/folder-link.svg");

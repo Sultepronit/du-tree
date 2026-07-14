@@ -44,26 +44,27 @@ function genTitle(data: DataNode, path: string) {
 }
 
 function createLi(data: DataNode, path: string): string {
-    // if (data.type[0] === "L")
     const type = data.type[0] === "L" ? `link t${data.type.slice(1)}` : `t${data.type}`
-    // const classes = [`shoot t${data.type}`]
+
     const classes = [`shoot ${type}`]
     if (data.locked) {
         classes.push("locked")
         if (data.locked === -1) classes.push("itself")
     }
-    if (data.temp) classes.push("temp")
+    if (data.temp) {
+        classes.push("temp")
+        if (data.temp === 2) classes.push("unavailable")
+    }
     if (data.nlink) classes.push("hardlink")
 
-    // <div class="fd-type t${data.type}"></div>
-    // <div class="fd-details"></div>
     return `<li><div
             class="${classes.join(" ")}"
+            title="${genTitle(data, path)}"
             data-path="${path}" 
             data-name="${data.name}"
             style="--size: ${data.size}%"
         >
-            <div class="fd-entry" title="${genTitle(data, path)}">
+            <div class="fd-entry">
                 <div class="fd-sizebar"></div>
                 <div class="fd-size" title="${data.size} B">${handleBytes(data.size)}</div>
                 <div class="fd-name">${data.name}</div>
@@ -162,8 +163,16 @@ function updateShootSize(elNode: ElNode, oldD: DataNode | null, newD: DataNode) 
         elNode.size.textContent = handleBytes(newD.size)
     }
 
-    if (newD.temp) elNode.shoot.classList.add("temp")
-    else elNode.shoot.classList.remove("temp")
+    if (newD.temp) {
+        elNode.shoot.classList.add("temp")
+        if (newD.temp === 2) {
+            elNode.shoot.classList.add("unavailable")
+        } else {
+            elNode.shoot.classList.remove("unavailable")
+        }
+    } else {
+        elNode.shoot.classList.remove("temp", "unavailable")
+    }
 }
 
 function resetTitle(elNode: ElNode, data: DataNode) {
@@ -236,7 +245,7 @@ async function updateBranch(branchUpdate: DataNode) {
         })
     }
 
-    // branch.ul.style.display = "none"
+    branch.ul.style.display = "none"
     const store = new DocumentFragment()
     // update exhisting shoots
     actual.forEach((data, i) => {
@@ -303,7 +312,7 @@ async function updateBranch(branchUpdate: DataNode) {
             console.log("reset")
         }
     })
-    // branch.ul.style.display = ""
+    branch.ul.style.display = ""
     // console.log(store.childNodes)
 
     branch.dataShoots =

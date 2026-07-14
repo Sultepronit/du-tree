@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"syscall"
+	"time"
 )
 
 func getRootBlockSize(target string) (int64, error) {
@@ -53,18 +54,33 @@ func calcSize(entry os.DirEntry) (int64, error) {
 	return size, nil
 }
 
-// func scanDir(ctx context.Context, path string, node *models.Node) error {
 func scanDir(ctx context.Context, path string, node *dirNode) error {
-	// fmt.Println("scan:", path)
 	select {
 	case <-ctx.Done():
 		return ctx.Err()
 	default:
 	}
-	// fmt.Println(ctx)
+
+	// to check if the dir is locked, without looking at node.Locked
+	if !explorer.IsAccessible(path, "") {
+		return nil
+	}
 
 	entries, err := os.ReadDir(path)
 	if err != nil {
+		// fmt.Println("errr reading", err)
+		if os.IsPermission(err) {
+			data.mu.Lock()
+			node.Locked = -1
+			node.Temp = 0
+
+			for p := node.Parent; p != nil; p = p.Parent {
+				p.Locked++
+			}
+			data.mu.Unlock()
+			return nil
+		}
+
 		return err
 	}
 
@@ -73,6 +89,7 @@ func scanDir(ctx context.Context, path string, node *dirNode) error {
 	dirs := make([]*dirNode, 0, len(entries))
 
 	for _, entry := range entries {
+		time.Sleep(time.Millisecond * 50)
 		size, err := calcSize(entry)
 		if err != nil {
 			fmt.Println(err)
@@ -97,7 +114,6 @@ func scanDir(ctx context.Context, path string, node *dirNode) error {
 
 				for p := node; p != nil; p = p.Parent {
 					p.Locked++
-					// fmt.Println(p)
 				}
 			}
 			dirs = append(dirs, &child)
@@ -111,10 +127,6 @@ func scanDir(ctx context.Context, path string, node *dirNode) error {
 
 	data.mu.Unlock()
 	for _, child := range node.Dirs {
-		if child.Locked == -1 {
-			continue
-		}
-
 		fullPath := filepath.Join(path, child.Name)
 		err := scanDir(ctx, fullPath, child)
 		if err != nil {
@@ -139,14 +151,9 @@ func Init(req models.Request) {
 	data.request = req
 
 	data.inodes = make(map[uint64]bool)
-	data.scanTree = &dirNode{
-		Temp: 2,
-	}
-	// data.viewTree = &viewNode{
-	// 	dirNode:  data.scanTree,
-	// 	Branches: make(map[string]*viewNode),
-	// }
-	data.viewTree = nil
+	data.scanTree = &dirNode{Temp: 2}
+	data.viewTree = &viewNode{dirNode: data.scanTree}
+	// data.viewTree = nil
 
 	rootSize, err := getRootBlockSize(data.request.Path)
 	if err != nil {
@@ -161,8 +168,25 @@ func Init(req models.Request) {
 	go func() {
 		err = scanDir(ctx, data.request.Path, data.scanTree)
 		fmt.Println(err)
+
+		data.mu.Lock()
+		data.cancel = nil
+		data.mu.Unlock()
+		fmt.Println("ended!")
 	}()
 
-	fmt.Println("ended!!!")
 	// helpers.TempPrinAsJson(data.scanTree)
+}
+
+func Stop() {
+	data.mu.Lock()
+	defer data.mu.Unlock()
+
+	if data.cancel != nil {
+		log.Println("Stopping scan...")
+		data.cancel()
+		data.cancel = nil
+	} else {
+		log.Println("No scan is currently running.")
+	}
 }

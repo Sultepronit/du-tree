@@ -54,17 +54,31 @@ ul.dir-content {
 li {
     border: none;
     position: relative;
-    margin: 0 0 0.2em 0;
+    /* margin: 0 0 0.2em 0; */
+    padding-bottom: 0.2em;
 }
 
-/* .fd-entry {
-    padding-left: 1em;
-    display: grid;
-    grid-template-columns: 1.3em auto;
-    gap: 0;
+.shoot {
+    /* cursor: auto; */
+    position: relative;
+    padding-left: 1.25em;
+    /* margin-bottom: 0.2em; */
+}
+
+.td {
+    cursor: pointer;
+}
+
+.td li,
+.td .fd-entry {
+    cursor: auto;
+}
+
+/* .td li {
+    pointer-events: none;
+    cursor: auto;
 } */
 
-/* .fd-details { */
 .fd-entry {
     display: grid;
     grid-template-columns: 4em auto;
@@ -78,6 +92,10 @@ li {
     /* opacity: 0.4; */
     color: var(--temp-color);
 }
+
+/* .unavailable {
+    color: var(--temp-color);
+} */
 
 .locked > * > .fd-size {
     color: var(--locked-color);

@@ -10,26 +10,14 @@ let rootPath = ""
 export async function initTree(path: string) {
     rootPath = path
 
-    // const command = ["du", "-B", "1", "--exclude=/proc"]
-    // const options = ["block-size"]
-    // const command = ["du", "-b", "--exclude=/proc"]
-    // const options = []
-    // const command = ["uutils-du", "-B", "1", "--exclude=/proc"]
-    // const command = ["du", "--exclude=/proc"]
-    const command = ["uutils-du", "--exclude=/proc"]
     const options = []
     if (useBlockSize.checked) {
-        command.push("-B", "1")
         options.push("block-size")
-    } else {
-        command.push("-b")
     }
 
-    // const data = (await doFetch("/dir", {
     const data = (await doFetch("/scan", {
         path,
         pages: 1,
-        // command,
         options
     })) as DataNode
 
@@ -102,33 +90,22 @@ async function addMore(button: HTMLButtonElement) {
 
     const branch = updateBranches.find(b => b.path === button.dataset.path)
     if (branch) branch.pages = pages
-    // console.log(updateBranches)
-    // console.log(branch)
-    // console.log(path)
 }
 
-document.getElementById("tree").addEventListener("click", async e => {
-    const target = e.target as HTMLDivElement | HTMLButtonElement
-    // console.log(target)
-    // if (!target.dataset.dir) return
-    if (target instanceof HTMLButtonElement && target.name === "add-more") addMore(target)
-
-    if (!target.classList.contains("td")) return
+async function unfoldDir(target: HTMLElement) {
     if (target.classList.contains("itself")) return
+    if (target.classList.contains("link")) return
+    if (target.classList.contains("unavailable")) return
 
     const shoot = target.closest("div.shoot") as HTMLDivElement
     const dataset = shoot?.dataset
 
     if (!dataset.nested) {
-        // const prePath = dataset.path ? `${rootPath}${dataset.path}/` : rootPath
-        // const fullPath = prePath + dataset.name
-        // console.log(fullPath)
-        // const path =`${dataset.path}/${dataset.name}`
-        const path = dataset.path ? `${dataset.path}/${dataset.name}` : dataset.name
-
+        dataset.nested = "true"
         target.classList.add("unfold")
 
-        // const data = (await doFetch("/dir", { path: fullPath, pages: 1 })) as DataNode
+        const path = dataset.path ? `${dataset.path}/${dataset.name}` : dataset.name
+
         const data = (await doFetch("/dir", { path, pages: 1 })) as DataNode
         console.log(data)
 
@@ -136,11 +113,16 @@ document.getElementById("tree").addEventListener("click", async e => {
 
         const branch = createBranch(data, dataset.path)
         if (branch) shoot.appendChild(branch)
-        dataset.nested = "true"
-        // dataset.unfolded = "true"
     } else {
         target.classList.toggle("unfold")
         shoot.querySelector<HTMLDivElement>(".dir-content")!.hidden =
             !target.classList.contains("unfold")
     }
+}
+
+document.getElementById("tree").addEventListener("click", async e => {
+    const target = e.target as HTMLDivElement | HTMLButtonElement
+    // console.log(target)
+    if (target instanceof HTMLButtonElement && target.name === "add-more") addMore(target)
+    else if (target.classList.contains("td")) unfoldDir(target)
 })

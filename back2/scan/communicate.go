@@ -20,14 +20,12 @@ func sortContent(nodes []*models.Node) {
 
 func getBranch(path string) *viewNode {
 	parts := strings.Split(path, "/")
-	// data.mu.Lock()
-	// defer data.mu.Unlock()
 	target := data.viewTree
 
-	if target == nil {
-		data.viewTree = &viewNode{dirNode: data.scanTree}
-		return data.viewTree
-	}
+	// if target == nil {
+	// 	data.viewTree = &viewNode{dirNode: data.scanTree}
+	// 	return data.viewTree
+	// }
 
 	for _, name := range parts {
 		fmt.Println(name)
@@ -88,9 +86,23 @@ func GetDir(path string, pages int) (*models.Node, error) {
 	return re, nil
 }
 
+func checkCanceled() bool {
+	if data.scanTree == nil {
+		return true
+	}
+	return data.cancel == nil && data.scanTree.Temp != 0
+}
+
 func GetUpdate(req []models.Request) []*models.Node {
 	re := make([]*models.Node, len(req))
+
 	data.mu.Lock()
+	defer data.mu.Unlock()
+
+	if checkCanceled() {
+		return nil
+	}
+
 	for i, r := range req {
 		b := getBranch(r.Path)
 		re[i] = parseDirNode(b.dirNode)
@@ -102,6 +114,6 @@ func GetUpdate(req []models.Request) []*models.Node {
 		sortContent(re[i].Content)
 		re[i].Content = helpers.LimitSlice(re[i].Content, pageSize*r.Pages)
 	}
-	data.mu.Unlock()
+
 	return re
 }
