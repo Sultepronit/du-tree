@@ -5,7 +5,6 @@ import (
 	"du-tree/models"
 	"du-tree/scan"
 	"os"
-	"time"
 
 	"encoding/json"
 	"fmt"
@@ -49,10 +48,11 @@ func handleScan(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Println(req)
 
-	scan.Init(req)
-	time.Sleep(time.Millisecond * 10)
+	// scan.Init(req)
+	// time.Sleep(time.Millisecond * 10)
 
-	re, err := scan.GetDir("", req.Pages)
+	// re, err := scan.GetDir("", req.Pages)
+	re, err := scan.Init(req)
 	if err != nil {
 		log.Println(err)
 	}

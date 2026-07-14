@@ -22,11 +22,6 @@ func getBranch(path string) *viewNode {
 	parts := strings.Split(path, "/")
 	target := data.viewTree
 
-	// if target == nil {
-	// 	data.viewTree = &viewNode{dirNode: data.scanTree}
-	// 	return data.viewTree
-	// }
-
 	for _, name := range parts {
 		fmt.Println(name)
 		if next, prs := target.Branches[name]; prs {
@@ -58,7 +53,7 @@ func GetDir(path string, pages int) (*models.Node, error) {
 	branch := getBranch(path)
 
 	if branch.Files == nil {
-		files, err := getFiles(request.Path+path, true)
+		files, err := getFiles(request.Path+path, slices.Contains(request.Options, "block-size"))
 		if err != nil {
 			return nil, err
 		}

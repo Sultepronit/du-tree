@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"slices"
 	"syscall"
 	"time"
 )
@@ -25,8 +26,7 @@ func getRootBlockSize(target string) (int64, error) {
 	return 0, errors.New("no file info")
 }
 
-// func calcSize(ctx context.Context, path string, node *models.Node, entry os.DirEntry) error {
-func calcSize(entry os.DirEntry) (int64, error) {
+func calcSize(entry os.DirEntry, reqBlockSize bool) (int64, error) {
 	info, err := entry.Info()
 	if err != nil {
 		return 0, err
@@ -38,7 +38,7 @@ func calcSize(entry os.DirEntry) (int64, error) {
 	}
 
 	var size int64
-	if true {
+	if reqBlockSize {
 		size = sysStat.Blocks * 512
 	} else if !entry.IsDir() {
 		size = info.Size()
@@ -54,7 +54,7 @@ func calcSize(entry os.DirEntry) (int64, error) {
 	return size, nil
 }
 
-func scanDir(ctx context.Context, path string, node *dirNode) error {
+func scanDir(ctx context.Context, path string, node *dirNode, reqBlockSize bool) error {
 	select {
 	case <-ctx.Done():
 		return ctx.Err()
@@ -90,7 +90,7 @@ func scanDir(ctx context.Context, path string, node *dirNode) error {
 
 	for _, entry := range entries {
 		time.Sleep(time.Millisecond * 50)
-		size, err := calcSize(entry)
+		size, err := calcSize(entry, reqBlockSize)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -128,7 +128,7 @@ func scanDir(ctx context.Context, path string, node *dirNode) error {
 	data.mu.Unlock()
 	for _, child := range node.Dirs {
 		fullPath := filepath.Join(path, child.Name)
-		err := scanDir(ctx, fullPath, child)
+		err := scanDir(ctx, fullPath, child, reqBlockSize)
 		if err != nil {
 			return err
 		}
@@ -138,7 +138,7 @@ func scanDir(ctx context.Context, path string, node *dirNode) error {
 	return nil
 }
 
-func Init(req models.Request) {
+func Init(req models.Request) (*models.Node, error) {
 	data.mu.Lock()
 
 	if data.cancel != nil {
@@ -153,20 +153,21 @@ func Init(req models.Request) {
 	data.inodes = make(map[uint64]bool)
 	data.scanTree = &dirNode{Temp: 2}
 	data.viewTree = &viewNode{dirNode: data.scanTree}
-	// data.viewTree = nil
 
-	rootSize, err := getRootBlockSize(data.request.Path)
-	if err != nil {
-		fmt.Println(err)
-		return
+	reqBlockSize := slices.Contains(req.Options, "block-size")
+
+	if reqBlockSize {
+		rootSize, err := getRootBlockSize(data.request.Path)
+		if err != nil {
+			fmt.Println(err)
+			return nil, nil
+		}
+		data.scanTree.Size = rootSize
 	}
-	data.scanTree.Size = rootSize
 	data.mu.Unlock()
 
-	// err = scanDir(ctx, data.request.Path, data.scanTree)
-	// fmt.Println(err)
 	go func() {
-		err = scanDir(ctx, data.request.Path, data.scanTree)
+		err := scanDir(ctx, data.request.Path, data.scanTree, reqBlockSize)
 		fmt.Println(err)
 
 		data.mu.Lock()
@@ -176,6 +177,9 @@ func Init(req models.Request) {
 	}()
 
 	// helpers.TempPrinAsJson(data.scanTree)
+	time.Sleep(time.Millisecond * 100)
+
+	return GetDir("", req.Pages)
 }
 
 func Stop() {
