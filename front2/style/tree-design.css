@@ -81,7 +81,7 @@ li {
 
 .fd-entry {
     display: grid;
-    grid-template-columns: 4em auto;
+    grid-template-columns: 4.7em auto;
     gap: 1em;
     position: relative;
     background-color: aliceblue;
@@ -89,9 +89,12 @@ li {
 
 .temp > * > .fd-size {
     /* animation: wave-pulse 2s infinite ease-in-out; */
-    /* opacity: 0.4; */
     color: var(--temp-color);
 }
+
+/* .temp > * > .fd-size::before {
+    content: "≥";
+} */
 
 /* .unavailable {
     color: var(--temp-color);
@@ -100,6 +103,10 @@ li {
 .locked > * > .fd-size {
     color: var(--locked-color);
 }
+
+/* .locked > * > .fd-size::before {
+    content: "≥";
+} */
 
 .locked.itself > * > .fd-size {
     color: red;

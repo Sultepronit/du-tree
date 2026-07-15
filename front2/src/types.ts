@@ -13,7 +13,7 @@ export type DataNode = {
 export type ElNode = {
     shoot: HTMLDivElement
     size?: HTMLDivElement
-    entry?: HTMLDivElement
+    // entry?: HTMLDivElement
 }
 
 export type UpdateBranch = {

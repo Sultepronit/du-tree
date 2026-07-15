@@ -43,6 +43,11 @@ function genTitle(data: DataNode, path: string) {
     return title.join("\n")
 }
 
+const handleBytesExt = (data: DataNode) => {
+    console.log(data.temp > 0, data.locked !== undefined, data.locked)
+    return handleBytes(data.size, data.temp > 0 || data.locked !== undefined)
+}
+
 function createLi(data: DataNode, path: string): string {
     const type = data.type[0] === "L" ? `link t${data.type.slice(1)}` : `t${data.type}`
 
@@ -66,7 +71,7 @@ function createLi(data: DataNode, path: string): string {
         >
             <div class="fd-entry">
                 <div class="fd-sizebar"></div>
-                <div class="fd-size" title="${data.size} B">${handleBytes(data.size)}</div>
+                <div class="fd-size" title="${data.size} B">${handleBytesExt(data)}</div>
                 <div class="fd-name">${data.name}</div>
             </div>
     </div></li>`
@@ -142,25 +147,29 @@ export function appendBranch(data: DataNode, button: HTMLButtonElement, pages: n
 
 function updateLocked(elNode: ElNode, oldD: DataNode, newD: DataNode) {
     if (oldD.locked === newD.locked) return
-    if (!elNode.entry) elNode.entry = elNode.shoot.querySelector(".fd-entry")
+    // if (!elNode.entry) elNode.entry = elNode.shoot.querySelector(".fd-entry")
 
     elNode.shoot.classList.add("locked")
     const details = genLockedDetails(newD).join("\n")
     if (newD.locked === -1) {
         elNode.shoot.classList.add("itself")
-        elNode.entry.title += "\n" + details
+        // elNode.entry.title += "\n" + details
+        elNode.shoot.title += "\n" + details
     } else {
-        elNode.entry.title = genTitle(newD, elNode.shoot.dataset.path)
+        // elNode.entry.title = genTitle(newD, elNode.shoot.dataset.path)
+        elNode.shoot.title = genTitle(newD, elNode.shoot.dataset.path)
     }
 }
 
 function updateShootSize(elNode: ElNode, oldD: DataNode | null, newD: DataNode) {
-    // console.log(oldD?.size, newD.size)
     if (oldD?.size !== newD.size) {
         elNode.shoot.style.setProperty("--size", `${newD.size}%`)
         if (!elNode.size) elNode.size = elNode.shoot.querySelector(".fd-size")
+        elNode.size.textContent = handleBytesExt(newD)
         elNode.size.title = `${newD.size} B`
-        elNode.size.textContent = handleBytes(newD.size)
+    } else if (oldD?.temp !== newD.temp || oldD?.locked !== newD.locked) {
+        if (!elNode.size) elNode.size = elNode.shoot.querySelector(".fd-size")
+        elNode.size.textContent = handleBytesExt(newD)
     }
 
     if (newD.temp) {
@@ -176,14 +185,13 @@ function updateShootSize(elNode: ElNode, oldD: DataNode | null, newD: DataNode) 
 }
 
 function resetTitle(elNode: ElNode, data: DataNode) {
-    if (!elNode.entry) elNode.entry = elNode.shoot.querySelector(".fd-entry")
-    elNode.entry.title = genTitle(data, elNode.shoot.dataset.path)
+    // if (!elNode.entry) elNode.entry = elNode.shoot.querySelector(".fd-entry")
+    // elNode.entry.title = genTitle(data, elNode.shoot.dataset.path)
+    elNode.shoot.title = genTitle(data, elNode.shoot.dataset.path)
 }
 
 function resetShoot(elNode: ElNode, data: DataNode) {
     delete elNode.shoot.dataset.nested
-    // delete elNode.shoot.dataset.unfolded
-    // elNode.shoot.className = "shoot"
     elNode.shoot.querySelector("ul")?.remove() // remove the branch too?
 
     const classes = [`shoot t${data.type}`]
@@ -195,7 +203,6 @@ function resetShoot(elNode: ElNode, data: DataNode) {
 
     elNode.shoot.dataset.name = data.name
     elNode.shoot.querySelector(".fd-name").textContent = data.name
-    // elNode.shoot.querySelector(".fd-type").className = `fd-type t${data.type}`
 
     updateShootSize(elNode, null, data)
     resetTitle(elNode, data)
@@ -328,12 +335,12 @@ export function updateTree(bNodes: DataNode[]) {
     }
 }
 
-let totalSizeVal = 0
+let totalSizeVal = -7
 function updateTreeRoot(data: DataNode) {
     // updateSize(node, totalSize, totalSize.parentElement as HTMLDivElement)
     if (data?.size !== totalSizeVal) {
         totalSize.title = `${data.size} B`
-        totalSize.textContent = handleBytes(data.size)
+        totalSize.textContent = handleBytesExt(data)
         totalSizeVal = data.size
     }
 
@@ -355,6 +362,7 @@ export async function rebuildTree(data: DataNode, path: string) {
     treeBlock.innerHTML = ""
     max = 1
     branches2 = {}
+    totalSizeVal = -7
 
     updateTreeRoot(data)
 

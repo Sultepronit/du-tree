@@ -40,9 +40,9 @@ func calcSize(entry os.DirEntry, reqBlockSize bool) (int64, error) {
 	var size int64
 	if reqBlockSize {
 		size = sysStat.Blocks * 512
-	} else if !entry.IsDir() {
+	}  else if !entry.IsDir() {
 		size = info.Size()
-	}
+	} 
 
 	if sysStat.Nlink > 1 {
 		if data.inodes[sysStat.Ino] {
@@ -89,14 +89,16 @@ func scanDir(ctx context.Context, path string, node *dirNode, reqBlockSize bool)
 	dirs := make([]*dirNode, 0, len(entries))
 
 	for _, entry := range entries {
-		time.Sleep(time.Millisecond * 50)
+		// time.Sleep(time.Millisecond * 50)
 		size, err := calcSize(entry, reqBlockSize)
 		if err != nil {
 			fmt.Println(err)
 		}
 
-		for n := node; n != nil; n = n.Parent {
-			n.Size += size
+		if size > 0 {
+			for n := node; n != nil; n = n.Parent {
+				n.Size += size
+			}
 		}
 
 		if entry.IsDir() {
