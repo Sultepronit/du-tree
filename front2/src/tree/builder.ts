@@ -31,7 +31,14 @@ function genLockedDetails(node: DataNode) {
 function genTitle(data: DataNode, path: string) {
     const title = [`Path: ${rootPath}${path}`, `Name: ${data.name}`]
     if (data.linkPath) {
-        title.push(`${data.type === "Lbrk" ? "Broken link to:" : "Link to:"} ${data.linkPath}`)
+        // title.push(`${data.type === "Lbrk" ? "Broken link to:" : "Link to:"} ${data.linkPath}`)
+        title.push(
+            data.type === "Lbrk"
+                ? `Broken link to: ${data.linkPath}`
+                : data.type === "Lperm"
+                  ? `Locked link (permission denied)\n Run as root to see where it points.`
+                  : `Link to: ${data.linkPath}`
+        )
     } else if (data.locked) {
         title.push(...genLockedDetails(data))
     }
@@ -44,7 +51,7 @@ function genTitle(data: DataNode, path: string) {
 }
 
 const handleBytesExt = (data: DataNode) => {
-    console.log(data.temp > 0, data.locked !== undefined, data.locked)
+    // console.log(data.temp > 0, data.locked !== undefined, data.locked)
     return handleBytes(data.size, data.temp > 0 || data.locked !== undefined)
 }
 
@@ -340,7 +347,8 @@ function updateTreeRoot(data: DataNode) {
     // updateSize(node, totalSize, totalSize.parentElement as HTMLDivElement)
     if (data?.size !== totalSizeVal) {
         totalSize.title = `${data.size} B`
-        totalSize.textContent = handleBytesExt(data)
+        // totalSize.textContent = handleBytesExt(data)
+        totalSize.textContent = handleBytes(data.size)
         totalSizeVal = data.size
     }
 
@@ -353,6 +361,9 @@ function updateTreeRoot(data: DataNode) {
     } else {
         totalLocked.classList.add("hidden")
     }
+
+    if (data.temp || data.locked) totalSize.parentElement.classList.add("probably-bigger")
+    else totalSize.parentElement.classList.remove("probably-bigger")
 }
 
 export async function rebuildTree(data: DataNode, path: string) {

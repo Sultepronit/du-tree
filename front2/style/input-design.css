@@ -73,11 +73,15 @@
     /* animation: wave-pulse 2s infinite ease-in-out; */
 }
 
+.probably-bigger #total-size::before {
+    content: "≥";
+}
+
 .temp #total-size::after {
     /* #total-size::after { */
     content: "";
     display: inline-block;
-    margin: 0 0.1em -0.1em;
+    margin: 0 0.5em -0.1em;
     width: 0.9em;
     height: 0.9em;
     -webkit-mask-repeat: no-repeat;

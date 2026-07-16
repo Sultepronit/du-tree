@@ -138,23 +138,26 @@
 
 .link::before {
     background-color: #00acff;
-}
-
-/* .tLbrk::before { */
-.tbrk::before {
-    background-color: #ff71c7;
     mask-image: url("icons/link-2.svg");
     -webkit-mask-image: url("icons/link-2.svg");
 }
 
-/* .tL-::before { */
+.tbrk::before {
+    background-color: #ff71c7;
+    /* mask-image: url("icons/link-2.svg");
+    -webkit-mask-image: url("icons/link-2.svg"); */
+}
+
+.tperm::before {
+    background-color: red;
+}
+
 .link.t-::before {
     /* background-color: #00acff; */
     mask-image: url("icons/file-link.svg");
     -webkit-mask-image: url("icons/file-link.svg");
 }
 
-/* .tLd::before { */
 .link.td::before {
     cursor: auto;
     /* background-color: #00acff; */

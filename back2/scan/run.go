@@ -29,6 +29,9 @@ func getRootBlockSize(target string) (int64, error) {
 func calcSize(entry os.DirEntry, reqBlockSize bool) (int64, error) {
 	info, err := entry.Info()
 	if err != nil {
+		if os.IsNotExist(err) {
+			return 0, nil
+		}
 		return 0, err
 	}
 
@@ -92,7 +95,7 @@ func scanDir(ctx context.Context, path string, node *dirNode, reqBlockSize bool)
 		// time.Sleep(time.Millisecond * 50)
 		size, err := calcSize(entry, reqBlockSize)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println("run/calcSize:", err)
 		}
 
 		if size > 0 {
@@ -170,7 +173,7 @@ func Init(req models.Request) (*models.Node, error) {
 
 	go func() {
 		err := scanDir(ctx, data.request.Path, data.scanTree, reqBlockSize)
-		fmt.Println(err)
+		fmt.Println("run/scanDir:", err)
 
 		data.mu.Lock()
 		data.cancel = nil
