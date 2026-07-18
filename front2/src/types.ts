@@ -6,6 +6,7 @@ export type DataNode = {
     locked?: number
     linkPath?: string
     nlink?: number
+    isHardLink?: true
     content?: DataNode[]
     contentCount?: number
 }

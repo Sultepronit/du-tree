@@ -10,17 +10,18 @@ type dirNode struct {
 	Parent *dirNode   `json:"-"`
 	Name   string     `json:"name"`
 	Size   int64      `json:"size"`
-	Locked int        `json:"locked,omitempty"`
+	Locked int        `json:"locked,omitempty"` // -1 means locked itself >=1 means locked children count
 	Dirs   []*dirNode `json:"content,omitempty"`
 	Temp   int8       `json:"temp,omitempty"`
 }
 
 type fileNode struct {
-	Name     string `json:"name"`
-	Size     int64  `json:"size"`
-	Type     string `json:"type"`
-	LinkPath string `json:"linkPath,omitempty"`
-	Nlink    uint64 `json:"nlink,omitempty"`
+	Name       string `json:"name"`
+	Size       int64  `json:"size"` // -1 means ommited hardlink, size = 0
+	Type       string `json:"type"`
+	LinkPath   string `json:"linkPath,omitempty"`
+	Nlink      uint64 `json:"nlink,omitempty"`
+	IsHardlink bool   `json:"isHardlink,omitempty"`
 }
 
 type viewNode struct {
@@ -30,10 +31,11 @@ type viewNode struct {
 }
 
 type scanData struct {
-	mu       sync.RWMutex
-	cancel   context.CancelFunc
-	request  models.Request
-	inodes   map[uint64]bool
+	mu      sync.RWMutex
+	cancel  context.CancelFunc
+	request models.Request
+	inodes  map[uint64]bool
+	// inodes   map[uint64][]string
 	scanTree *dirNode
 	viewTree *viewNode
 }

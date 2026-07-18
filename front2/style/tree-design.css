@@ -123,3 +123,7 @@ li {
 .hardlink .fd-size {
     color: var(--hardlink-color);
 }
+
+.neglected .fd-size {
+    opacity: 0.5;
+}

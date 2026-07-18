@@ -19,6 +19,7 @@ func parseFileNode(node *fileNode) *models.Node {
 		Type:     node.Type,
 		LinkPath: node.LinkPath,
 		Nlink:    node.Nlink,
+		IsHardLink: node.IsHardlink,
 	}
 
 }

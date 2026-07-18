@@ -67,7 +67,10 @@ function createLi(data: DataNode, path: string): string {
         classes.push("temp")
         if (data.temp === 2) classes.push("unavailable")
     }
-    if (data.nlink) classes.push("hardlink")
+    if (data.nlink) {
+        classes.push("hardlink")
+        if (data.isHardLink) classes.push("neglected")
+    }
 
     return `<li><div
             class="${classes.join(" ")}"
