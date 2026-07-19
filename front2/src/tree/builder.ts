@@ -28,8 +28,19 @@ function genLockedDetails(node: DataNode) {
     return re
 }
 
+const specialTypes = {
+    S: "Socket",
+    p: "Pipe",
+    D: "Device"
+}
+
 function genTitle(data: DataNode, path: string) {
     const title = [`Path: ${rootPath}${path}`, `Name: ${data.name}`]
+
+    const t = data.type[0] === "L" ? data.type.slice(1) : data.type
+    const st = specialTypes[t]
+    if (st) title.push(`File type: ${st}`)
+
     if (data.linkPath) {
         title.push(
             data.type === "Lbrk"
@@ -41,6 +52,7 @@ function genTitle(data: DataNode, path: string) {
     } else if (data.locked) {
         title.push(...genLockedDetails(data))
     }
+
     if (data.nlink) {
         let msg = ` Shared inode: ${data.nlink} hard links exist.\n `
         if (data.isNeglected) {
@@ -53,6 +65,7 @@ function genTitle(data: DataNode, path: string) {
             msg
         )
     }
+
     return title.join("\n")
 }
 
