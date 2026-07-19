@@ -18,7 +18,6 @@ export async function checkUser() {
     return user?.root
 }
 
-// type pathHint = { current: string; next: string[] }
 type nextDetails = {
     name: string
     link?: string
@@ -30,7 +29,6 @@ type pathHint = {
 }
 
 let selected = null as Element
-// function addSuggestions(names: string[]) {
 function addSuggestions(sugg: nextDetails[]) {
     suggestions.classList.remove("hidden")
     selected = null
@@ -139,7 +137,8 @@ function moveSelection(down: boolean) {
     }
 
     if (selected) selected.classList.add("selected")
-    console.log(approvedPath.current, selected?.textContent)
+    // console.log(approvedPath.current, selected?.textContent)
+    selected.scrollIntoView({ behavior: "smooth", block: "center" })
 }
 
 const inputPath = () => (input.value.endsWith("/") ? input.value : input.value + "/")
@@ -147,7 +146,6 @@ const inputPath = () => (input.value.endsWith("/") ? input.value : input.value +
 // input.addEventListener("keydown", e => {
 document.addEventListener("keydown", e => {
     // console.log(e.key)
-    // if (e.key === "Enter" && isOk) {
     if (e.key === "Enter") {
         let path: string
         if (selected) {
@@ -163,7 +161,6 @@ document.addEventListener("keydown", e => {
             isOk = true
             input.className = "ok"
         } else if (isOk) {
-            // path = input.value.endsWith("/") ? input.value : input.value + "/"
             path = inputPath()
             initTree(path)
         } else {
