@@ -4,6 +4,7 @@ import (
 	"du-tree/explorer"
 	"errors"
 	"os"
+	"path/filepath"
 	"syscall"
 )
 
@@ -43,10 +44,9 @@ func getFiles(path string, blockSizeReq bool) ([]*fileNode, error) {
 		if stat.Nlink > 1 {
 			node.Nlink = stat.Nlink
 			// if (data.inodes[stat.Ino][0] != filepath.Join(path, node.Name)) {
-			if data.inodes[stat.Ino] {
-				// node.Size = -1
+			if data.inodes[stat.Ino] != filepath.Join(path, node.Name) {
+				// if data.inodes[stat.Ino] {
 				node.IsHardlink = true
-				// continue
 			}
 		}
 

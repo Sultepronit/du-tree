@@ -14,12 +14,12 @@ func parseDirNode(node *dirNode) *models.Node {
 
 func parseFileNode(node *fileNode) *models.Node {
 	return &models.Node{
-		Name:     node.Name,
-		Size:     node.Size,
-		Type:     node.Type,
-		LinkPath: node.LinkPath,
-		Nlink:    node.Nlink,
-		IsHardLink: node.IsHardlink,
+		Name:        node.Name,
+		Size:        node.Size,
+		Type:        node.Type,
+		LinkPath:    node.LinkPath,
+		Nlink:       node.Nlink,
+		IsNeglected: node.IsHardlink,
 	}
 
 }

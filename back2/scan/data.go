@@ -34,8 +34,9 @@ type scanData struct {
 	mu      sync.RWMutex
 	cancel  context.CancelFunc
 	request models.Request
-	inodes  map[uint64]bool
+	// inodes  map[uint64]bool
 	// inodes   map[uint64][]string
+	inodes   map[uint64]string
 	scanTree *dirNode
 	viewTree *viewNode
 }

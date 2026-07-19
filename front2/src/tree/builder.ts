@@ -31,20 +31,26 @@ function genLockedDetails(node: DataNode) {
 function genTitle(data: DataNode, path: string) {
     const title = [`Path: ${rootPath}${path}`, `Name: ${data.name}`]
     if (data.linkPath) {
-        // title.push(`${data.type === "Lbrk" ? "Broken link to:" : "Link to:"} ${data.linkPath}`)
         title.push(
             data.type === "Lbrk"
-                ? `Broken link to: ${data.linkPath}`
+                ? `Broken soft link to: ${data.linkPath}`
                 : data.type === "Lperm"
-                  ? `Locked link (permission denied)\n Run as root to see where it points.`
-                  : `Link to: ${data.linkPath}`
+                  ? `Locked soft link (permission denied)\n Run as root to see where it points.`
+                  : `Soft link to: ${data.linkPath}`
         )
     } else if (data.locked) {
         title.push(...genLockedDetails(data))
     }
     if (data.nlink) {
+        let msg = ` Shared inode: ${data.nlink} hard links exist.\n `
+        if (data.isNeglected) {
+            msg += "Size of this hard link is neglected."
+        } else {
+            msg += "Size of this hard link is counted, all others are neglected."
+        }
         title.push(
-            ` Shared inode: ${data.nlink} hard links exist.\n Size counted once to reflect actual disk usage.`
+            // ` Shared inode: ${data.nlink} hard links exist.\n Size counted once to reflect actual disk usage.`
+            msg
         )
     }
     return title.join("\n")
@@ -69,7 +75,7 @@ function createLi(data: DataNode, path: string): string {
     }
     if (data.nlink) {
         classes.push("hardlink")
-        if (data.isHardLink) classes.push("neglected")
+        if (data.isNeglected) classes.push("neglected")
     }
 
     return `<li><div
@@ -208,7 +214,10 @@ function resetShoot(elNode: ElNode, data: DataNode) {
     if (data.locked) {
         classes.push("locked")
         if (data.locked === -1) classes.push("itself")
-    } else if (data.nlink) classes.push("hardlink")
+    } else if (data.nlink) {
+        classes.push("hardlink")
+        if (data.isNeglected) classes.push("neglected")
+    }
     elNode.shoot.className = classes.join(" ")
 
     elNode.shoot.dataset.name = data.name

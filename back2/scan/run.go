@@ -3,7 +3,6 @@ package scan
 import (
 	"context"
 	"du-tree/explorer"
-	"du-tree/helpers"
 	"du-tree/models"
 	"errors"
 	"fmt"
@@ -49,19 +48,20 @@ func calcSize(entry os.DirEntry, reqBlockSize bool, path string) (int64, error) 
 	}
 
 	if sysStat.Nlink > 1 && !entry.IsDir() {
-		// fullPath := filepath.Join(path, entry.Name())
-		if data.inodes[sysStat.Ino] {
-			// if data.inodes[sysStat.Ino] != nil {
+		fullPath := filepath.Join(path, entry.Name())
+		// if data.inodes[sysStat.Ino] {
+		if data.inodes[sysStat.Ino] != "" {
 			// data.inodes[sysStat.Ino] = append(data.inodes[sysStat.Ino], fullPath)
 			size = 0
 			// size *= -1
 		} else {
 			// data.inodes[sysStat.Ino] = []string{fullPath}
-			data.inodes[sysStat.Ino] = true
+			// data.inodes[sysStat.Ino] = true
+			data.inodes[sysStat.Ino] = fullPath
 		}
 
-		fmt.Println(sysStat.Nlink, sysStat.Ino)
-		helpers.TempPrinAsJson(data.inodes[sysStat.Ino])
+		// fmt.Println(sysStat.Nlink, sysStat.Ino)
+		// helpers.TempPrinAsJson(data.inodes[sysStat.Ino])
 	}
 
 	return size, nil
@@ -166,7 +166,8 @@ func Init(req models.Request) (*models.Node, error) {
 	data.request = req
 
 	// data.inodes = make(map[uint64][]string)
-	data.inodes = make(map[uint64]bool)
+	// data.inodes = make(map[uint64]bool)
+	data.inodes = make(map[uint64]string)
 	data.scanTree = &dirNode{Temp: 2}
 	data.viewTree = &viewNode{dirNode: data.scanTree}
 
@@ -194,7 +195,7 @@ func Init(req models.Request) (*models.Node, error) {
 
 	// helpers.TempPrinAsJson(data.scanTree)
 	time.Sleep(time.Millisecond * 100)
-
+	// fmt.Println("here?")
 	return GetDir("", req.Pages)
 }
 

@@ -29,5 +29,5 @@ type Node struct {
 	ContentCount int     `json:"contentCount,omitempty"`
 	SizeIsTemp   bool    `json:"sizeIsTemp,omitempty"`
 	Temp         int8    `json:"temp,omitempty"`
-	IsHardLink   bool    `json:"isHardLink,omitempty"`
+	IsNeglected  bool    `json:"isNeglected,omitempty"`
 }
