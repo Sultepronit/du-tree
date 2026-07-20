@@ -1,6 +1,6 @@
 import { doFetch } from "../api/fetch"
 
-import type { DataNode } from "../types"
+import type { DataNode, reqOptions } from "../types"
 import { appendBranch, createBranch, rebuildTree, setCanceled, updateTree } from "./builder"
 
 const useBlockSize = document.getElementById("use-block-size") as HTMLInputElement
@@ -11,20 +11,31 @@ export async function initTree(path: string) {
     rootPath = path
 
     const options = []
+    const options2 = {} as reqOptions
     if (useBlockSize.checked) {
         options.push("block-size")
+        options2.blockSize = true
     }
 
     const data = (await doFetch("/scan", {
         path,
         pages: 1,
-        options
+        options,
+        options2
     })) as DataNode
-
     console.log(data)
 
     rebuildTree(data, path)
+    if (data.temp) initUpdates()
+}
 
+export async function renderTree(path: string) {
+    rootPath = path
+
+    const data = (await doFetch("/dir", { path: "", pages: 1 })) as DataNode
+    console.log(data)
+
+    rebuildTree(data, path)
     if (data.temp) initUpdates()
 }
 

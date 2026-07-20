@@ -26,6 +26,10 @@ func checkUser(w http.ResponseWriter, _ *http.Request) {
 	sendResult(w, map[string]bool{"root": os.Getuid() == 0})
 }
 
+func handleInit(w http.ResponseWriter, _ *http.Request) {
+	sendResult(w, scan.GetState())
+}
+
 func checkPath(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.URL.Path)
 
@@ -48,10 +52,6 @@ func handleScan(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Println(req)
 
-	// scan.Init(req)
-	// time.Sleep(time.Millisecond * 10)
-
-	// re, err := scan.GetDir("", req.Pages)
 	re, err := scan.Init(req)
 	if err != nil {
 		log.Println(err)

@@ -112,3 +112,9 @@ func GetUpdate(req []models.Request) []*models.Node {
 
 	return re
 }
+
+func GetState() models.Request {
+	data.mu.RLock()
+	defer data.mu.RUnlock()
+	return data.request
+}

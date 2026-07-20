@@ -1,3 +1,7 @@
+export type reqOptions = {
+    blockSize?: true
+}
+
 export type DataNode = {
     name: string
     type: string

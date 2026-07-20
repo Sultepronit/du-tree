@@ -11,11 +11,15 @@ type Path struct {
 	Next    []PathDetail `json:"next"`
 }
 
+type reqOptions struct {
+	BlockSize bool `json:"blockSize,omitempty"`
+}
+
 type Request struct {
-	Path    string   `json:"path"`
-	Pages   int      `json:"pages"`
-	Command []string `json:"command"`
-	Options []string `json:"options"`
+	Path     string   `json:"path"`
+	Pages    int      `json:"pages"`
+	Options  []string `json:"options"`
+	Options2 reqOptions
 }
 
 type Node struct {
