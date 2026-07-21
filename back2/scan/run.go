@@ -195,7 +195,7 @@ func Init(req models.Request) (*models.Node, error) {
 
 	// helpers.TempPrinAsJson(data.scanTree)
 	time.Sleep(time.Millisecond * 100)
-	// fmt.Println("here?")
+	fmt.Println("here?")
 	return GetDir("", req.Pages)
 }
 

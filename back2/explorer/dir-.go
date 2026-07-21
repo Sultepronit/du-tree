@@ -23,7 +23,7 @@ func ReadDir(path string, blockSizeReq bool) ([]*models.Node, error) {
 			node.SizeIsTemp = true
 			continue
 		} else if node.Type == "L" {
-			typ, realPath := GetRealEntity(path, node.Name)
+			typ, realPath := GetLinkInfo(path, node.Name)
 			node.Type += typ
 			node.LinkPath = realPath
 		}

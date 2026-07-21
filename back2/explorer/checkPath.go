@@ -15,7 +15,6 @@ func CheckPath(path string) *models.Path {
 
 	re := models.Path{
 		Current: "ok",
-		// Next:    make([]string, 0, 5),
 		Next: make([]models.PathDetail, 0, 5),
 	}
 
@@ -23,7 +22,6 @@ func CheckPath(path string) *models.Path {
 		entries, err := os.ReadDir(path)
 		if err != nil {
 			if errors.Is(err, os.ErrPermission) {
-				// re.Next = append(re.Next, "Presmission denied")
 				re.Current = "Permission denied"
 				return &re
 			}
@@ -42,10 +40,11 @@ func CheckPath(path string) *models.Path {
 					re.Next = append(re.Next, next)
 
 				} else if e.Type().String()[0:1] == "L" {
-					typ, realPath := GetRealEntity(path, e.Name())
+					typ, linkTo := GetLinkInfo(path, e.Name())
 					if typ == "d" {
-						next := models.PathDetail{Name: e.Name(), Link: realPath}
-						if !IsAccessible(realPath, "") {
+						next := models.PathDetail{Name: e.Name(), Link: linkTo}
+						// if !IsAccessible(realPath, "") {
+						if !IsAccessible(path, e.Name()) {
 							next.IsLocked = true
 						}
 						re.Next = append(re.Next, next)

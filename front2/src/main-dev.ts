@@ -1,8 +1,6 @@
 import { checkState } from "./init/init"
-import { checkUser, updateAccessWidget } from "./path/pathInput"
+
 console.log("dev version!")
-// checkUser()
-updateAccessWidget()
 
 checkState()
 

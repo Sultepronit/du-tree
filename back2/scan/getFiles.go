@@ -27,7 +27,7 @@ func getFiles(path string, blockSizeReq bool) ([]*fileNode, error) {
 		inflated = append(inflated, node)
 
 		if node.Type == "L" {
-			typ, realPath := explorer.GetRealEntity(path, node.Name)
+			typ, realPath := explorer.GetLinkInfo(path, node.Name)
 			node.Type += typ
 			node.LinkPath = realPath
 		}

@@ -6,16 +6,26 @@ const input = document.getElementById("path") as HTMLInputElement
 const pre = document.getElementById("pre-suggestions") as HTMLDivElement
 const suggestions = document.getElementById("suggestions-box") as HTMLDivElement
 
-export async function updateAccessWidget() {
-    const root = await checkUser()
-    if (root) accessWidget.classList.add("root")
-    else accessWidget.classList.remove("root")
+export async function setAccessWidget(val: "root" | "nonroot" | "locked" | "unlocked") {
+    // accessWidget.className = val
+    if (val === "root") {
+        accessWidget.classList.add("root")
+    } else if (val === "nonroot") {
+        accessWidget.classList.remove("root")
+    } else if (val === "locked") {
+        accessWidget.classList.add("locked")
+    } else if (val === "unlocked") {
+        accessWidget.classList.remove("locked")
+    }
 }
 
 export async function checkUser() {
     const user = await doFetch("/user")
-    console.log(user?.root)
-    return user?.root
+    setAccessWidget(user?.root ? "root" : "nonroot")
+}
+
+export function setPath(val: string) {
+    input.value = val
 }
 
 type nextDetails = {
@@ -63,7 +73,7 @@ function hideSuggesions() {
 let approvedPath = null as pathHint
 let isOk = false
 input.addEventListener("input", async () => {
-    updateAccessWidget()
+    checkUser()
     // console.log(input.value)
     if (!input.value) {
         hideSuggesions()
@@ -73,8 +83,10 @@ input.addEventListener("input", async () => {
     approvedPath = (await doFetch("/path", { path: input.value })) as pathHint
     console.log(approvedPath)
 
-    if (approvedPath?.current === "Permission denied") accessWidget.classList.add("locked")
-    else accessWidget.classList.remove("locked")
+    // if (approvedPath?.current === "Permission denied") accessWidget.classList.add("locked")
+    // else accessWidget.classList.remove("locked")
+    if (approvedPath?.current === "Permission denied") setAccessWidget("locked")
+    else setAccessWidget("unlocked")
 
     if (approvedPath?.current === "ok") {
         isOk = true
@@ -136,9 +148,12 @@ function moveSelection(down: boolean) {
         selected = suggestions.firstElementChild
     }
 
-    if (selected) selected.classList.add("selected")
+    if (selected) {
+        selected.classList.add("selected")
+        selected.scrollIntoView({ behavior: "smooth", block: "center" })
+        checkUser()
+    }
     // console.log(approvedPath.current, selected?.textContent)
-    selected.scrollIntoView({ behavior: "smooth", block: "center" })
 }
 
 const inputPath = () => (input.value.endsWith("/") ? input.value : input.value + "/")
@@ -147,6 +162,7 @@ const inputPath = () => (input.value.endsWith("/") ? input.value : input.value +
 document.addEventListener("keydown", e => {
     // console.log(e.key)
     if (e.key === "Enter") {
+        checkUser()
         let path: string
         if (selected) {
             const suggName = selected.textContent

@@ -54,7 +54,7 @@ func handleScan(w http.ResponseWriter, r *http.Request) {
 
 	re, err := scan.Init(req)
 	if err != nil {
-		log.Println(err)
+		log.Println("Scan failed:",err)
 	}
 	sendResult(w, re)
 }

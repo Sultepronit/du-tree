@@ -45,9 +45,11 @@ function genTitle(data: DataNode, path: string) {
         title.push(
             data.type === "Lbrk"
                 ? `Broken soft link to: ${data.linkPath}`
-                : data.type === "Lperm"
-                  ? `Locked soft link (permission denied)\n Run as root to see where it points.`
-                  : `Soft link to: ${data.linkPath}`
+                : data.type === "Lperm-file"
+                  ? `Soft link (Target hidden: permission denied).`
+                  : data.type === "Lperm-target"
+                    ? `Soft link to: ${data.linkPath} (Target inaccessible: permission denied).`
+                    : `Soft link to: ${data.linkPath}`
         )
     } else if (data.locked) {
         title.push(...genLockedDetails(data))

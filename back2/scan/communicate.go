@@ -55,6 +55,7 @@ func GetDir(path string, pages int) (*models.Node, error) {
 	if branch.Files == nil {
 		files, err := getFiles(request.Path+path, slices.Contains(request.Options, "block-size"))
 		if err != nil {
+			data.mu.Unlock()
 			return nil, err
 		}
 		branch.Files = files

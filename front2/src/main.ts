@@ -1,7 +1,7 @@
-import { checkUser, updateAccessWidget } from "./path/pathInput"
+import { checkUser, setAccessWidget } from "./path/pathInput"
 
 // checkUser()
-updateAccessWidget()
+setAccessWidget()
 
 // /usr/share/doc
 // /var/log
