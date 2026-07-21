@@ -78,14 +78,14 @@ function hideSuggesions() {
 
 let approvedPath = null as pathHint
 let isOk = false
-input.addEventListener("input", async () => {
+async function handleInput() {
     checkUser()
     // console.log(input.value)
     if (!input.value) {
         hideSuggesions()
         return
     }
-    // const re = await doFetch("/path", pathInpunt.value)
+
     approvedPath = (await doFetch("/path", { path: input.value })) as pathHint
     console.log(approvedPath)
 
@@ -122,22 +122,23 @@ input.addEventListener("input", async () => {
             console.log(sorted)
         }
 
-        console.log(approvedPath.next)
+        console.log(approvedPath?.next)
         if (sorted.length > 0) {
             addSuggestions(sorted)
-        } else if (approvedPath?.next?.length > 0) {
+        } else {
+            addSuggestions(approvedPath?.next || [])
+        }
+        /*} else if (approvedPath?.next?.length > 0) {
             addSuggestions(approvedPath.next)
         } else {
             console.log("no suggestions")
             hideSuggesions()
-        }
-        /*} else {
-            addSuggestions(approvedPath?.next || [])
         }*/
 
         input.className = sorted.length > 0 ? "almost" : "wrong"
     }
-})
+}
+input.addEventListener("input", handleInput)
 
 function moveSelection(down: boolean) {
     if (suggestions.classList.contains("hidden")) return
@@ -163,48 +164,41 @@ function moveSelection(down: boolean) {
     // console.log(approvedPath.current, selected?.textContent)
 }
 
-function handleNext() {}
-
 const inputPath = () => (input.value.endsWith("/") ? input.value : input.value + "/")
+function slashIt(path: string) {
+    return path.endsWith("/") ? path : path + "/"
+}
+function handleSelection(): boolean {
+    if (!selected) return false
+    if (selected.classList.contains("locked")) return false
 
-// input.addEventListener("keydown", e => {
+    const suggName = selected.textContent
+    const prePath = approvedPath.current === "ok" ? inputPath() : slashIt(approvedPath.current)
+
+    input.value = `${prePath}${suggName}/`
+    isOk = true
+    input.className = "ok"
+
+    return true
+}
+
 document.addEventListener("keydown", e => {
     // console.log(e.key)
-    // if (e.key === "Enter") {
     if (e.key === "ArrowRight") {
-        checkUser()
-        let path: string
-        if (selected) {
-            if (selected.classList.contains("locked")) return
-
-            const suggName = selected.textContent
-            const prePath =
-                approvedPath.current === "ok"
-                    ? inputPath()
-                    : approvedPath.current === "/"
-                      ? "/"
-                      : approvedPath.current + "/"
-            path = prePath + suggName
-            input.value = path
-            isOk = true
-            input.className = "ok"
-        } else if (isOk) {
-            path = inputPath()
-            initTree(path)
-        } else {
-            return
+        if (handleSelection()) handleInput()
+    } else if (e.key === "Enter") {
+        if (selected && !handleSelection()) return
+        if (isOk) {
+            hideSuggesions()
+            initTree(inputPath())
         }
-
-        console.log("final path:", path)
-
-        hideSuggesions()
-    } else if (e.key === "Escape") {
-        hideSuggesions()
     } else if (e.key === "ArrowDown") {
         e.preventDefault()
         moveSelection(true)
     } else if (e.key === "ArrowUp") {
         e.preventDefault()
         moveSelection(false)
+    } else if (e.key === "Escape") {
+        hideSuggesions()
     }
 })
