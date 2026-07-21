@@ -40,6 +40,12 @@ type pathHint = {
 
 let selected = null as Element
 function addSuggestions(sugg: nextDetails[]) {
+    console.log(sugg)
+    if (sugg.length === 0) {
+        hideSuggesions()
+        return
+    }
+
     suggestions.classList.remove("hidden")
     selected = null
     const html = sugg
@@ -97,15 +103,11 @@ input.addEventListener("input", async () => {
         isOk = false
         pre.textContent = approvedPath?.current
 
-        // let candidates = []
         const sorted = []
         if (approvedPath?.next) {
             let next = input.value.slice(approvedPath.current.length).toLocaleLowerCase()
             if (next.startsWith("/")) next = next.slice(1)
             console.log("next:", next)
-            // const candidates = path.next.filter(e => `/${e}`.startsWith(next) || e.startsWith(next))
-            // candidates = approvedPath.next.filter(e => e.name.toLocaleLowerCase().includes(next))
-            // console.log(candidates)
 
             const relevant = []
             for (const e of approvedPath.next) {
@@ -113,20 +115,25 @@ input.addEventListener("input", async () => {
                 if (i >= 0) relevant[i] ? relevant[i].push(e) : (relevant[i] = [e])
             }
             console.log(relevant)
-            // const sorted = []
             for (const block of relevant) {
                 console.log(block)
                 if (block) sorted.push(...block)
             }
             console.log(sorted)
-            // console.log(candidates)
         }
 
+        console.log(approvedPath.next)
         if (sorted.length > 0) {
             addSuggestions(sorted)
+        } else if (approvedPath?.next?.length > 0) {
+            addSuggestions(approvedPath.next)
         } else {
-            addSuggestions(approvedPath?.next || [])
+            console.log("no suggestions")
+            hideSuggesions()
         }
+        /*} else {
+            addSuggestions(approvedPath?.next || [])
+        }*/
 
         input.className = sorted.length > 0 ? "almost" : "wrong"
     }
@@ -156,15 +163,20 @@ function moveSelection(down: boolean) {
     // console.log(approvedPath.current, selected?.textContent)
 }
 
+function handleNext() {}
+
 const inputPath = () => (input.value.endsWith("/") ? input.value : input.value + "/")
 
 // input.addEventListener("keydown", e => {
 document.addEventListener("keydown", e => {
     // console.log(e.key)
-    if (e.key === "Enter") {
+    // if (e.key === "Enter") {
+    if (e.key === "ArrowRight") {
         checkUser()
         let path: string
         if (selected) {
+            if (selected.classList.contains("locked")) return
+
             const suggName = selected.textContent
             const prePath =
                 approvedPath.current === "ok"

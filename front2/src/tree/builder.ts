@@ -410,6 +410,11 @@ export async function rebuildTree(data: DataNode, path: string) {
 export function setCanceled() {
     canceled = true
     document.documentElement.style.setProperty("--temp-dir-icon", `url("icons/folder-x.svg")`)
+    document.documentElement.style.setProperty(
+        "--unavailable-dir-icon",
+        `url("icons/folder-x.svg")`
+    )
+    document.documentElement.style.setProperty("--unavailable-cursor", "not-allowed")
     statePannel.classList.add("canceled")
 }
 

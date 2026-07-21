@@ -101,12 +101,8 @@
 }
 
 .td.locked.itself::before {
-    cursor: no-drop;
+    cursor: not-allowed;
     background-color: red;
-}
-
-.td.unavailable::before {
-    cursor: progress;
 }
 
 .td.temp::before {
@@ -116,8 +112,9 @@
 }
 
 .td.unavailable::before {
+    cursor: var(--unavailable-cursor, progress);
     background-color: var(--temp-color);
-    -webkit-mask-image: var(--temp-dir-icon);
+    -webkit-mask-image: var(--unavailable-dir-icon);
     mask-image: var(--unavailable-dir-icon);
 }
 
