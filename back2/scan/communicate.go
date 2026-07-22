@@ -48,12 +48,12 @@ var pageSize = 100
 
 func GetDir(path string, pages int) (*models.Node, error) {
 	data.mu.Lock()
-	request := data.request
+	req := data.request
 
 	branch := getBranch(path)
 
 	if branch.Files == nil {
-		files, err := getFiles(request.Path+path, slices.Contains(request.Options, "block-size"))
+		files, err := getFiles(req.Path+path, req.Options.BlockSize)
 		if err != nil {
 			data.mu.Unlock()
 			return nil, err

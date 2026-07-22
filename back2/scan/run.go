@@ -9,7 +9,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"slices"
 	"syscall"
 	"time"
 )
@@ -171,9 +170,7 @@ func Init(req models.Request) (*models.Node, error) {
 	data.scanTree = &dirNode{Temp: 2}
 	data.viewTree = &viewNode{dirNode: data.scanTree}
 
-	reqBlockSize := slices.Contains(req.Options, "block-size")
-
-	if reqBlockSize {
+	if req.Options.BlockSize {
 		rootSize, err := getRootBlockSize(data.request.Path)
 		if err != nil {
 			fmt.Println(err)
@@ -184,7 +181,7 @@ func Init(req models.Request) (*models.Node, error) {
 	data.mu.Unlock()
 
 	go func() {
-		err := scanDir(ctx, data.request.Path, data.scanTree, reqBlockSize)
+		err := scanDir(ctx, data.request.Path, data.scanTree, req.Options.BlockSize)
 		fmt.Println("run/scanDir:", err)
 
 		data.mu.Lock()

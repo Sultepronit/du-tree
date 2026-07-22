@@ -7,21 +7,22 @@ const useBlockSize = document.getElementById("use-block-size") as HTMLInputEleme
 
 let rootPath = ""
 
+export function setOptions(options: reqOptions) {
+    useBlockSize.checked = options.blockSize ?? false
+}
+
 export async function initTree(path: string) {
     rootPath = path
 
-    const options = []
-    const options2 = {} as reqOptions
+    const options = {} as reqOptions
     if (useBlockSize.checked) {
-        options.push("block-size")
-        options2.blockSize = true
+        options.blockSize = true
     }
 
     const data = (await doFetch("/scan", {
         path,
         pages: 1,
-        options,
-        options2
+        options
     })) as DataNode
     console.log(data)
 

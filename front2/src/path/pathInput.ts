@@ -115,12 +115,12 @@ async function handleInput() {
                 const i = e.name.toLocaleLowerCase().indexOf(next)
                 if (i >= 0) relevant[i] ? relevant[i].push(e) : (relevant[i] = [e])
             }
-            console.log(relevant)
+            // console.log(relevant)
             for (const block of relevant) {
-                console.log(block)
+                // console.log(block)
                 if (block) sorted.push(...block)
             }
-            console.log(sorted)
+            // console.log(sorted)
         }
 
         console.log(approvedPath?.next)
@@ -165,7 +165,7 @@ function moveSelection(down: boolean) {
     // console.log(approvedPath.current, selected?.textContent)
 }
 
-const inputPath = () => (input.value.endsWith("/") ? input.value : input.value + "/")
+// const inputPath = () => (input.value.endsWith("/") ? input.value : input.value + "/")
 function slashIt(path: string) {
     return path.endsWith("/") ? path : path + "/"
 }
@@ -174,7 +174,7 @@ function handleSelection(): boolean {
     if (selected.classList.contains("locked")) return false
 
     const suggName = selected.textContent
-    const prePath = approvedPath.current === "ok" ? inputPath() : slashIt(approvedPath.current)
+    const prePath = approvedPath.current === "ok" ? slashIt(input.value) : slashIt(approvedPath.current)
 
     input.value = `${prePath}${suggName}/`
     isOk = true
@@ -195,7 +195,7 @@ document.addEventListener("keydown", async (e) => {
             if (handleSelection()) handleInput()
         } else if (isOk) {
             hideSuggesions()
-            initTree(inputPath())
+            initTree(slashIt(input.value))
         }
     } else if (e.key === "ArrowDown") {
         e.preventDefault()

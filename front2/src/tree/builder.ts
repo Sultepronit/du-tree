@@ -128,7 +128,7 @@ export function createBranch(data: DataNode, prePath: string): DocumentFragment 
             dataShoots: new Map(data.content.map(s => [s.name, s])),
             pages: 1
         }
-        console.log("branches2", branches2)
+        // console.log("branches2", branches2)
     }
 
     const lis = data.content.map(entry => createLi(entry, path))

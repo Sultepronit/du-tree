@@ -16,10 +16,10 @@ type reqOptions struct {
 }
 
 type Request struct {
-	Path     string   `json:"path"`
-	Pages    int      `json:"pages"`
-	Options  []string `json:"options"`
-	Options2 reqOptions
+	Path  string `json:"path"`
+	Pages int    `json:"pages"`
+	// Options  []string `json:"options"`
+	Options reqOptions `json:"options"`
 }
 
 type Node struct {
