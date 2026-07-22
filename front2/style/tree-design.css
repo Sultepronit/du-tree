@@ -85,6 +85,28 @@ li {
     gap: 1em;
     position: relative;
     background-color: aliceblue;
+    height: 1.01em;
+}
+
+.fd-sizebar {
+    position: absolute;
+    /* height: 0.99em; */
+    height: 1.01em;
+    width: calc(var(--size) / var(--max-size));
+    background-color: #0f0;
+    z-index: 1;
+}
+
+.fd-size {
+    text-align: right;
+    z-index: 10;
+}
+
+.fd-name {
+    z-index: 10;
+    text-wrap: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .temp > * > .fd-size {
@@ -92,21 +114,9 @@ li {
     color: var(--temp-color);
 }
 
-/* .temp > * > .fd-size::before {
-    content: "≥";
-} */
-
-/* .unavailable {
-    color: var(--temp-color);
-} */
-
 .locked > * > .fd-size {
     color: var(--locked-color);
 }
-
-/* .locked > * > .fd-size::before {
-    content: "≥";
-} */
 
 .locked.itself > * > .fd-size {
     color: red;
@@ -115,10 +125,6 @@ li {
 .locked.itself {
     color: red;
 }
-
-/* .hardlink > * > * > .fd-size {
-    color: #00acff;
-} */
 
 .hardlink .fd-size {
     color: var(--hardlink-color);

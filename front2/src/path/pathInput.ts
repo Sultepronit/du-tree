@@ -77,7 +77,8 @@ function hideSuggesions() {
 }
 
 let approvedPath = null as pathHint
-let isOk = false
+// let isOk = false
+let isOk: boolean
 async function handleInput() {
     checkUser()
     // console.log(input.value)
@@ -182,13 +183,17 @@ function handleSelection(): boolean {
     return true
 }
 
-document.addEventListener("keydown", e => {
+document.addEventListener("keydown", async (e) => {
     // console.log(e.key)
     if (e.key === "ArrowRight") {
         if (handleSelection()) handleInput()
     } else if (e.key === "Enter") {
-        if (selected && !handleSelection()) return
-        if (isOk) {
+        // if (selected && !handleSelection()) return
+        if (isOk === undefined) await handleInput()
+
+        if (selected) {
+            if (handleSelection()) handleInput()
+        } else if (isOk) {
             hideSuggesions()
             initTree(inputPath())
         }

@@ -26,15 +26,19 @@
     color: red;
 }
 
+.suggestions-block {
+    position: absolute;
+    /* display: flex; */
+    display: grid;
+    grid-template-columns: 1fr auto;
+    
+}
+
 #pre-suggestions {
     white-space: nowrap;
     opacity: 0;
     margin-right: 1em;
-}
-
-.suggestions-block {
-    position: absolute;
-    display: flex;
+    overflow-x: auto;
 }
 
 .suggestions {

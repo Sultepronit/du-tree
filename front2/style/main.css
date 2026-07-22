@@ -2,6 +2,20 @@
     --max-size: 1;
 }
 
+@font-face {
+    font-family: "Ubuntu";
+    src: url("fonts/Ubuntu-Regular.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Ubuntu Mono";
+    src: url("fonts/UbuntuMono-Regular.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -13,7 +27,9 @@ body {
     font-size: 1.1rem;
     padding: 0.5em;
     font-family: "Ubuntu Mono", monospace;
-    /* background-color: yellow; */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
 }
 
 input,
@@ -21,10 +37,14 @@ button {
     font: inherit;
 }
 
+button, label {
+    font-family: "Ubuntu", sans-serif;
+}
+
 input[type="checkbox"] {
-    /* height: 0.8em;
-    width: 0.8em; */
-    margin-right: -0.3em;
+    height: 0.7em;
+    width: 0.7em;
+    /* margin-right: -0.3em; */
 }
 
 .hidden {
@@ -35,22 +55,3 @@ input[type="checkbox"] {
     width: 100%;
 }
 
-.fd-sizebar {
-    position: absolute;
-    height: 1.11em;
-    width: calc(var(--size) / var(--max-size));
-    background-color: #0f0;
-    z-index: 1;
-}
-
-.fd-name {
-    z-index: 10;
-    text-wrap: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.fd-size {
-    text-align: right;
-    z-index: 10;
-}
