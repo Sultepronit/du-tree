@@ -7,7 +7,6 @@ const pre = document.getElementById("pre-suggestions") as HTMLDivElement
 const suggestions = document.getElementById("suggestions-box") as HTMLDivElement
 
 export async function setAccessWidget(val: "root" | "nonroot" | "locked" | "unlocked") {
-    // accessWidget.className = val
     if (val === "root") {
         accessWidget.classList.add("root")
     } else if (val === "nonroot") {
@@ -40,7 +39,7 @@ type pathHint = {
 
 let selected = null as Element
 function addSuggestions(sugg: nextDetails[]) {
-    console.log(sugg)
+    // console.log(sugg)
     if (sugg.length === 0) {
         hideSuggesions()
         return
@@ -88,10 +87,8 @@ async function handleInput() {
     }
 
     approvedPath = (await doFetch("/path", { path: input.value })) as pathHint
-    console.log(approvedPath)
+    // console.log(approvedPath)
 
-    // if (approvedPath?.current === "Permission denied") accessWidget.classList.add("locked")
-    // else accessWidget.classList.remove("locked")
     if (approvedPath?.current === "Permission denied") setAccessWidget("locked")
     else setAccessWidget("unlocked")
 

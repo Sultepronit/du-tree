@@ -150,7 +150,7 @@ export function createBranch(data: DataNode, prePath: string): DocumentFragment 
 export function appendBranch(data: DataNode, button: HTMLButtonElement, pages: number) {
     const oldNodesCount = (pages - 1) * pageSize
     const newNodes = data.content.slice(oldNodesCount)
-    console.log(oldNodesCount, newNodes)
+    // console.log(oldNodesCount, newNodes)
 
     const shortPath = button.dataset.path
     const lis = newNodes.map(entry => createLi(entry, shortPath))
@@ -248,13 +248,11 @@ async function updateBranch(branchUpdate: DataNode) {
     console.log("branch update:", branchUpdate)
 
     const branch = branches2[branchUpdate.name]
-    console.log("branch:", branch)
+    // console.log("branch:", branch)
 
     const mix = new Map(branch.dataShoots)
     branchUpdate.content.forEach(s => mix.set(s.name, s))
 
-    const count = pageSize * branch.pages
-    // const actual = [...mix.values()].sort((a, b) => b.size - a.size).slice(0, count)
     const actual = [...mix.values()]
         .sort((a, b) => {
             if (b.size === a.size) {
@@ -262,8 +260,8 @@ async function updateBranch(branchUpdate: DataNode) {
             }
             return b.size - a.size
         })
-        .slice(0, count)
-    console.log("actual", actual)
+        .slice(0, pageSize * branch.pages)
+    // console.log("actual", actual)
 
     if (branchUpdate.name === "") {
         if (actual[0].size != max) {
@@ -287,6 +285,18 @@ async function updateBranch(branchUpdate: DataNode) {
     }
 
     branch.ul.style.display = "none"
+
+    if (branch.elShoots.size < actual.length) {
+        const newNodes = actual.filter(s => !branch.dataShoots.has(s.name))
+        console.log(newNodes)
+
+        newNodes.forEach(n => branch.dataShoots.set(n.name, n))
+
+        const lis = newNodes.map(entry => createLi(entry, branch.ul.dataset.path))
+        console.log(lis)
+        branch.ul.insertAdjacentHTML("beforeend", lis.join(""))
+    }
+
     const store = new DocumentFragment()
     // update exhisting shoots
     actual.forEach((data, i) => {
@@ -320,8 +330,6 @@ async function updateBranch(branchUpdate: DataNode) {
                 // if it contains wrong one - pull it out
                 if (liCont instanceof HTMLDivElement) store.appendChild(liCont)
                 // add the right one
-                // console.log(elNode)
-                // console.log(i, branch.ul.childNodes[i], shootEl)
                 branch.ul.childNodes[i].appendChild(shootEl)
                 // console.log("moved", data.name)
                 console.log("moved")
@@ -422,5 +430,7 @@ export function removeCanceled() {
     if (!canceled) return
     canceled = false
     document.documentElement.style.removeProperty("--temp-dir-icon")
+    document.documentElement.style.removeProperty("--unavailable-dir-icon")
+    document.documentElement.style.removeProperty("--unavailable-cursor")
     statePannel.classList.remove("canceled")
 }

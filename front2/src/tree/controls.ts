@@ -46,11 +46,15 @@ document.getElementById("cancel").addEventListener("click", async () => {
     if (re?.status === "canceled") setCanceled()
 })
 
+let interval = 2
 let syncing = false
 async function update() {
-    await new Promise(resolve => setTimeout(resolve, 900))
+    console.log(interval)
+    // await new Promise(resolve => setTimeout(resolve, 900))
+    await new Promise(resolve => setTimeout(resolve, interval * 100))
+    if (interval < 9) interval++
     const updates = await doFetch("/update", updateBranches)
-    console.log(updates)
+    // console.log(updates)
     if (!updates) {
         setCanceled()
         return
@@ -67,11 +71,11 @@ async function update() {
     update()
 }
 
-// let updateInterval = 0
 let updateBranches = [] as { path: string; pages: number }[]
 function initUpdates() {
     updateBranches = [{ path: "", pages: 1 }]
     syncing = true
+    interval = 1
     update()
 }
 
@@ -91,7 +95,7 @@ function sanitizeUpdates(results: DataNode[]) {
 }
 
 async function addMore(button: HTMLButtonElement) {
-    console.log(button)
+    // console.log(button)
     // const path = button.dataset.path ? `${rootPath}${button.dataset.path}/` : rootPath
     const path = rootPath + button.dataset.path
     const pages = Number(button.dataset.pages) + 1

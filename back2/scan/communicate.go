@@ -3,7 +3,6 @@ package scan
 import (
 	"du-tree/helpers"
 	"du-tree/models"
-	"fmt"
 	"strings"
 )
 
@@ -21,7 +20,7 @@ func getBranch(path string) *viewNode {
 	target := data.viewTree
 
 	for _, name := range parts {
-		fmt.Println(name)
+		// fmt.Println(name)
 		if next, prs := target.Branches[name]; prs {
 			target = next
 		} else {
@@ -49,6 +48,7 @@ func GetDir(path string, pages int) (*models.Node, error) {
 	req := data.request
 
 	branch := getBranch(path)
+	// fmt.Println("branch:", branch)
 
 	if branch.Files == nil {
 		files, err := getFiles(req.Path+path, req.Options.BlockSize)

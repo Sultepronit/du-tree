@@ -3,19 +3,18 @@ package explorer
 import (
 	"du-tree/models"
 	"errors"
-	"fmt"
 
 	"os"
 	"path/filepath"
 )
 
 func CheckPath(path string) *models.Path {
-	fmt.Println("path:", path)
+	// fmt.Println("path:", path)
 	// filepath.Clean()?
 
 	re := models.Path{
 		Current: "ok",
-		Next: make([]models.PathDetail, 0, 5),
+		Next:    make([]models.PathDetail, 0, 5),
 	}
 
 	for i := range 100 {
@@ -25,7 +24,7 @@ func CheckPath(path string) *models.Path {
 				re.Current = "Permission denied"
 				return &re
 			}
-			fmt.Println("err:", err)
+			// fmt.Println("err:", err)
 		} else {
 			if i > 0 {
 				re.Current = path

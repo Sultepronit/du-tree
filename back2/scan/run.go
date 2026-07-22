@@ -101,7 +101,7 @@ func scanDir(ctx context.Context, path string, node *dirNode, reqBlockSize bool)
 	dirs := make([]*dirNode, 0, len(entries))
 
 	for _, entry := range entries {
-		// time.Sleep(time.Millisecond * 50)
+		// time.Sleep(time.Millisecond * 10)
 		size, err := calcSize(entry, reqBlockSize, path)
 		if err != nil {
 			fmt.Println("run/calcSize:", err)
@@ -153,6 +153,7 @@ func scanDir(ctx context.Context, path string, node *dirNode, reqBlockSize bool)
 }
 
 func Init(req models.Request) (*models.Node, error) {
+	log.Println("Scanning:", req.Path)
 	data.mu.Lock()
 
 	if data.cancel != nil {
@@ -182,17 +183,18 @@ func Init(req models.Request) (*models.Node, error) {
 
 	go func() {
 		err := scanDir(ctx, data.request.Path, data.scanTree, req.Options.BlockSize)
-		fmt.Println("run/scanDir:", err)
+		if err != nil {
+			fmt.Println("run/scanDir:", err)
+		}
 
 		data.mu.Lock()
 		data.cancel = nil
+		log.Println("Total:", data.scanTree.Size)
 		data.mu.Unlock()
-		fmt.Println("ended!")
 	}()
 
 	// helpers.TempPrinAsJson(data.scanTree)
 	time.Sleep(time.Millisecond * 100)
-	fmt.Println("here?")
 	return GetDir("", req.Pages)
 }
 

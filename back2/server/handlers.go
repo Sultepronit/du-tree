@@ -7,7 +7,6 @@ import (
 	"os"
 
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 )
@@ -31,7 +30,7 @@ func handleInit(w http.ResponseWriter, _ *http.Request) {
 }
 
 func checkPath(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.URL.Path)
+	// log.Println(r.URL.Path)
 
 	var req models.Request
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -44,29 +43,29 @@ func checkPath(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleScan(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.URL.Path)
+	// log.Println(r.URL.Path)
 	var req models.Request
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Bad JSON", 400)
 		return
 	}
-	fmt.Println(req)
+	// fmt.Println(req)
 
 	re, err := scan.Init(req)
 	if err != nil {
-		log.Println("Scan failed:",err)
+		log.Println("Scan failed:", err)
 	}
 	sendResult(w, re)
 }
 
 func handleDir(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.URL.Path)
+	// log.Println(r.URL.Path)
 	var req models.Request
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Bad JSON", 400)
 		return
 	}
-	fmt.Println(req)
+	// fmt.Println(req)
 
 	re, err := scan.GetDir(req.Path, req.Pages)
 	if err != nil {
@@ -82,13 +81,13 @@ func handleUpdate(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Bad JSON", 400)
 		return
 	}
-	fmt.Println(req)
+	// fmt.Println(req)
 	// sendResult(w, du.GetUpdate(req))
 	sendResult(w, scan.GetUpdate(req))
 }
 
 func handleCancel(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.URL.Path)
+	// log.Println(r.URL.Path)
 	// du.Stop()
 	scan.Stop()
 	sendResult(w, map[string]string{"status": "canceled"})
