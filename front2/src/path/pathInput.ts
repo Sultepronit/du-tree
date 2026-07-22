@@ -105,7 +105,7 @@ async function handleInput() {
         if (approvedPath?.next) {
             let next = input.value.slice(approvedPath.current.length).toLocaleLowerCase()
             if (next.startsWith("/")) next = next.slice(1)
-            console.log("next:", next)
+            // console.log("next:", next)
 
             const relevant = []
             for (const e of approvedPath.next) {
@@ -171,7 +171,8 @@ function handleSelection(): boolean {
     if (selected.classList.contains("locked")) return false
 
     const suggName = selected.textContent
-    const prePath = approvedPath.current === "ok" ? slashIt(input.value) : slashIt(approvedPath.current)
+    const prePath =
+        approvedPath.current === "ok" ? slashIt(input.value) : slashIt(approvedPath.current)
 
     input.value = `${prePath}${suggName}/`
     isOk = true
@@ -180,7 +181,7 @@ function handleSelection(): boolean {
     return true
 }
 
-document.addEventListener("keydown", async (e) => {
+document.addEventListener("keydown", async e => {
     // console.log(e.key)
     if (e.key === "ArrowRight") {
         if (handleSelection()) handleInput()

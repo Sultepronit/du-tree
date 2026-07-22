@@ -49,7 +49,7 @@ document.getElementById("cancel").addEventListener("click", async () => {
 let interval = 2
 let syncing = false
 async function update() {
-    console.log(interval)
+    // console.log(interval)
     // await new Promise(resolve => setTimeout(resolve, 900))
     await new Promise(resolve => setTimeout(resolve, interval * 100))
     if (interval < 9) interval++
