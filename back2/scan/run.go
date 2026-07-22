@@ -67,6 +67,7 @@ func calcSize(entry os.DirEntry, reqBlockSize bool, path string) (int64, error) 
 }
 
 func scanDir(ctx context.Context, path string, node *dirNode, reqBlockSize bool) error {
+	// fmt.Println("scanning:", path)
 	select {
 	case <-ctx.Done():
 		return ctx.Err()
@@ -140,8 +141,14 @@ func scanDir(ctx context.Context, path string, node *dirNode, reqBlockSize bool)
 	node.Temp = 1
 
 	data.mu.Unlock()
+	// fmt.Println(node.Dirs)
 	for _, child := range node.Dirs {
 		fullPath := filepath.Join(path, child.Name)
+		// fmt.Println("scanning:", fullPath)
+		// fmt.Println(path, child.Name)
+		if len(fullPath) < 15 {
+			fmt.Println(fullPath)
+		}
 		err := scanDir(ctx, fullPath, child, reqBlockSize)
 		if err != nil {
 			return err

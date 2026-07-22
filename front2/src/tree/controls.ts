@@ -75,7 +75,7 @@ let updateBranches = [] as { path: string; pages: number }[]
 function initUpdates() {
     updateBranches = [{ path: "", pages: 1 }]
     syncing = true
-    interval = 1
+    interval = 2
     update()
 }
 
