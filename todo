@@ -2,6 +2,5 @@ make sure that reset of shoot is total & clean!
 make unfolded dirs persistent in the output?
 
 do something with the enttities that are removed while scannng
-improve sorting on the Go side
 
 change entity accessibility check method?

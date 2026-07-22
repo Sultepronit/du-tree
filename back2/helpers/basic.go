@@ -1,5 +1,12 @@
 package helpers
 
+import (
+	"cmp"
+	"du-tree/models"
+	"slices"
+	"strings"
+)
+
 func LimitSlice[T any](s []T, limit int) []T {
 	if len(s) <= limit {
 		return s
@@ -8,11 +15,11 @@ func LimitSlice[T any](s []T, limit int) []T {
 	return s[:limit]
 }
 
-// func sortBySize[T any](s []// return branch, nilT) {
-// 	slices.SortFunc(s, func(a, b T) int {
-// 		if a.Size == b.Size {
-// 			return cmp.Compare(strings.ToLower(a.Name), strings.ToLower(b.Name))
-// 		}
-// 		return cmp.Compare(b.Size, a.Size)
-// 	})
-// }
+func SortBySizeThenName[T models.SortNode](s []T) {
+	slices.SortFunc(s, func(a, b T) int {
+		if a.GetSize() == b.GetSize() {
+			return cmp.Compare(strings.ToLower(a.GetName()), strings.ToLower(b.GetName()))
+		}
+		return cmp.Compare(b.GetSize(), a.GetSize())
+	})
+}

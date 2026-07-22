@@ -22,6 +22,11 @@ type Request struct {
 	Options reqOptions `json:"options"`
 }
 
+type SortNode interface {
+	GetName() string
+	GetSize() int64
+}
+
 type Node struct {
 	Name         string  `json:"name"`
 	Type         string  `json:"type"`
@@ -35,3 +40,6 @@ type Node struct {
 	Temp         int8    `json:"temp,omitempty"`
 	IsNeglected  bool    `json:"isNeglected,omitempty"`
 }
+
+func (n *Node) GetName() string { return n.Name }
+func (n *Node) GetSize() int64  { return n.Size }

@@ -1,22 +1,20 @@
 package scan
 
 import (
-	"cmp"
 	"du-tree/helpers"
 	"du-tree/models"
 	"fmt"
-	"slices"
 	"strings"
 )
 
-func sortContent(nodes []*models.Node) {
-	slices.SortFunc(nodes, func(a, b *models.Node) int {
-		if a.Size == b.Size {
-			return cmp.Compare(strings.ToLower(a.Name), strings.ToLower(b.Name))
-		}
-		return cmp.Compare(b.Size, a.Size)
-	})
-}
+// func sortContent(nodes []*models.Node) {
+// 	slices.SortFunc(nodes, func(a, b *models.Node) int {
+// 		if a.Size == b.Size {
+// 			return cmp.Compare(strings.ToLower(a.Name), strings.ToLower(b.Name))
+// 		}
+// 		return cmp.Compare(b.Size, a.Size)
+// 	})
+// }
 
 func getBranch(path string) *viewNode {
 	parts := strings.Split(path, "/")
@@ -61,17 +59,19 @@ func GetDir(path string, pages int) (*models.Node, error) {
 		branch.Files = files
 	}
 
-	re := parseDirNode(branch.dirNode)
-	re.Content = make([]*models.Node, 0, pageSize*pages)
-	for _, n := range branch.Dirs {
-		re.Content = append(re.Content, parseDirNode(n))
-	}
-	for _, n := range branch.Files {
-		re.Content = append(re.Content, parseFileNode(n))
-	}
+	// re := parseDirNode(branch.dirNode)
+	// re.Content = make([]*models.Node, 0, pageSize*pages)
+	// for _, n := range branch.Dirs {
+	// 	re.Content = append(re.Content, parseDirNode(n))
+	// }
+	// for _, n := range branch.Files {
+	// 	re.Content = append(re.Content, parseFileNode(n))
+	// }
+	re := parseViewNode(branch, true)
 	data.mu.Unlock()
 
-	sortContent(re.Content)
+	// sortContent(re.Content)
+	helpers.SortBySizeThenName(re.Content)
 
 	contLen := pageSize * pages
 	if len(re.Content) > contLen {
@@ -101,13 +101,15 @@ func GetUpdate(req []models.Request) []*models.Node {
 
 	for i, r := range req {
 		b := getBranch(r.Path)
-		re[i] = parseDirNode(b.dirNode)
+		// re[i] = parseDirNode(b.dirNode)
+		// re[i].Name = r.Path
+		// for _, n := range b.Dirs {
+		// 	re[i].Content = append(re[i].Content, parseDirNode(n))
+		// }
+		// sortContent(re[i].Content)
+		re[i] = parseViewNode(b, false)
 		re[i].Name = r.Path
-		for _, n := range b.Dirs {
-			re[i].Content = append(re[i].Content, parseDirNode(n))
-		}
 
-		sortContent(re[i].Content)
 		re[i].Content = helpers.LimitSlice(re[i].Content, pageSize*r.Pages)
 	}
 

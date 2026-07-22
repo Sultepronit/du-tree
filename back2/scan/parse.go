@@ -1,6 +1,9 @@
 package scan
 
-import "du-tree/models"
+import (
+	"du-tree/helpers"
+	"du-tree/models"
+)
 
 func parseDirNode(node *dirNode) *models.Node {
 	return &models.Node{
@@ -21,5 +24,23 @@ func parseFileNode(node *fileNode) *models.Node {
 		Nlink:       node.Nlink,
 		IsNeglected: node.IsHardlink,
 	}
+}
 
+func parseViewNode(branch *viewNode, includeFiles bool) *models.Node {
+	re := parseDirNode(branch.dirNode)
+	re.Content = make([]*models.Node, 0, 10)
+
+	helpers.SortBySizeThenName(branch.Dirs)
+
+	for _, n := range branch.Dirs {
+		re.Content = append(re.Content, parseDirNode(n))
+	}
+
+	if includeFiles {
+		for _, n := range branch.Files {
+			re.Content = append(re.Content, parseFileNode(n))
+		}
+	}
+
+	return re
 }

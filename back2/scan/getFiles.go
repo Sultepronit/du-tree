@@ -2,6 +2,7 @@ package scan
 
 import (
 	"du-tree/explorer"
+	"du-tree/helpers"
 	"errors"
 	"os"
 	"path/filepath"
@@ -13,7 +14,7 @@ func getFiles(path string, blockSizeReq bool) ([]*fileNode, error) {
 	if err != nil {
 		return nil, err
 	}
-	inflated := make([]*fileNode, 0, len(entries))
+	oversized := make([]*fileNode, 0, len(entries))
 
 	for _, e := range entries {
 		if e.IsDir() {
@@ -24,7 +25,7 @@ func getFiles(path string, blockSizeReq bool) ([]*fileNode, error) {
 			Name: e.Name(),
 			Type: e.Type().String()[0:1],
 		}
-		inflated = append(inflated, node)
+		oversized = append(oversized, node)
 
 		if node.Type == "L" {
 			typ, realPath := explorer.GetLinkInfo(path, node.Name)
@@ -57,8 +58,10 @@ func getFiles(path string, blockSizeReq bool) ([]*fileNode, error) {
 		}
 	}
 
-	re := make([]*fileNode, len(inflated))
-	copy(re, inflated)
+	re := make([]*fileNode, len(oversized))
+	copy(re, oversized)
+	helpers.SortBySizeThenName(re)
+	// helpers.TempPrinAsJson(re)
 
 	return re, nil
 }
