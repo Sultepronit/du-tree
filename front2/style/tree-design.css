@@ -61,7 +61,7 @@ li {
 .shoot {
     /* cursor: auto; */
     position: relative;
-    padding-left: 1.25em;
+    padding-left: 1.12em;
     /* margin-bottom: 0.2em; */
 }
 
@@ -85,20 +85,27 @@ li {
     gap: 1em;
     position: relative;
     background-color: aliceblue;
-    height: 1.01em;
+    /* height: 1.1em; */
+    /* padding-top: 0.04em; */
+    padding: 0.01em 0 0.01em;
 }
 
 .fd-sizebar {
     position: absolute;
     /* height: 0.99em; */
-    height: 1.01em;
+    /* height: 1.1em; */
+    top: 0;
+    bottom: 0;
     width: calc(var(--size) / var(--max-size));
     background-color: #0f0;
     z-index: 1;
 }
 
 .fd-size {
-    text-align: right;
+    display: flex;
+    align-items: center;
+    justify-content: right;
+    /* text-align: right; */
     z-index: 10;
 }
 
