@@ -1,7 +1,29 @@
 package main
 
-import "du-tree/internal/server"
+import (
+	"du-tree/internal/models"
+	"du-tree/internal/scan"
+	"du-tree/internal/server"
+	"flag"
+	"time"
+)
 
 func main() {
-	server.Start()
+	port := flag.String("p", "51200", "The server port")
+	path := flag.String("s", "", "The scan path")
+	apparentSize := flag.Bool("A", false, "To get apparent size of files instead of the default block size")
+	flag.Parse()
+
+	if *path != "" {
+		go func() {
+			time.Sleep(time.Millisecond * 20)
+			scan.Init(models.Request{
+				Path:    *path,
+				Pages:   1,
+				Options: models.ReqOptions{BlockSize: !*apparentSize},
+			})
+		}()
+	}
+
+	server.Start(*port)
 }

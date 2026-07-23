@@ -11,7 +11,7 @@ type Path struct {
 	Next    []PathDetail `json:"next"`
 }
 
-type reqOptions struct {
+type ReqOptions struct {
 	BlockSize bool `json:"blockSize,omitempty"`
 }
 
@@ -19,7 +19,7 @@ type Request struct {
 	Path  string `json:"path"`
 	Pages int    `json:"pages"`
 	// Options  []string `json:"options"`
-	Options reqOptions `json:"options"`
+	Options ReqOptions `json:"options"`
 }
 
 type SortNode interface {

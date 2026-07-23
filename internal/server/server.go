@@ -4,11 +4,12 @@ package server
 
 import (
 	"du-tree/internal/embeded"
+	"fmt"
 	"log"
 	"net/http"
 )
 
-func Start() {
+func Start(port string) {
 	http.HandleFunc("/init", handleInit)
 	http.HandleFunc("/user", checkUser)
 	http.HandleFunc("POST /path", checkPath)
@@ -17,11 +18,12 @@ func Start() {
 	http.HandleFunc("POST /update", handleUpdate)
 	http.HandleFunc("/cancel", handleCancel)
 
-	// fs := http.FileServer(http.Dir("./ui"))
 	fs := embeded.GetSubFSHandler()
 	http.Handle("/", fs)
 
-	port := "51200"
+	url := "http://localhost:" + port
+	fmt.Printf("du-tree server started: \033[36m%s\033[0m\n", url)
+	fmt.Print("\033[3mTo exit press Ctrl+C\033[0m\n\n")
 
 	log.Printf("Listening on port: %s\n", port)
 	err := http.ListenAndServe(":"+port, nil)

@@ -4,11 +4,12 @@ package server
 
 import (
 	"du-tree/internal/jscss"
+	"fmt"
 	"log"
 	"net/http"
 )
 
-func Start() {
+func Start(port string) {
 	go jscss.StartCSSWhatcher("./ui/style")
 	http.HandleFunc("/sse-css", jscss.SseHandler)
 	http.HandleFunc("/main.js", jscss.UseEsbuild)
@@ -24,9 +25,13 @@ func Start() {
 	fs := http.FileServer(http.Dir("./ui"))
 	http.Handle("/", fs)
 
-	port := "51200"
+	if port == "51200" {
+		port = "51201"
+	}
+	url := "http://localhost:" + port
+	fmt.Printf("Dev du-tree server started: \033[36m%s\033[0m\n", url)
+	fmt.Print("\033[3mTo exit press Ctrl+C\033[0m\n\n")
 
-	log.Printf("Dev TS Server started at: %s\n", port)
 	err := http.ListenAndServe(":"+port, nil)
 	if err != nil {
 		log.Fatal(err)
