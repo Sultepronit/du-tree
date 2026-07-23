@@ -25,8 +25,8 @@
     -webkit-mask-position: center center;
     mask-repeat: no-repeat;
     -webkit-mask-repeat: no-repeat;
-    mask-image: url("icons/folder-search.svg");
-    -webkit-mask-image: url("icons/folder-search.svg");
+    mask-image: url("icons/search.svg");
+    -webkit-mask-image: url("icons/search.svg");
 }
 
 #suggestions-box {

@@ -16,6 +16,21 @@ let branches2 = {} as Record<string, UpdateBranch>
 
 let rootPath = ""
 
+// function changeTreeVisibility(mode: "hidden" | "") {
+
+// }
+
+document.addEventListener("mode", (e: CustomEvent) => {
+    console.log(e.detail)
+    if (e.detail === "results") {
+        treeBlock.style.opacity = "1"
+        statePannel.style.opacity = "1"
+    } else if (e.detail === "preparations") {
+        treeBlock.style.opacity = "0.5"
+        statePannel.style.opacity = "0.5"
+    }
+})
+
 function genLockedDetails(node: DataNode) {
     const re = []
     if (node.locked === -1) {

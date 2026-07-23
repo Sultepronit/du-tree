@@ -27,6 +27,16 @@ export function setPath(val: string) {
     input.value = val
 }
 
+document.addEventListener("mode", (e: CustomEvent) => {
+    console.log(e.detail)
+    if (e.detail === "results") {
+        input.disabled = true
+    } else if (e.detail === "preparations") {
+        input.disabled = false
+        input.focus()
+    }
+})
+
 type nextDetails = {
     name: string
     link?: string
