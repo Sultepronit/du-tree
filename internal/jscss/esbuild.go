@@ -14,7 +14,7 @@ func UseEsbuild(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/javascript")
 
 	result := api.Build(api.BuildOptions{
-		EntryPoints: []string{"./front2/src/main-dev.ts"},
+		EntryPoints: []string{"./ui/src/main-dev.ts"},
 		Bundle:      true,
 		Write:       false,
 		Target:      api.ESNext,

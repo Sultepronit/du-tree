@@ -1,8 +1,13 @@
-.PHONY: build run
-
-build: 
-	CGO_ENABLED=0 go build -o du-tree .
+.PHONY: bundle build run
 
 run:
-# 	CGO_ENABLED=0 go build -o test .; ./test
 	CGO_ENABLED=0 go run .
+
+bundle:
+	CGO_ENABLED=0 go run bundle.go
+	@mkdir -p internal/embeded/dist
+	cp -r ui/{index.html,icon.png,style} internal/embeded/dist
+
+build: bundle
+	CGO_ENABLED=0 go build -tags production -o du-tree .
+

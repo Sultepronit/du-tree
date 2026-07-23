@@ -3,24 +3,24 @@
 package server
 
 import (
-	"fmt"
+	"du-tree/internal/embeded"
 	"log"
 	"net/http"
 )
 
-func handleHello(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.URL.Path, "as /")
-	fmt.Fprintln(w, "Hello there!")
-}
-
 func Start() {
+	http.HandleFunc("/init", handleInit)
 	http.HandleFunc("/user", checkUser)
 	http.HandleFunc("POST /path", checkPath)
+	http.HandleFunc("POST /scan", handleScan)
 	http.HandleFunc("POST /dir", handleDir)
 	http.HandleFunc("POST /update", handleUpdate)
 	http.HandleFunc("/cancel", handleCancel)
 
-	http.HandleFunc("/", handleHello)
+	// fs := http.FileServer(http.Dir("./ui"))
+	fs := embeded.GetSubFSHandler()
+	http.Handle("/", fs)
+
 	port := "51200"
 
 	log.Printf("Listening on port: %s\n", port)

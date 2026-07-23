@@ -9,8 +9,9 @@ import (
 )
 
 func Start() {
-	go jscss.StartCSSWhatcher("./front2/style")
+	go jscss.StartCSSWhatcher("./ui/style")
 	http.HandleFunc("/sse-css", jscss.SseHandler)
+	http.HandleFunc("/main.js", jscss.UseEsbuild)
 
 	http.HandleFunc("/init", handleInit)
 	http.HandleFunc("/user", checkUser)
@@ -20,8 +21,7 @@ func Start() {
 	http.HandleFunc("POST /update", handleUpdate)
 	http.HandleFunc("/cancel", handleCancel)
 
-	http.HandleFunc("/main.js", jscss.UseEsbuild)
-	fs := http.FileServer(http.Dir("./front2"))
+	fs := http.FileServer(http.Dir("./ui"))
 	http.Handle("/", fs)
 
 	port := "51200"
