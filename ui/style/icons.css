@@ -18,6 +18,17 @@
     -webkit-mask-image: url("icons/lock.svg");
 }
 
+#scan {
+    /* mask-size: 100% 80%; */
+    /* -webkit-mask-size: 100% 80%; */
+    mask-position: center center;
+    -webkit-mask-position: center center;
+    mask-repeat: no-repeat;
+    -webkit-mask-repeat: no-repeat;
+    mask-image: url("icons/folder-search.svg");
+    -webkit-mask-image: url("icons/folder-search.svg");
+}
+
 #suggestions-box {
     padding-left: 1.2em;
 }

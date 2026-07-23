@@ -35,6 +35,22 @@
     color: red;
 }
 
+.scan-wrap {
+    background-color: aquamarine;
+    padding: 0.1em;
+    border-radius: 6px;
+    /* background-image: url("icons/folder-search.svg"); */
+}
+
+#scan {
+    display: block;
+    width: 1.5em;
+    height: 1.5em;
+    /* opacity: 0; */
+    background-color: black;
+    /* margin-inline: 0.2em; */
+}
+
 .suggestions-block {
     position: absolute;
     display: grid;
