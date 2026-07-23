@@ -5,16 +5,13 @@
 
 /* path iput -------------------- */
 
-#access-widged.locked::before {
-    content: "";
-    display: inline-block;
-    width: 1.1em;
-    height: 1em;
-    /* margin-left: -0.3em; */
-    margin: 0.1em 0 0 -0.3em;
+#access-widged.locked {
+    color: red;
     background-color: red;
-    mask-size: contain;
-    -webkit-mask-size: contain;
+    mask-size: 100% 80%;
+    -webkit-mask-size: 100% 80%;
+    mask-position: center center;
+    -webkit-mask-position: center center;
     mask-repeat: no-repeat;
     -webkit-mask-repeat: no-repeat;
     mask-image: url("icons/lock.svg");
@@ -71,8 +68,6 @@
     display: inline-block;
     width: 1em;
     height: 1em;
-    /* margin: 0.1em 0 0; */
-    /* background-color: black; */
 
     -webkit-mask-repeat: no-repeat;
     mask-repeat: no-repeat;
@@ -83,13 +78,7 @@
     left: 0;
 }
 
-/* .td {
-    cursor: pointer;
-} */
-
 .td::before {
-    /* cursor: pointer; */
-    /* background-color: black; */
     -webkit-mask-image: url("icons/folder.svg");
     mask-image: url("icons/folder.svg");
 }
@@ -124,7 +113,6 @@
 }
 
 .t-::before {
-    /* background-color: black; */
     -webkit-mask-image: url("icons/file.svg");
     mask-image: url("icons/file.svg");
 }
@@ -141,8 +129,6 @@
 
 .tbrk::before {
     background-color: #ff71c7;
-    /* mask-image: url("icons/link-2.svg");
-    -webkit-mask-image: url("icons/link-2.svg"); */
 }
 
 .tperm-file::before,
@@ -151,14 +137,12 @@
 }
 
 .link.t-::before {
-    /* background-color: #00acff; */
     mask-image: url("icons/file-link.svg");
     -webkit-mask-image: url("icons/file-link.svg");
 }
 
 .link.td::before {
     cursor: auto;
-    /* background-color: #00acff; */
     mask-image: url("icons/folder-link.svg");
     -webkit-mask-image: url("icons/folder-link.svg");
 }
@@ -169,13 +153,11 @@
 }
 
 .tS::before {
-    /* background-color: black; */
     -webkit-mask-image: url("icons/unplug.svg");
     mask-image: url("icons/unplug.svg");
 }
 
 .tp::before {
-    /* background-color: black; */
     -webkit-mask-image: url("icons/waypoints.svg");
     mask-image: url("icons/waypoints.svg");
 }

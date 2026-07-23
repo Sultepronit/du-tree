@@ -1,5 +1,4 @@
 :root {
-    /* --temp-color: #00f; */
     --temp-color: #666;
     --locked-color: brown;
     --hardlink-color: #00f;
@@ -8,15 +7,10 @@
 body {
     display: grid;
     grid-template-rows: auto 1fr;
-    /* gap: 0.1em; */
-    height: 100vh;
+    height: 100svh;
 }
 
-.flex1 {
-    display: flex;
-    justify-content: space-between;
-}
-
+/* unused! */
 @keyframes wave-pulse {
     0% {
         opacity: 1;
@@ -29,40 +23,33 @@ body {
     }
 }
 
-/* tree design */
-#total-size {
-    z-index: 100;
-}
-
 #tree {
     overflow: auto;
+    padding-left: 0.5%;
 }
 
 ul.dir-content {
     list-style-type: none;
     min-height: 0.9em;
     padding: 0.2em 0 1px;
-    /* max-height: 150vh;
-    overflow: auto;
-    overflow: hidden; */
 }
-
-/* .dir-content .dir-content {
-    margin-left: 0.9em;
-} */
 
 li {
     border: none;
     position: relative;
     /* margin: 0 0 0.2em 0; */
-    padding-bottom: 0.2em;
+    /* padding-bottom: 0.2em; */
+}
+
+.show-more {
+    padding-left: 0.2em;
 }
 
 .shoot {
     /* cursor: auto; */
     position: relative;
     padding-left: 1.12em;
-    /* margin-bottom: 0.2em; */
+    margin-bottom: 0.2em;
 }
 
 .td {
@@ -74,26 +61,17 @@ li {
     cursor: auto;
 }
 
-/* .td li {
-    pointer-events: none;
-    cursor: auto;
-} */
-
 .fd-entry {
     display: grid;
-    grid-template-columns: 4.7em auto;
+    grid-template-columns: 4.2em auto;
     gap: 1em;
     position: relative;
     background-color: aliceblue;
-    /* height: 1.1em; */
-    /* padding-top: 0.04em; */
     padding: 0.01em 0 0.01em;
 }
 
 .fd-sizebar {
     position: absolute;
-    /* height: 0.99em; */
-    /* height: 1.1em; */
     top: 0;
     bottom: 0;
     width: calc(var(--size) / var(--max-size));

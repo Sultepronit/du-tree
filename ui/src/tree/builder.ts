@@ -133,7 +133,8 @@ export function createBranch(data: DataNode, prePath: string): DocumentFragment 
 
     const lis = data.content.map(entry => createLi(entry, path))
     if (data.contentCount) {
-        lis.push(`<li class="fd-more" title="${path ? path + "/" : "Root"}">
+        // lis.push(`<li class="show-more" title="${path ? path + "/" : "Root"}">
+        lis.push(`<li class="show-more">
             <span class="so-far">${data.content.length}</span>/${data.contentCount}
             <button name="add-more" data-path="${path}" data-pages="1">
                 Show more

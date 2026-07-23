@@ -45,7 +45,7 @@ function addSuggestions(sugg: nextDetails[]) {
         return
     }
 
-    suggestions.classList.remove("hidden")
+    suggestions.parentElement.classList.remove("hidden")
     selected = null
     const html = sugg
         .map(s => {
@@ -71,7 +71,7 @@ function addSuggestions(sugg: nextDetails[]) {
 }
 
 function hideSuggesions() {
-    suggestions.classList.add("hidden")
+    suggestions.parentElement.classList.add("hidden")
     selected = null
 }
 
@@ -120,7 +120,7 @@ async function handleInput() {
             // console.log(sorted)
         }
 
-        console.log(approvedPath?.next)
+        // console.log(approvedPath?.next)
         if (sorted.length > 0) {
             addSuggestions(sorted)
         } else {
@@ -139,7 +139,7 @@ async function handleInput() {
 input.addEventListener("input", handleInput)
 
 function moveSelection(down: boolean) {
-    if (suggestions.classList.contains("hidden")) return
+    if (suggestions.parentElement.classList.contains("hidden")) return
 
     if (selected) {
         selected.classList.remove("selected")

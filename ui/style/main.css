@@ -5,7 +5,6 @@
 @font-face {
     font-family: "Ubuntu";
     src: url("fonts/Ubuntu-Regular.ttf") format("truetype");
-    /* src: url("fonts/Ubuntu-R.ttf") format("truetype"); */
     font-weight: 400;
     font-style: normal;
 }
@@ -13,7 +12,6 @@
 @font-face {
     font-family: "Ubuntu Mono";
     src: url("fonts/UbuntuMono-Regular.ttf") format("truetype");
-    /* src: url("fonts/UbuntuMono-R.ttf") format("truetype"); */
     font-weight: 400;
     font-style: normal;
 }
@@ -25,11 +23,9 @@
 }
 
 body {
-    /* font-size: 1.1rem; */
     font-size: 1.2em;
-    padding: 0.5em;
+    padding: min(0.3em, 2%);
     font-family: "Ubuntu Mono", monospace;
-    /* background-color: #252525;*/
 }
 
 input,
@@ -40,18 +36,29 @@ button {
 button,
 label {
     font-family: "Ubuntu", sans-serif;
+    font-size: 0.85em;
+}
+
+button {
+    cursor: pointer;
+    border: none;
+    border-radius: 6px;
+    background-color: #08f;
+    color: white;
+    font-size: 0.8em;
+    padding-inline: 0.8em;
+}
+
+button:hover {
+    background-color: #004d00;
+    box-shadow: 0 0px 2px 0 rgb(0, 0, 0);
 }
 
 input[type="checkbox"] {
     height: 0.7em;
     width: 0.7em;
-    /* margin-right: -0.3em; */
 }
 
 .hidden {
-    display: none;
-}
-
-#path {
-    width: 100%;
+    display: none !important;
 }
