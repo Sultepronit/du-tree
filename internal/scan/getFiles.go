@@ -45,7 +45,8 @@ func getFiles(path string, blockSizeReq bool) ([]*fileNode, error) {
 		if stat.Nlink > 1 {
 			node.Nlink = stat.Nlink
 			// if (data.inodes[stat.Ino][0] != filepath.Join(path, node.Name)) {
-			if data.inodes[stat.Ino] != filepath.Join(path, node.Name) {
+			// if data.inodes[stat.Ino] != filepath.Join(path, node.Name) {
+			if data.devInodes[stat.Dev][stat.Ino] != filepath.Join(path, node.Name) {
 				// if data.inodes[stat.Ino] {
 				node.IsHardlink = true
 			}

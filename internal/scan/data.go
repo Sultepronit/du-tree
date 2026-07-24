@@ -42,7 +42,8 @@ type scanData struct {
 	request models.Request
 	// inodes  map[uint64]bool
 	// inodes   map[uint64][]string
-	inodes   map[uint64]string
+	// inodes   map[uint64]string
+	devInodes map[uint64]map[uint64]string
 	scanTree *dirNode
 	viewTree *viewNode
 }

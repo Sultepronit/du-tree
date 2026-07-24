@@ -3,6 +3,7 @@ package scan
 import (
 	"context"
 	"du-tree/internal/explorer"
+	"du-tree/internal/helpers"
 	"du-tree/internal/models"
 	"errors"
 	"fmt"
@@ -34,29 +35,38 @@ func calcSize(entry os.DirEntry, reqBlockSize bool, path string) (int64, error) 
 		return 0, err
 	}
 
-	sysStat, ok := info.Sys().(*syscall.Stat_t)
+	stat, ok := info.Sys().(*syscall.Stat_t)
 	if !ok {
 		return 0, nil
 	}
 
 	var size int64
 	if reqBlockSize {
-		size = sysStat.Blocks * 512
+		size = stat.Blocks * 512
 	} else if !entry.IsDir() {
 		size = info.Size()
 	}
 
-	if sysStat.Nlink > 1 && !entry.IsDir() {
+	if stat.Nlink > 1 && !entry.IsDir() {
 		fullPath := filepath.Join(path, entry.Name())
 		// if data.inodes[sysStat.Ino] {
-		if data.inodes[sysStat.Ino] != "" {
-			// data.inodes[sysStat.Ino] = append(data.inodes[sysStat.Ino], fullPath)
-			size = 0
-			// size *= -1
+		// if data.inodes[sysStat.Ino] != "" {
+		// if data.devInodes[stat.Dev][stat.Ino] != "" {
+		// 	// data.inodes[sysStat.Ino] = append(data.inodes[sysStat.Ino], fullPath)
+		// 	size = 0
+		// } else {
+		// 	// data.inodes[sysStat.Ino] = []string{fullPath}
+		// 	// data.inodes[sysStat.Ino] = true
+		// 	// data.inodes[stat.Ino] = fullPath
+		// 	data.devInodes[stat.Dev][stat.Ino] = fullPath
+		// }
+		if data.devInodes[stat.Dev] == nil {
+			data.devInodes[stat.Dev] = make(map[uint64]string)
+			data.devInodes[stat.Dev][stat.Ino] = fullPath
+		} else if data.devInodes[stat.Dev][stat.Ino] == "" {
+			data.devInodes[stat.Dev][stat.Ino] = fullPath
 		} else {
-			// data.inodes[sysStat.Ino] = []string{fullPath}
-			// data.inodes[sysStat.Ino] = true
-			data.inodes[sysStat.Ino] = fullPath
+			size = 0
 		}
 
 		// fmt.Println(sysStat.Nlink, sysStat.Ino)
@@ -159,6 +169,7 @@ func scanDir(ctx context.Context, path string, node *dirNode, reqBlockSize bool)
 	data.mu.Unlock()
 
 	// helpers.TempPrinAsJson(data.result)
+	// helpers.TempPrinAsJson(data.devInodes)
 	return nil
 }
 
@@ -177,7 +188,8 @@ func Init(req models.Request) (*models.Node, error) {
 
 	// data.inodes = make(map[uint64][]string)
 	// data.inodes = make(map[uint64]bool)
-	data.inodes = make(map[uint64]string)
+	// data.inodes = make(map[uint64]string)
+	data.devInodes = make(map[uint64]map[uint64]string)
 	data.scanTree = &dirNode{Temp: 2}
 	data.viewTree = &viewNode{dirNode: data.scanTree}
 
@@ -199,6 +211,7 @@ func Init(req models.Request) (*models.Node, error) {
 
 		data.mu.Lock()
 		data.cancel = nil
+		helpers.TempPrinAsJson(data.devInodes)
 		log.Println("Total:", data.scanTree.Size)
 		data.mu.Unlock()
 	}()
