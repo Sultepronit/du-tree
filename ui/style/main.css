@@ -47,11 +47,17 @@ button {
     color: white;
     font-size: 0.8em;
     padding-inline: 0.8em;
+    opacity: 0.8;
 }
 
 button:hover {
-    background-color: #004d00;
+    /* background-color: #004d00; */
+    opacity: 1;
     box-shadow: 0 0px 2px 0 rgb(0, 0, 0);
+}
+
+button:disabled {
+    opacity: 0.2;
 }
 
 input[type="checkbox"] {

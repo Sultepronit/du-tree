@@ -25,7 +25,6 @@ func Start(port string) {
 	fmt.Printf("du-tree server started: \033[36m%s\033[0m\n", url)
 	fmt.Print("\033[3mTo exit press Ctrl+C\033[0m\n\n")
 
-	log.Printf("Listening on port: %s\n", port)
 	err := http.ListenAndServe(":"+port, nil)
 	if err != nil {
 		log.Fatal(err)

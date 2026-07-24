@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 )
 
 func Start(port string) {
@@ -21,6 +22,9 @@ func Start(port string) {
 	http.HandleFunc("POST /dir", handleDir)
 	http.HandleFunc("POST /update", handleUpdate)
 	http.HandleFunc("/cancel", handleCancel)
+	http.HandleFunc("/exit", func(_ http.ResponseWriter, _ *http.Request) {
+		os.Exit(0)
+	})
 
 	fs := http.FileServer(http.Dir("./ui"))
 	http.Handle("/", fs)

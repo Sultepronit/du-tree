@@ -4,7 +4,7 @@
         <meta charset="UTF-8" />
         <link rel="icon" type="image/png" href="/icon.png" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Disk Usage Tree 0.7.7</title>
+        <title>Disk Usage Tree 0.7.10</title>
         <link rel="stylesheet" href="style/main.css" />
         <link rel="stylesheet" href="style/header-design.css" />
         <link rel="stylesheet" href="style/tree-design.css" />
@@ -28,8 +28,19 @@
                         data-gramm="false"
                         autocomplete="off"
                     />
-                    <!-- <div class="scan-wrap"><button id="scan"></button></div> -->
-                    <button id="scan" title="Run analysis&#10;Enter"></button>
+                    <!-- <button class="icon-button" id="scan" title="Run analysis&#10;(Enter)"></button> -->
+                    <button class="icon-button" id="scan" disabled autocomplete="off"></button>
+                    <button class="icon-button" id="cancel2" disabled autocomplete="off"></button>
+                    <!-- <div class="exit-wrap" title="Auto-exit server on page close">
+                        <div class="exit-dot"></div>
+                        <input type="checkbox" id="auto-exit" />
+                    </div> -->
+                    <input
+                        type="checkbox"
+                        id="auto-exit"
+                        autocomplete="off"
+                        title="Auto-exit server on page close&#9;[Ctrl+Q]"
+                    />
                 </div>
 
                 <div class="suggestions-block hidden">

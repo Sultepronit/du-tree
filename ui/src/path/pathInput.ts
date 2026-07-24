@@ -193,6 +193,7 @@ function handleSelection(): boolean {
 
 document.addEventListener("keydown", async e => {
     // console.log(e.key)
+    // console.log(e.code)
     if (e.key === "ArrowRight") {
         if (handleSelection()) handleInput()
     } else if (e.key === "Enter") {

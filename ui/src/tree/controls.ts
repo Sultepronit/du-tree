@@ -5,62 +5,80 @@ import { appendBranch, createBranch, rebuildTree, setCanceled, updateTree } from
 
 const useBlockSize = document.getElementById("use-block-size") as HTMLInputElement
 const scanButton = document.getElementById("scan") as HTMLButtonElement
+const cancelButton = document.getElementById("cancel2") as HTMLButtonElement
 
 let rootPath = ""
-// let status = "fresh" as "fresh" | "syncing" | "done"
+
+window.addEventListener("pagehide", () => {
+    if (false) {
+        navigator.sendBeacon("/exit")
+    }
+})
 
 export function setOptions(options: reqOptions) {
     useBlockSize.checked = options.blockSize ?? false
 }
 
-function setResults() {
+function disableEdit() {
     document.dispatchEvent(new CustomEvent("mode", { detail: "results" }))
-    scanButton.classList.add("force")
     useBlockSize.disabled = true
 }
 
-// function setNewScan() {
-//     status.set("ready")
-//     document.dispatchEvent(new CustomEvent("mode", { detail: "preparations" }))
-//     scanButton.classList.remove("force")
-//     useBlockSize.disabled = false
-// }
-
-function initNewScan() {
-    if (status.get() === "syncing") {
-        // cancel it!
-    }
-    // setNewScan()
-    status.set("ready")
+function enableEdit() {
     document.dispatchEvent(new CustomEvent("mode", { detail: "preparations" }))
-    scanButton.classList.remove("force")
     useBlockSize.disabled = false
 }
 
+type statusType = "blank" | "setting" | "ready" | "scanning" | "done"
 const status = {
-    _val: "fresh",
-    get(): "fresh" | "syncing" | "done" | "ready" {
+    _val: "blank",
+    get(): statusType {
         return this._val
     },
-    set(newVal: "syncing" | "done" | "ready") {
+    set(newVal: statusType) {
         console.log(this._val, newVal)
         this._val = newVal
-        if (newVal === "syncing") {
-            setResults()
-            scanButton.title = "Cancel current analysis & start new one\nCtrl+Enter"
+        if (newVal === "scanning") {
+            disableEdit()
+            scanButton.disabled = true
+            scanButton.classList.add("scanning")
+            scanButton.title = "Scanning..."
+
+            cancelButton.disabled = false
+            cancelButton.title = "Abort the scan\t[Esc]"
         } else if (newVal === "done") {
-            setResults()
-            scanButton.title = "Start new analysis\nCtrl+Enter"
+            disableEdit()
+            scanButton.disabled = false
+            scanButton.classList.remove("scanning")
+            scanButton.title = "Rescan now\t[Ctrl+Enter]"
+
+            cancelButton.disabled = false
+            cancelButton.title = "Discard results & allow edit\t[Esc]"
         } else if (newVal === "ready") {
-            scanButton.title = "Run analysis\nEnter"
+            enableEdit()
+            scanButton.title = "Scan\t[Enter]"
+
+            cancelButton.disabled = true
+            cancelButton.title = ""
         }
     }
 }
 
-scanButton.addEventListener("click", initNewScan)
+// scanButton.addEventListener("click", initNewScan)
+scanButton.addEventListener("click", () => {
+    const st = status.get()
+    if (st === "ready" || st === "done") initTree(rootPath)
+})
+
+cancelButton.addEventListener("click", () => {
+    if (status.get() === "done") {
+        status.set("ready")
+    }
+})
 
 export async function initTree(path: string) {
     rootPath = path
+    status.set("scanning")
 
     const options = {} as reqOptions
     if (useBlockSize.checked) {
@@ -81,6 +99,7 @@ export async function initTree(path: string) {
 
 export async function renderTree(path: string) {
     rootPath = path
+    status.set("scanning")
 
     const data = (await doFetch("/dir", { path: "", pages: 1 })) as DataNode
     console.log(data)
@@ -125,14 +144,14 @@ let updateBranches = [] as { path: string; pages: number }[]
 function initUpdates() {
     updateBranches = [{ path: "", pages: 1 }]
     // syncing = true
-    status.set("syncing")
+    // status.set("scanning")
     interval = 200
     update()
 }
 
 function populateUpdates(data: DataNode, prePath: string, dirname: string) {
     // if (syncing && data.temp) {
-    if (status.get() === "syncing" && data.temp) {
+    if (status.get() === "scanning" && data.temp) {
         const path = prePath ? `${prePath}/${dirname}` : dirname
         updateBranches.push({ path, pages: 1 })
     }

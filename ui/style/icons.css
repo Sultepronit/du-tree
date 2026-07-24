@@ -18,15 +18,32 @@
     -webkit-mask-image: url("icons/lock.svg");
 }
 
-#scan {
+.icon-button {
     /* mask-size: 100% 80%; */
     /* -webkit-mask-size: 100% 80%; */
+    background-color: black;
     mask-position: center center;
     -webkit-mask-position: center center;
     mask-repeat: no-repeat;
     -webkit-mask-repeat: no-repeat;
+}
+
+#scan {
     mask-image: url("icons/search.svg");
     -webkit-mask-image: url("icons/search.svg");
+}
+
+#scan.scanning {
+    mask-size: 90% 90%;
+    -webkit-mask-size: 90% 90%;
+    mask-image: url("icons/sync.svg");
+    -webkit-mask-image: url("icons/sync.svg");
+    opacity: 1;
+}
+
+#cancel2 {
+    mask-image: url("icons/x.svg");
+    -webkit-mask-image: url("icons/x.svg");
 }
 
 #suggestions-box {
