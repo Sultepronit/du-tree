@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 )
 
 func Start(port string) {
@@ -22,9 +21,7 @@ func Start(port string) {
 	http.HandleFunc("POST /dir", handleDir)
 	http.HandleFunc("POST /update", handleUpdate)
 	http.HandleFunc("/cancel", handleCancel)
-	http.HandleFunc("/exit", func(_ http.ResponseWriter, _ *http.Request) {
-		os.Exit(0)
-	})
+	http.HandleFunc("/exit", handleExit)
 
 	fs := http.FileServer(http.Dir("./ui"))
 	http.Handle("/", fs)
@@ -33,7 +30,7 @@ func Start(port string) {
 		port = "51201"
 	}
 	url := "http://localhost:" + port
-	fmt.Printf("Dev du-tree server started: \033[36m%s\033[0m\n", url)
+	fmt.Printf("Dev du-tree server started. Open Web UI: \033[36m%s\033[0m\n", url)
 	fmt.Print("\033[3mTo exit press Ctrl+C\033[0m\n\n")
 
 	err := http.ListenAndServe(":"+port, nil)

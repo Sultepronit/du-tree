@@ -1,5 +1,5 @@
 import { doFetch } from "../api/fetch"
-import { initTree } from "../tree/controls"
+import { initTree, status } from "../tree/controls"
 
 const accessWidget = document.getElementById("access-widged")
 const input = document.getElementById("path") as HTMLInputElement
@@ -28,7 +28,6 @@ export function setPath(val: string) {
 }
 
 document.addEventListener("mode", (e: CustomEvent) => {
-    console.log(e.detail)
     if (e.detail === "results") {
         input.disabled = true
     } else if (e.detail === "preparations") {
@@ -86,8 +85,18 @@ function hideSuggesions() {
 }
 
 let approvedPath = null as pathHint
-// let isOk = false
-let isOk: boolean
+
+// let isOk: boolean
+const pathIsValid = {
+    _val: null,
+    get(): boolean | null {
+        return this._val
+    },
+    set(valid: boolean) {
+        this._val = valid
+        status.set(valid ? "ready" : "setting")
+    }
+}
 async function handleInput() {
     checkUser()
     // console.log(input.value)
@@ -103,12 +112,14 @@ async function handleInput() {
     else setAccessWidget("unlocked")
 
     if (approvedPath?.current === "ok") {
-        isOk = true
+        // isOk = true
+        pathIsValid.set(true)
         pre.textContent = input.value
         input.className = "ok"
         addSuggestions(approvedPath.next)
     } else {
-        isOk = false
+        // isOk = false
+        pathIsValid.set(false)
         pre.textContent = approvedPath?.current
 
         const sorted = []
@@ -136,12 +147,6 @@ async function handleInput() {
         } else {
             addSuggestions(approvedPath?.next || [])
         }
-        /*} else if (approvedPath?.next?.length > 0) {
-            addSuggestions(approvedPath.next)
-        } else {
-            console.log("no suggestions")
-            hideSuggesions()
-        }*/
 
         input.className = sorted.length > 0 ? "almost" : "wrong"
     }
@@ -185,8 +190,9 @@ function handleSelection(): boolean {
         approvedPath.current === "ok" ? slashIt(input.value) : slashIt(approvedPath.current)
 
     input.value = `${prePath}${suggName}/`
-    isOk = true
     input.className = "ok"
+    // isOk = true
+    pathIsValid.set(true)
 
     return true
 }
@@ -197,12 +203,14 @@ document.addEventListener("keydown", async e => {
     if (e.key === "ArrowRight") {
         if (handleSelection()) handleInput()
     } else if (e.key === "Enter") {
-        // if (selected && !handleSelection()) return
-        if (isOk === undefined) await handleInput()
+        e.preventDefault()
+        // if (isOk === undefined) await handleInput()
+        if (pathIsValid.get() === null) await handleInput()
 
         if (selected) {
             if (handleSelection()) handleInput()
-        } else if (isOk) {
+            // } else if (isOk) {
+        } else if (pathIsValid.get() === true) {
             hideSuggesions()
             initTree(slashIt(input.value))
         }
@@ -215,4 +223,16 @@ document.addEventListener("keydown", async e => {
     } else if (e.key === "Escape") {
         hideSuggesions()
     }
+})
+
+suggestions.addEventListener("click", e => {
+    const target = e.target as HTMLElement
+    console.log(target)
+    if (!target.classList.contains("suggestion")) return
+
+    selected?.classList.remove("selected")
+    selected = target
+
+    target.classList.add("selected")
+    checkUser()
 })

@@ -17,12 +17,13 @@ func Start(port string) {
 	http.HandleFunc("POST /dir", handleDir)
 	http.HandleFunc("POST /update", handleUpdate)
 	http.HandleFunc("/cancel", handleCancel)
+	http.HandleFunc("/exit", handleExit)
 
 	fs := embeded.GetSubFSHandler()
 	http.Handle("/", fs)
 
 	url := "http://localhost:" + port
-	fmt.Printf("du-tree server started: \033[36m%s\033[0m\n", url)
+	fmt.Printf("du-tree server started. Open Web UI: \033[36m%s\033[0m\n", url)
 	fmt.Print("\033[3mTo exit press Ctrl+C\033[0m\n\n")
 
 	err := http.ListenAndServe(":"+port, nil)

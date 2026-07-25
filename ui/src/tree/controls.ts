@@ -6,15 +6,16 @@ import { appendBranch, createBranch, rebuildTree, setCanceled, updateTree } from
 
 const useBlockSize = document.getElementById("use-block-size") as HTMLInputElement
 const scanButton = document.getElementById("scan") as HTMLButtonElement
-const cancelButton = document.getElementById("cancel2") as HTMLButtonElement
+const autoExit = document.getElementById("auto-exit") as HTMLInputElement
 
 let rootPath = ""
 
 window.addEventListener("pagehide", () => {
-    if (false) {
+    if (autoExit.checked) {
         navigator.sendBeacon("/exit")
     }
 })
+// navigator.sendBeacon("/exit")
 
 export function setOptions(options: reqOptions) {
     useBlockSize.checked = options.blockSize ?? false
@@ -37,42 +38,34 @@ const status = {
         return this._val
     },
     set(newVal: statusType) {
-        console.log(this._val, newVal)
+        // console.log(this._val, newVal)
         this._val = newVal
-        if (newVal === "scanning") {
-            disableEdit()
+        if (newVal === "setting") {
             scanButton.disabled = true
-            scanButton.classList.add("scanning")
-            scanButton.title = "Scanning..."
-
-            cancelButton.disabled = false
-            cancelButton.title = "Abort the scan\t[Esc]"
-        } else if (newVal === "done") {
-            disableEdit()
-            scanButton.disabled = false
-            scanButton.classList.remove("scanning")
-            scanButton.title = "Rescan now\t[Ctrl+Enter]"
-
-            cancelButton.disabled = false
-            cancelButton.title = "Discard results & allow edit\t[Esc]"
+            scanButton.title = ""
         } else if (newVal === "ready") {
             enableEdit()
+            scanButton.disabled = false
             scanButton.title = "Scan\t[Enter]"
-
-            cancelButton.disabled = true
-            cancelButton.title = ""
+        } else if (newVal === "scanning") {
+            disableEdit()
+            scanButton.disabled = true
+            scanButton.title = ""
+        } else if (newVal === "done") {
+            scanButton.disabled = false
+            scanButton.title = "Discard results & set new scan\t[Ctrl+Enter]"
         }
     }
 }
+export { status }
 
 // scanButton.addEventListener("click", initNewScan)
 scanButton.addEventListener("click", () => {
     const st = status.get()
-    if (st === "ready" || st === "done") initTree(rootPath)
-})
-
-cancelButton.addEventListener("click", () => {
-    if (status.get() === "done") {
+    // if (st === "ready" || st === "done") initTree(rootPath)
+    if (st === "ready") {
+        initTree(rootPath)
+    } else if (st === "done") {
         status.set("ready")
     }
 })
@@ -110,14 +103,14 @@ export async function renderTree(path: string) {
     else status.set("done")
 }
 
+let interval = 200
 document.getElementById("cancel").addEventListener("click", async () => {
+    interval = 100
     const re = await doFetch("/cancel")
     console.log(re)
     if (re?.status === "canceled") setCanceled()
 })
 
-let interval = 200
-// let syncing = false
 async function update() {
     await new Promise(resolve => setTimeout(resolve, interval))
     if (interval < 900) interval += 100
@@ -144,14 +137,11 @@ async function update() {
 let updateBranches = [] as { path: string; pages: number }[]
 function initUpdates() {
     updateBranches = [{ path: "", pages: 1 }]
-    // syncing = true
-    // status.set("scanning")
     interval = 200
     update()
 }
 
 function populateUpdates(data: DataNode, prePath: string, dirname: string) {
-    // if (syncing && data.temp) {
     if (status.get() === "scanning" && data.temp) {
         const path = prePath ? `${prePath}/${dirname}` : dirname
         updateBranches.push({ path, pages: 1 })

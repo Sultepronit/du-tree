@@ -5,6 +5,7 @@ import (
 	"du-tree/internal/models"
 	"du-tree/internal/scan"
 	"os"
+	"time"
 
 	"encoding/json"
 	"log"
@@ -91,4 +92,16 @@ func handleCancel(w http.ResponseWriter, r *http.Request) {
 	// du.Stop()
 	scan.Stop()
 	sendResult(w, map[string]string{"status": "canceled"})
+}
+
+func handleExit(w http.ResponseWriter, _ *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write([]byte("exiting"))
+
+	log.Println("Received exit signal from Web UI. Gracefully exiting...")
+
+	go func() {
+		time.Sleep(100 * time.Millisecond)
+		os.Exit(0)
+	}()
 }

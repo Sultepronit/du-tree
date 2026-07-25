@@ -44,8 +44,8 @@ type scanData struct {
 	// inodes   map[uint64][]string
 	// inodes   map[uint64]string
 	devInodes map[uint64]map[uint64]string
-	scanTree *dirNode
-	viewTree *viewNode
+	scanTree  *dirNode
+	viewTree  *viewNode
 }
 
 var data scanData

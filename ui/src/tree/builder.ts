@@ -16,12 +16,7 @@ let branches2 = {} as Record<string, UpdateBranch>
 
 let rootPath = ""
 
-// function changeTreeVisibility(mode: "hidden" | "") {
-
-// }
-
 document.addEventListener("mode", (e: CustomEvent) => {
-    console.log(e.detail)
     if (e.detail === "results") {
         treeBlock.style.opacity = "1"
         statePannel.style.opacity = "1"
@@ -87,7 +82,6 @@ function genTitle(data: DataNode, path: string) {
 }
 
 const handleBytesExt = (data: DataNode) => {
-    // console.log(data.temp > 0, data.locked !== undefined, data.locked)
     return handleBytes(data.size, data.temp > 0 || data.locked !== undefined)
 }
 
@@ -431,6 +425,7 @@ export async function rebuildTree(data: DataNode, path: string) {
     treeBlock.appendChild(createBranch(data, ""))
 }
 
+// move to controls?..
 export function setCanceled() {
     canceled = true
     document.documentElement.style.setProperty("--temp-dir-icon", `url("icons/folder-x.svg")`)
@@ -440,6 +435,7 @@ export function setCanceled() {
     )
     document.documentElement.style.setProperty("--unavailable-cursor", "not-allowed")
     statePannel.classList.add("canceled")
+    statePannel.classList.remove("temp")
 }
 
 export function removeCanceled() {

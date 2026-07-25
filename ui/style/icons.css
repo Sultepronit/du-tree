@@ -89,12 +89,8 @@
     background-color: red;
 }
 
-/* .scan-progress { */
-.temp .scan-progress {
-    /* content: "";
-    display: inline-block; */
-    /* margin: 0 0.5em -0.1em; */
-    /* margin: 0.2em 0 -0.2em; */
+.scan-progress {
+    display: none;
     margin-top: 0.1em;
     width: 0.9em;
     height: 0.9em;
@@ -105,9 +101,17 @@
     -webkit-mask-image: url("icons/sync.svg");
     -webkit-mask-size: contain;
     mask-size: contain;
+}
 
-    /* transform-origin: center center;
-    animation: spin-counter 2s linear infinite; */
+/* .scan-progress { */
+.temp .scan-progress {
+    display: block;
+}
+
+.canceled .scan-progress {
+    display: block;
+    mask-image: url("icons/refresh-cw-off.svg");
+    -webkit-mask-image: url("icons/refresh-cw-off.svg");
 }
 
 /* tree design ----------------------- */

@@ -31,7 +31,3 @@
     transform-origin: center center;
     animation: spin-counter 2s linear infinite;
 }
-
-#scan {
-    animation: wave-pulse 2.5s infinite ease-in-out;
-}
