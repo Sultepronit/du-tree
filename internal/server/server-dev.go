@@ -4,10 +4,27 @@ package server
 
 import (
 	"du-tree/internal/jscss"
+	"du-tree/internal/utils"
 	"fmt"
 	"log"
 	"net/http"
 )
+
+func printMsg(port string) {
+	url := "http://localhost:" + port
+	// fmt.Printf("Dev du-tree server started. Open Web UI: \033[36m%s\033[0m\n", url)
+	fmt.Printf("Dev du-tree server started. Open Web UI:\n\033[36m%s\033[0m", url)
+
+	ip, err := utils.GetLocalIP()
+	if err != nil {
+		fmt.Println("\n" + err.Error())
+		return
+	} else {
+		fmt.Printf("\t\033[36mhttp://%s:%s\033[0m\n", ip, port)
+	}
+
+	fmt.Print("\033[3mTo exit press \033[0mCtrl+C\n\n")
+}
 
 func Start(port string) {
 	go jscss.StartCSSWhatcher("./ui/style")
@@ -29,9 +46,8 @@ func Start(port string) {
 	if port == "51200" {
 		port = "51201"
 	}
-	url := "http://localhost:" + port
-	fmt.Printf("Dev du-tree server started. Open Web UI: \033[36m%s\033[0m\n", url)
-	fmt.Print("\033[3mTo exit press Ctrl+C\033[0m\n\n")
+
+	printMsg(port)
 
 	err := http.ListenAndServe(":"+port, nil)
 	if err != nil {

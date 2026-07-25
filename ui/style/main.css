@@ -40,6 +40,23 @@ label {
     user-select: none;
 }
 
+label {
+    /* opacity: 0.5; */
+    /* text-decoration: line-through; */
+    color: #000c;
+}
+
+label:has(input:not(:checked):disabled) {
+    text-decoration: line-through;
+    color: black;
+}
+
+label:has(input:checked) {
+    /* text-decoration: underline; */
+    /* opacity: 1; */
+    color: black;
+}
+
 button {
     cursor: pointer;
     border: none;
@@ -62,8 +79,14 @@ button:disabled {
 }
 
 input[type="checkbox"] {
-    height: 0.7em;
-    width: 0.7em;
+    height: 0.8em;
+    width: 0.8em;
+    margin-top: 0.1em;
+    margin-left: 0;
+}
+
+input[type="checkbox"]:not(:checked):disabled {
+    display: none;
 }
 
 .hidden {
