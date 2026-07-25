@@ -1,6 +1,7 @@
 import { doFetch } from "../api/fetch"
 
 import type { DataNode, reqOptions } from "../types"
+import toggleCSS from "../utils/toggleCss"
 import { appendBranch, createBranch, rebuildTree, setCanceled, updateTree } from "./builder"
 
 const useBlockSize = document.getElementById("use-block-size") as HTMLInputElement
@@ -207,4 +208,8 @@ document.getElementById("tree").addEventListener("click", async e => {
     // console.log(target)
     if (target instanceof HTMLButtonElement && target.name === "add-more") addMore(target)
     else if (target.classList.contains("td")) unfoldDir(target)
+})
+
+document.getElementById("use-animation").addEventListener("click", e => {
+    toggleCSS("./style/animations.css", "animations-css", (e.target as HTMLInputElement).checked)
 })

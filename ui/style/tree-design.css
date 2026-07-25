@@ -10,19 +10,6 @@ body {
     height: 100svh;
 }
 
-/* unused! */
-@keyframes wave-pulse {
-    0% {
-        opacity: 1;
-    }
-    50% {
-        opacity: 0.2;
-    }
-    100% {
-        opacity: 1;
-    }
-}
-
 #tree {
     overflow: auto;
     padding-left: 0.5%;

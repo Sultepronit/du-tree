@@ -4,7 +4,7 @@
         <meta charset="UTF-8" />
         <link rel="icon" type="image/png" href="/icon.png" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Disk Usage Tree 0.7.10</title>
+        <title>Disk Usage Tree 0.7.12</title>
         <link rel="stylesheet" href="style/main.css" />
         <link rel="stylesheet" href="style/header-design.css" />
         <link rel="stylesheet" href="style/tree-design.css" />
@@ -53,12 +53,17 @@
                 <div class="tree-root">
                     <div id="total-size"></div>
                     <div id="lock-widget" class="hidden"></div>
+                    <div class="scan-progress"></div>
                     <button id="cancel">Abort</button>
                 </div>
                 <div class="options">
                     <label>
                         <input type="checkbox" name="use-block-size" id="use-block-size" checked />
                         block size
+                    </label>
+                    <label>
+                        <input type="checkbox" name="use-animation" id="use-animation" />
+                        animation
                     </label>
                 </div>
             </div>

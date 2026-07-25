@@ -167,9 +167,9 @@
     gap: 0.5em;
 }
 
-#total-size {
+/* #total-size {
     z-index: 100;
-}
+} */
 
 .temp #total-size {
     color: var(--temp-color);
@@ -178,33 +178,6 @@
 
 .probably-bigger #total-size::before {
     content: "≥";
-}
-
-.temp #total-size::after {
-    content: "";
-    display: inline-block;
-    margin: 0 0.5em -0.1em;
-    width: 0.9em;
-    height: 0.9em;
-    -webkit-mask-repeat: no-repeat;
-    mask-repeat: no-repeat;
-    background-color: var(--temp-color);
-    mask-image: url("icons/sync.svg");
-    -webkit-mask-image: url("icons/sync.svg");
-    -webkit-mask-size: contain;
-    mask-size: contain;
-
-    transform-origin: center center;
-    /* animation: spin-counter 2s linear infinite; */
-}
-
-@keyframes spin-counter {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(-360deg);
-    }
 }
 
 .canceled #total-size::after {

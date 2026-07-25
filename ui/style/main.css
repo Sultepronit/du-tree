@@ -37,6 +37,7 @@ button,
 label {
     font-family: "Ubuntu", sans-serif;
     font-size: 0.85em;
+    user-select: none;
 }
 
 button {
