@@ -102,6 +102,7 @@ async function handleInput() {
     // console.log(input.value)
     if (!input.value) {
         hideSuggesions()
+        setAccessWidget("unlocked")
         return
     }
 
@@ -116,6 +117,7 @@ async function handleInput() {
         pathIsValid.set(true)
         pre.textContent = input.value
         input.className = "ok"
+        input.title = `The path is valid. \nYou can start scanning the directory by pressing the Enter key.`
         addSuggestions(approvedPath.next)
     } else {
         // isOk = false
@@ -144,17 +146,25 @@ async function handleInput() {
         // console.log(approvedPath?.next)
         if (sorted.length > 0) {
             addSuggestions(sorted)
+            input.className = "almost"
+            input.title = `Enter or select an available directory path.`
         } else {
             addSuggestions(approvedPath?.next || [])
+            input.className = "wrong"
+            input.title = `There is no directory with path: ${input.value}.\n Please select an available one.`
         }
 
-        input.className = sorted.length > 0 ? "almost" : "wrong"
+        // input.className = sorted.length > 0 ? "almost" : "wrong"
     }
 }
 input.addEventListener("input", handleInput)
 
-function moveSelection(down: boolean) {
-    if (suggestions.parentElement.classList.contains("hidden")) return
+async function moveSelection(down: boolean) {
+    // if (suggestions.parentElement.classList.contains("hidden")) return
+    if (suggestions.parentElement.classList.contains("hidden")) {
+        if (down) await handleInput()
+        else return
+    }
 
     if (selected) {
         selected.classList.remove("selected")
@@ -197,13 +207,12 @@ function handleSelection(): boolean {
     return true
 }
 
-document.addEventListener("keydown", async e => {
-    // console.log(e.key)
-    // console.log(e.code)
+async function handlePathInput(e: KeyboardEvent) {
     if (e.key === "ArrowRight") {
         if (handleSelection()) handleInput()
     } else if (e.key === "Enter") {
         e.preventDefault()
+
         // if (isOk === undefined) await handleInput()
         if (pathIsValid.get() === null) await handleInput()
 
@@ -223,6 +232,28 @@ document.addEventListener("keydown", async e => {
     } else if (e.key === "Escape") {
         hideSuggesions()
     }
+}
+
+const autoExit = document.getElementById("auto-exit") as HTMLInputElement // yeah it shouldn't be there!
+document.addEventListener("keydown", async e => {
+    // console.log(e.key)
+    // console.log(e.code)
+    if (e.ctrlKey && e.code === "KeyQ") {
+        console.log("here we go?")
+        autoExit.checked = !autoExit.checked
+    }
+    const st = status.get()
+    if (st === "scanning") return
+    if (st === "done") {
+        if (e.key === "Enter" && e.ctrlKey) {
+            e.preventDefault()
+            console.log("here we go!")
+            status.set("ready")
+        }
+
+        return
+    }
+    handlePathInput(e)
 })
 
 suggestions.addEventListener("click", e => {

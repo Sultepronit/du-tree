@@ -132,21 +132,6 @@
     color: red;
 }
 
-#lock-widget::before {
-    content: "";
-    display: inline-block;
-    margin-bottom: -0.1em;
-    width: 1em;
-    height: 0.85em;
-    -webkit-mask-repeat: no-repeat;
-    mask-repeat: no-repeat;
-    background-color: red;
-    -webkit-mask-size: contain;
-    mask-size: contain;
-    mask-image: url("icons/lock.svg");
-    -webkit-mask-image: url("icons/lock.svg");
-}
-
 #cancel {
     display: none;
     margin: 0 0.5em;

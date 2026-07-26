@@ -2,9 +2,9 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
-        <link rel="icon" type="image/png" href="/icon.png" />
+        <link rel="icon" type="image/svg+xml" href="/folder-tree-3.svg" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Disk Usage Tree 0.7.16</title>
+        <title>Disk Usage Tree v0.1.0 [0.7.20]</title>
         <link rel="stylesheet" href="style/main.css" />
         <link rel="stylesheet" href="style/header-design.css" />
         <link rel="stylesheet" href="style/tree-design.css" />
@@ -47,7 +47,11 @@
             <div class="flex1">
                 <div class="tree-root">
                     <div id="total-size"></div>
-                    <div id="lock-widget" class="hidden"></div>
+                    <div
+                        id="lock-widget"
+                        class="hidden"
+                        title="Counter of dirs with no access, meaning no size evaluation.&#10; Run as root to get the full size."
+                    ></div>
                     <div class="scan-progress"></div>
                     <button id="cancel">Cancel</button>
                 </div>
@@ -63,7 +67,7 @@
                             id="use-animation"
                             autocomplete="on"
                         />
-                        animation
+                        animations
                     </label>
                 </div>
             </div>

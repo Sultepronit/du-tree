@@ -41,9 +41,25 @@
     opacity: 1;
 }
 
-#cancel2 {
-    mask-image: url("icons/x.svg");
-    -webkit-mask-image: url("icons/x.svg");
+/* #lock-widget::before { */
+#lock-widget::after {
+    content: "";
+    display: inline-block;
+    margin-left: 0.2em;
+    margin-bottom: -0.08em;
+    width: 1em;
+    height: 0.84em;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    background-color: red;
+    /* mask-position: center center;
+    -webkit-mask-position: right center; */
+    /* -webkit-mask-size: contain;
+    mask-size: contain; */
+    mask-size: 100% 100%;
+    -webkit-mask-size: 100% 100%;
+    mask-image: url("icons/lock.svg");
+    -webkit-mask-image: url("icons/lock.svg");
 }
 
 #suggestions-box {

@@ -25,5 +25,7 @@ func main() {
 		}()
 	}
 
+	// fmt.Println(os.Hostname())
+
 	server.Start(*port)
 }
