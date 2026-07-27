@@ -45,8 +45,8 @@ func stepBack(path string) string {
 func CheckPath(path string) *models.Path {
 	fmt.Println("path0:", path)
 	re := models.Path{
-		Current: "ok",
-		Next:    make([]models.PathDetail, 0, 5),
+		InputPath: "ok",
+		NextDirs:  make([]models.PathDetail, 0, 5),
 	}
 
 	// fmt.Println("path:", path)
@@ -71,13 +71,13 @@ func CheckPath(path string) *models.Path {
 		entries, err := os.ReadDir(path)
 		if err != nil {
 			if errors.Is(err, os.ErrPermission) {
-				re.Current = "Permission denied"
+				re.InputPath = "Permission denied"
 				return &re
 			}
 			// fmt.Println("err:", err)
 		} else {
 			if i > 0 {
-				re.Current = path
+				re.InputPath = path
 			}
 
 			for _, e := range entries {
@@ -86,7 +86,7 @@ func CheckPath(path string) *models.Path {
 					if !IsAccessible(path, e.Name()) {
 						next.IsLocked = true
 					}
-					re.Next = append(re.Next, next)
+					re.NextDirs = append(re.NextDirs, next)
 
 				} else if e.Type().String()[0:1] == "L" {
 					typ, linkTo := GetLinkInfo(path, e.Name())
@@ -96,7 +96,7 @@ func CheckPath(path string) *models.Path {
 						if !IsAccessible(path, e.Name()) {
 							next.IsLocked = true
 						}
-						re.Next = append(re.Next, next)
+						re.NextDirs = append(re.NextDirs, next)
 					}
 				}
 			}

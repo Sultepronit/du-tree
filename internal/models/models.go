@@ -7,8 +7,12 @@ type PathDetail struct {
 }
 
 type Path struct {
-	Current string       `json:"current"`
-	Next    []PathDetail `json:"next"`
+	InputPath   string       `json:"inputPath"`
+	WorkingPath string       `json:"workingPath,omitempty"`
+	Replacement []string     `json:"replacement,omitempty"`
+	NextDirs    []PathDetail `json:"nextDirs,omitempty"`
+	IsLocked    bool         `json:"isLocked,omitempty"`
+	IsRemoved   bool         `json:"isRemoved,omitempty"` // TODO!
 }
 
 type ReqOptions struct {

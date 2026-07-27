@@ -1,5 +1,6 @@
 import { doFetch } from "../api/fetch"
 import { initTree, status } from "../tree/controls"
+import sortByNeedlePosition from "./sortSuggesions"
 
 const accessWidget = document.getElementById("access-widged")
 const input = document.getElementById("path") as HTMLInputElement
@@ -42,8 +43,17 @@ type nextDetails = {
     isLocked?: true
 }
 type pathHint = {
-    current: string
-    next: nextDetails[]
+    // current: string
+    inputPath: string
+    workingPath?: string
+    replacement?: string[]
+    nextDirs?: nextDetails[]
+    isLocked?: true
+    isRemoved?: true
+}
+
+function slashIt(path: string) {
+    return path.endsWith("/") ? path : path + "/"
 }
 
 let selected = null as Element
@@ -84,8 +94,6 @@ function hideSuggesions() {
     selected = null
 }
 
-let approvedPath = null as pathHint
-
 // let isOk: boolean
 const pathIsValid = {
     _val: null,
@@ -95,8 +103,15 @@ const pathIsValid = {
     set(valid: boolean) {
         this._val = valid
         status.set(valid ? "ready" : "setting")
+        input.className = "ok"
+        input.title = `The path is valid. \nYou can start scanning the directory by pressing the Enter key.`
     }
 }
+
+let checkedPath = null as pathHint
+
+function evaluatePath() {}
+
 async function handleInput() {
     checkUser()
     // console.log(input.value)
@@ -106,56 +121,73 @@ async function handleInput() {
         return
     }
 
-    approvedPath = (await doFetch("/path", { path: input.value })) as pathHint
+    checkedPath = (await doFetch("/path", { path: input.value })) as pathHint
     // console.log(approvedPath)
 
-    if (approvedPath?.current === "Permission denied") setAccessWidget("locked")
-    else setAccessWidget("unlocked")
+    if (checkedPath.inputPath === input.value) {
+        if (checkedPath.isLocked) setAccessWidget("locked")
+        else setAccessWidget("unlocked")
 
-    if (approvedPath?.current === "ok") {
-        // isOk = true
-        pathIsValid.set(true)
-        pre.textContent = input.value
-        input.className = "ok"
-        input.title = `The path is valid. \nYou can start scanning the directory by pressing the Enter key.`
-        addSuggestions(approvedPath.next)
-    } else {
-        // isOk = false
-        pathIsValid.set(false)
-        pre.textContent = approvedPath?.current
-
-        const sorted = []
-        if (approvedPath?.next) {
-            let next = input.value.slice(approvedPath.current.length).toLocaleLowerCase()
-            if (next.startsWith("/")) next = next.slice(1)
-            // console.log("next:", next)
-
-            const relevant = []
-            for (const e of approvedPath.next) {
-                const i = e.name.toLocaleLowerCase().indexOf(next)
-                if (i >= 0) relevant[i] ? relevant[i].push(e) : (relevant[i] = [e])
-            }
-            // console.log(relevant)
-            for (const block of relevant) {
-                // console.log(block)
-                if (block) sorted.push(...block)
-            }
-            // console.log(sorted)
-        }
-
-        // console.log(approvedPath?.next)
-        if (sorted.length > 0) {
-            addSuggestions(sorted)
-            input.className = "almost"
-            input.title = `Enter or select an available directory path.`
+        if (!checkedPath.workingPath) {
+            pathIsValid.set(true)
+            pre.textContent = input.value
+            // input.className = "ok"
+            // input.title = `The path is valid. \nYou can start scanning the directory by pressing the Enter key.`
+            addSuggestions(checkedPath.nextDirs)
         } else {
-            addSuggestions(approvedPath?.next || [])
-            input.className = "wrong"
-            input.title = `There is no directory with path: ${input.value}.\n Please select an available one.`
-        }
+            // WORKING PATH CASE: the input path have some nuances
+            if (!checkedPath.replacement) {
+                pre.textContent = checkedPath.workingPath
+                // the beggining of the path is ok, the thing is about the suggestions
+                const slashedWorkingPath = slashIt(checkedPath.workingPath)
+                const ending = input.value.slice(slashedWorkingPath.length)
+                const sorted = sortByNeedlePosition(ending, checkedPath.nextDirs)
+                console.log(ending, sorted)
 
-        // input.className = sorted.length > 0 ? "almost" : "wrong"
+                // const sorted = [] // they really are sorted!
+                // if (checkedPath?.nextDirs) {
+                //     let ending = input.value
+                //         .slice(checkedPath.workingPath.length)
+                //         .toLocaleLowerCase()
+
+                //     const relevant = []
+                //     for (const e of checkedPath.nextDirs) {
+                //         const i = e.name.toLocaleLowerCase().indexOf(ending)
+                //         if (i >= 0) relevant[i] ? relevant[i].push(e) : (relevant[i] = [e]) // sorting!
+                //     }
+                //     // console.log(relevant)
+                //     for (const block of relevant) {
+                //         // console.log(block)
+                //         if (block) sorted.push(...block)
+                //     }
+                //     // console.log(sorted)
+                // }
+
+                if (sorted.length > 0) {
+                    addSuggestions(sorted)
+                    if (sorted[0].name === ending) {
+                        pathIsValid.set(true)
+                    } else {
+                        input.className = "almost"
+                        input.title = `Enter or select an available directory path.`
+                    }
+                } else {
+                    addSuggestions(checkedPath?.nextDirs || [])
+                    input.className = "wrong"
+                    input.title = `There is no directory with path: ${input.value}.\n Please select an available one.`
+                }
+            }
+        }
     }
+
+    // if (checkedPath?.current === "ok") {
+    // } else {
+    //     // isOk = false
+    //     pathIsValid.set(false)
+    //     pre.textContent = checkedPath?.current
+
+    //     // console.log(approvedPath?.next)
+    // }
 }
 input.addEventListener("input", handleInput)
 
@@ -187,29 +219,29 @@ async function moveSelection(down: boolean) {
     // console.log(approvedPath.current, selected?.textContent)
 }
 
-// const inputPath = () => (input.value.endsWith("/") ? input.value : input.value + "/")
-function slashIt(path: string) {
-    return path.endsWith("/") ? path : path + "/"
-}
-function handleSelection(): boolean {
+function select(): boolean {
     if (!selected) return false
     if (selected.classList.contains("locked")) return false
 
     const suggName = selected.textContent
-    const prePath =
-        approvedPath.current === "ok" ? slashIt(input.value) : slashIt(approvedPath.current)
+    // const prePath =
+    //     checkedPath.current === "ok" ? slashIt(input.value) : slashIt(checkedPath.current)
+    const prePath = checkedPath.workingPath
+        ? slashIt(checkedPath.workingPath)
+        : slashIt(input.value)
 
     input.value = `${prePath}${suggName}/`
-    input.className = "ok"
+    // we need to check for changes!
+    // input.className = "ok"
     // isOk = true
-    pathIsValid.set(true)
+    // pathIsValid.set(true)
 
     return true
 }
 
 async function handlePathInput(e: KeyboardEvent) {
     if (e.key === "ArrowRight") {
-        if (handleSelection()) handleInput()
+        if (select()) handleInput()
     } else if (e.key === "Enter") {
         e.preventDefault()
 
@@ -217,7 +249,7 @@ async function handlePathInput(e: KeyboardEvent) {
         if (pathIsValid.get() === null) await handleInput()
 
         if (selected) {
-            if (handleSelection()) handleInput()
+            if (select()) handleInput()
             // } else if (isOk) {
         } else if (pathIsValid.get() === true) {
             hideSuggesions()
@@ -239,7 +271,6 @@ document.addEventListener("keydown", async e => {
     // console.log(e.key)
     // console.log(e.code)
     if (e.ctrlKey && e.code === "KeyQ") {
-        console.log("here we go?")
         autoExit.checked = !autoExit.checked
     }
     const st = status.get()
