@@ -8,36 +8,6 @@ import (
 	"strings"
 )
 
-// func stepBack(path string) string {
-// 	fmt.Println("path1:", path)
-// 	// abs, err := filepath.Abs(path)
-// 	// fmt.Println("abs:", abs, err)
-// 	prev := filepath.Dir(path)
-
-// 	fmt.Println(path, prev, filepath.Base(path))
-
-// 	if prev[0] != path[0] && filepath.Clean(path)[0] != filepath.Clean(prev)[0] {
-// 		fmt.Println(filepath.Clean(path), filepath.Clean(prev))
-// 		return ""
-// 	}
-
-// 	return prev
-// }
-
-// func checkHome(path string) string {
-// 	if !strings.HasPrefix(path, "~") {
-// 		return path
-// 	}
-
-// 	home, err := os.UserHomeDir()
-// 	if err != nil {
-// 		fmt.Println("Home dir not found:", err)
-// 		return path
-// 	}
-
-// 	return filepath.Join(home, path[1:])
-// }
-
 func unwrapPath(path string) string {
 	if strings.HasPrefix(path, "~") {
 		home, err := os.UserHomeDir()
