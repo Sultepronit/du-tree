@@ -3,7 +3,7 @@ package server
 import (
 	"du-tree/internal/explorer"
 	"du-tree/internal/models"
-	"du-tree/internal/scan"
+	"du-tree/internal/scanner"
 	"os"
 	"time"
 
@@ -27,7 +27,7 @@ func checkUser(w http.ResponseWriter, _ *http.Request) {
 }
 
 func handleInit(w http.ResponseWriter, _ *http.Request) {
-	sendResult(w, scan.GetState())
+	sendResult(w, scanner.GetState())
 }
 
 func checkPath(w http.ResponseWriter, r *http.Request) {
@@ -53,7 +53,7 @@ func handleScan(w http.ResponseWriter, r *http.Request) {
 	}
 	// fmt.Println(req)
 
-	re, err := scan.Init(req)
+	re, err := scanner.Init(req)
 	if err != nil {
 		log.Println("Scan failed:", err)
 	}
@@ -69,7 +69,7 @@ func handleDir(w http.ResponseWriter, r *http.Request) {
 	}
 	// fmt.Println(req)
 
-	re, err := scan.GetDir(req.Path, req.Pages)
+	re, err := scanner.GetDir(req.Path, req.Pages)
 	if err != nil {
 		log.Println(err)
 	}
@@ -85,13 +85,13 @@ func handleUpdate(w http.ResponseWriter, r *http.Request) {
 	}
 	// fmt.Println(req)
 	// sendResult(w, du.GetUpdate(req))
-	sendResult(w, scan.GetUpdate(req))
+	sendResult(w, scanner.GetUpdate(req))
 }
 
 func handleCancel(w http.ResponseWriter, r *http.Request) {
 	// log.Println(r.URL.Path)
 	// du.Stop()
-	scan.Stop()
+	scanner.Stop()
 	sendResult(w, map[string]string{"status": "canceled"})
 }
 

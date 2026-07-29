@@ -1,4 +1,4 @@
-package scan
+package scanner
 
 import (
 	"du-tree/internal/helpers"

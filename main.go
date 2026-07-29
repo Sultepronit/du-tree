@@ -1,10 +1,13 @@
 package main
 
 import (
+	"du-tree/internal/explorer"
 	"du-tree/internal/models"
-	"du-tree/internal/scan"
+	"du-tree/internal/scanner"
 	"du-tree/internal/server"
 	"flag"
+	"fmt"
+	"path/filepath"
 	"time"
 )
 
@@ -14,10 +17,14 @@ func main() {
 	apparentSize := flag.Bool("A", false, "To get apparent size of files instead of the default block size")
 	flag.Parse()
 
+	fmt.Println(filepath.Abs("~"))
+	fmt.Println(explorer.IsAccessible("~", ""))
 	if *path != "" {
+		fmt.Println(filepath.Abs(*path))
+		fmt.Println(explorer.IsAccessible(*path, ""))
 		go func() {
 			time.Sleep(time.Millisecond * 20)
-			scan.Init(models.Request{
+			scanner.Init(models.Request{
 				Path:    *path,
 				Pages:   1,
 				Options: models.ReqOptions{BlockSize: !*apparentSize},

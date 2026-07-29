@@ -1,4 +1,4 @@
-package scan
+package scanner
 
 import (
 	"context"
@@ -195,7 +195,8 @@ func Init(req models.Request) (*models.Node, error) {
 	if req.Options.BlockSize {
 		rootSize, err := getRootBlockSize(data.request.Path)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println("run/getRootBlockSize:", err)
+			data.mu.Unlock()
 			return nil, nil
 		}
 		data.scanTree.Size = rootSize

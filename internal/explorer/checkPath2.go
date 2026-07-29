@@ -13,7 +13,7 @@ func unwrapPath(path string) string {
 		home, err := os.UserHomeDir()
 		if err != nil {
 			fmt.Println("Home dir not found:", err)
-		} else {
+		} else if path == "~" || strings.HasPrefix(path, "~/") {
 			return filepath.Join(home, path[1:])
 		}
 	}
@@ -78,14 +78,14 @@ func cleanSlash(input string) string {
 }
 
 func CheckPath2(inputPath string) *models.Path {
-	fmt.Println("path:", inputPath)
+	// fmt.Println("path:", inputPath)
 	re := models.Path{
 		InputPath: inputPath,
 		NextDirs:  make([]models.PathDetail, 0, 5),
 	}
 
 	improved := unwrapPath(inputPath)
-	fmt.Println("improved:", improved)
+	// fmt.Println("improved:", improved)
 
 	cleanInput := cleanSlash(inputPath)
 	re.Replacement = getDiffPrefix(cleanInput, improved)
@@ -95,8 +95,7 @@ func CheckPath2(inputPath string) *models.Path {
 	if filepath.Base(inputPath) == filepath.Base(improved) && !strings.HasSuffix(inputPath, "/") {
 		workingPath = filepath.Dir(improved)
 	}
-	fmt.Println("working:", workingPath)
-	// if workingPath != inputPath && workingPath+"/" != inputPath {
+	// fmt.Println("working:", workingPath)
 	if workingPath != cleanInput {
 		re.WorkingPath = workingPath
 	}
@@ -105,14 +104,12 @@ func CheckPath2(inputPath string) *models.Path {
 		entries, err := os.ReadDir(workingPath)
 		if err != nil {
 			if os.IsPermission(err) {
-				// re.InputPath = "Permission denied"
 				re.IsLocked = true
 				return &re
 			}
 			fmt.Println(err)
 
 			workingPath = filepath.Dir(workingPath)
-			// re.InputPath = workingPath
 			re.WorkingPath = workingPath
 			continue
 		}
