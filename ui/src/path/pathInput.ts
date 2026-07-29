@@ -27,21 +27,32 @@ const pathIsValid = {
     }
 }
 
-export async function setAccessWidget(val: "root" | "nonroot" | "locked" | "unlocked") {
+let user = "nonroot" as "root" | "nonroot"
+export function setAccessWidget(val: "root" | "nonroot" | "locked" | "unlocked") {
     if (val === "root") {
+        user = val
         accessWidget.classList.add("root")
+        accessWidget.title = "Root user!"
     } else if (val === "nonroot") {
+        user = val
         accessWidget.classList.remove("root")
+        accessWidget.title = "Non-root user"
     } else if (val === "locked") {
         accessWidget.classList.add("locked")
+        // accessWidget.title =
+        accessWidget.parentElement.title =
+            "You do not have permission to access this directory.\n Run as root to gain access."
+        accessWidget.removeAttribute("title")
+
         pathIsValid.set(false)
         input.classList.add("wrong")
-        accessWidget.parentElement.title =
-            "You have no rights to access this directory.\n Run as root to get access."
+        input.removeAttribute("title")
     } else if (val === "unlocked") {
         accessWidget.classList.remove("locked")
         input.classList.remove("wrong")
         accessWidget.parentElement.title = ""
+        // accessWidget.title = ""
+        setAccessWidget(user)
     }
 }
 
@@ -90,8 +101,10 @@ function showSuggestions(select?: boolean) {
 
 function hideSuggesions() {
     suggestions.parentElement.classList.add("hidden")
+    selected?.classList.remove("selected")
     selected = null
     document.removeEventListener("click", selectOrHideByClick)
+    // handleInput() // DON'T DO THIS!
 }
 
 let lastSugg = [] as nextDirDetails[]
@@ -203,6 +216,7 @@ function evaluatePath(canBeValid = true) {
     }
 }
 
+// split this thing for cases when we need to just validate the input
 async function handleInput() {
     pathIsValid.set(false)
     // checkUser()
@@ -314,8 +328,7 @@ async function handlePathInput(e: KeyboardEvent) {
     } else if (e.key === "Enter") {
         e.preventDefault()
 
-        // if (isOk === undefined) await handleInput()
-        if (pathIsValid.get() === null) await handleInput()
+        // if (pathIsValid.get() === null) await handleInput()
 
         if (selected) {
             // if (useSelected()) handleInput()
