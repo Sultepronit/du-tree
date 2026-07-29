@@ -41,7 +41,7 @@ export function setAccessWidget(val: "root" | "nonroot" | "locked" | "unlocked")
         accessWidget.classList.add("locked")
         // accessWidget.title =
         accessWidget.parentElement.title =
-            "You do not have permission to access this directory.\n Run as root to gain access."
+            "You do not have permission to access this directory!\n Run as root to gain access."
         accessWidget.removeAttribute("title")
 
         pathIsValid.set(false)
@@ -328,7 +328,7 @@ async function handlePathInput(e: KeyboardEvent) {
     } else if (e.key === "Enter") {
         e.preventDefault()
 
-        // if (pathIsValid.get() === null) await handleInput()
+        if (pathIsValid.get() === null) await handleInput()
 
         if (selected) {
             // if (useSelected()) handleInput()

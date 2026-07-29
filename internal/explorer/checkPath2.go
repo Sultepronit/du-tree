@@ -106,8 +106,9 @@ func CheckPath2(inputPath string) *models.Path {
 			if os.IsPermission(err) {
 				re.IsLocked = true
 				return &re
+			} else if !os.IsNotExist(err) {
+				fmt.Println("CheckPath:", err)
 			}
-			fmt.Println(err)
 
 			workingPath = filepath.Dir(workingPath)
 			re.WorkingPath = workingPath

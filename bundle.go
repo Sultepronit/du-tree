@@ -30,5 +30,5 @@ func main() {
 		return
 	}
 
-	fmt.Println("Successfully built!")
+	fmt.Println("Success!")
 }
