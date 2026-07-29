@@ -389,10 +389,8 @@ export function updateTree(bNodes: DataNode[]) {
 
 let totalSizeVal = -7
 function updateTreeRoot(data: DataNode) {
-    // updateSize(node, totalSize, totalSize.parentElement as HTMLDivElement)
     if (data?.size !== totalSizeVal) {
         totalSize.title = `${data.size} B`
-        // totalSize.textContent = handleBytesExt(data)
         totalSize.textContent = handleBytes(data.size)
         totalSizeVal = data.size
     }

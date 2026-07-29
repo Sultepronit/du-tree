@@ -1,4 +1,5 @@
 import { doFetch } from "../api/fetch"
+import arraysOfObjectsAreEqual from "../helpers/compareArrays"
 import { initTree, status } from "../tree/controls"
 import sortByNeedlePosition from "./sortSuggesions"
 
@@ -7,6 +8,25 @@ const input = document.getElementById("path") as HTMLInputElement
 const pre = document.getElementById("pre-suggestions") as HTMLDivElement
 const suggestions = document.getElementById("suggestions-box") as HTMLDivElement
 
+const pathIsValid = {
+    _val: null,
+    get(): boolean | null {
+        return this._val
+    },
+    set(valid: boolean) {
+        this._val = valid
+        status.set(valid ? "ready" : "setting")
+        if (valid) {
+            input.className = "ok"
+            // input.title = `The path is valid.`
+            input.title = ""
+        } else {
+            input.className = "almost"
+            input.title = `Enter or select an available directory path.`
+        }
+    }
+}
+
 export async function setAccessWidget(val: "root" | "nonroot" | "locked" | "unlocked") {
     if (val === "root") {
         accessWidget.classList.add("root")
@@ -14,7 +34,7 @@ export async function setAccessWidget(val: "root" | "nonroot" | "locked" | "unlo
         accessWidget.classList.remove("root")
     } else if (val === "locked") {
         accessWidget.classList.add("locked")
-        // input.className = "wrong"
+        pathIsValid.set(false)
         input.classList.add("wrong")
         accessWidget.parentElement.title =
             "You have no rights to access this directory.\n Run as root to get access."
@@ -43,7 +63,7 @@ document.addEventListener("mode", (e: CustomEvent) => {
     }
 })
 
-type nextDetails = {
+type nextDirDetails = {
     name: string
     link?: string
     isLocked?: true
@@ -52,7 +72,7 @@ type pathHint = {
     inputPath: string
     workingPath?: string
     replacement?: [string, string]
-    nextDirs?: nextDetails[]
+    nextDirs?: nextDirDetails[]
     isLocked?: true
     isRemoved?: true
 }
@@ -62,15 +82,34 @@ function slashIt(path: string) {
 }
 
 let selected = null as Element
-function addSuggestions(sugg: nextDetails[], prefix?: string) {
-    // console.log(sugg)
-    // if (sugg.length === 0) {
+function showSuggestions(select?: boolean) {
+    if (select) selectFirst()
+    suggestions.parentElement.classList.remove("hidden")
+    document.addEventListener("click", selectOrHideByClick)
+}
+
+function hideSuggesions() {
+    suggestions.parentElement.classList.add("hidden")
+    selected = null
+    document.removeEventListener("click", selectOrHideByClick)
+}
+
+let lastSugg = [] as nextDirDetails[]
+function addSuggestions(sugg: nextDirDetails[], select?: boolean, prefix?: string) {
     if (!sugg || sugg.length === 0) {
         hideSuggesions()
         return
     }
 
-    suggestions.parentElement.classList.remove("hidden")
+    if (arraysOfObjectsAreEqual(sugg, lastSugg)) {
+        // suggestions.parentElement.classList.remove("hidden")
+        // if (select) selectFirst()
+        showSuggestions(select)
+        return
+    }
+
+    lastSugg = sugg
+
     selected = null
     const html = sugg
         .map(s => {
@@ -93,35 +132,76 @@ function addSuggestions(sugg: nextDetails[], prefix?: string) {
         })
         .join("")
     suggestions.innerHTML = html
-}
-
-function hideSuggesions() {
-    suggestions.parentElement.classList.add("hidden")
-    selected = null
-}
-
-// let isOk: boolean
-const pathIsValid = {
-    _val: null,
-    get(): boolean | null {
-        return this._val
-    },
-    set(valid: boolean) {
-        this._val = valid
-        status.set(valid ? "ready" : "setting")
-        if (valid) {
-            input.className = "ok"
-            input.title = `The path is valid. \nYou can start scanning the directory by pressing the Enter key.`
-        } else {
-            input.className = "almost"
-            input.title = `Enter or select an available directory path.`
-        }
-    }
+    // if (select) selectFirst()
+    // suggestions.parentElement.classList.remove("hidden")
+    showSuggestions(select)
 }
 
 let checkedPath = null as pathHint
+function evaluatePath(canBeValid = true) {
+    if (checkedPath.isLocked) {
+        setAccessWidget("locked")
+        return
+    } else {
+        setAccessWidget("unlocked")
+    }
 
-function evaluatePath() {}
+    if (!checkedPath.workingPath) {
+        pathIsValid.set(canBeValid)
+        pre.textContent = input.value
+        addSuggestions(checkedPath.nextDirs)
+    } else {
+        // WORKING PATH CASE: the input path have some nuances
+        const slashedWorkingPath = slashIt(checkedPath.workingPath)
+        if (!checkedPath.replacement) {
+            // the beggining of the path is ok, the thing is about the suggestions
+            pre.textContent = slashedWorkingPath
+
+            const ending = input.value.slice(slashedWorkingPath.length)
+            const sorted = sortByNeedlePosition(ending, checkedPath.nextDirs) as nextDirDetails[]
+            // console.log(ending, sorted)
+
+            if (sorted.length > 0) {
+                addSuggestions(sorted, true)
+
+                if (sorted.length === 1 && sorted[0].name === ending) {
+                    if (sorted[0].isLocked) {
+                        // setAccessWidget("locked")
+                    } else {
+                        pathIsValid.set(canBeValid)
+                    }
+                    hideSuggesions()
+                }
+            } else {
+                addSuggestions(checkedPath?.nextDirs || [], true)
+            }
+        } else {
+            // REPLACEMENT CASE
+            // console.log(checkedPath)
+            // console.log(checkedPath.replacement)
+            pre.textContent = ""
+
+            const improvedInput = input.value.replace(...checkedPath.replacement)
+            const ending = improvedInput.slice(slashedWorkingPath.length)
+            if (ending === "") {
+                addSuggestions(
+                    [{ name: "" }, ...(checkedPath?.nextDirs ?? [])],
+                    true,
+                    slashedWorkingPath
+                )
+                return
+            }
+            const sorted = sortByNeedlePosition(ending, checkedPath.nextDirs) as nextDirDetails[]
+            // console.log(ending, sorted)
+
+            if (sorted.length > 0) {
+                addSuggestions(sorted, true, slashedWorkingPath)
+            } else {
+                addSuggestions(checkedPath?.nextDirs || [], true, slashedWorkingPath)
+            }
+        }
+    }
+}
 
 async function handleInput() {
     pathIsValid.set(false)
@@ -133,88 +213,25 @@ async function handleInput() {
         return
     }
 
+    if (
+        input.value.startsWith(checkedPath?.inputPath) ||
+        (checkedPath?.replacement && input.value.startsWith(checkedPath.replacement[0]))
+    )
+        evaluatePath(false)
+
     checkedPath = (await doFetch("/path", { path: input.value })) as pathHint
     // console.log(approvedPath)
 
-    if (checkedPath.inputPath === input.value) {
-        if (checkedPath.isLocked) setAccessWidget("locked")
-        else setAccessWidget("unlocked")
-
-        if (!checkedPath.workingPath) {
-            pathIsValid.set(true)
-            pre.textContent = input.value
-            // input.className = "ok"
-            // input.title = `The path is valid. \nYou can start scanning the directory by pressing the Enter key.`
-            addSuggestions(checkedPath.nextDirs)
-        } else {
-            // WORKING PATH CASE: the input path have some nuances
-            if (!checkedPath.replacement) {
-                // the beggining of the path is ok, the thing is about the suggestions
-                const slashedWorkingPath = slashIt(checkedPath.workingPath)
-                pre.textContent = slashedWorkingPath
-
-                const ending = input.value.slice(slashedWorkingPath.length)
-                const sorted = sortByNeedlePosition(ending, checkedPath.nextDirs) as nextDetails[]
-                // console.log(ending, sorted)
-
-                if (sorted.length > 0) {
-                    addSuggestions(sorted)
-                    moveSelection(true)
-
-                    if (sorted.length === 1 && sorted[0].name === ending) {
-                        // pathIsValid.set(!sorted[0].isLocked)
-                        if (sorted[0].isLocked) {
-                            pathIsValid.set(false)
-                            // input.className = "wrong"
-                            setAccessWidget("locked")
-                        } else {
-                            pathIsValid.set(true)
-                        }
-                        hideSuggesions()
-                        console.log("point 1")
-                    }
-                } else {
-                    addSuggestions(checkedPath?.nextDirs || [])
-                    moveSelection(true)
-                    // input.className = "wrong"
-                    // input.title = `There is no directory with path: ${input.value}.\n Please select an available one.`
-                }
-            } else {
-                // REPLACEMENT CASE
-                console.log(checkedPath)
-                console.log(checkedPath.replacement)
-                pre.textContent = ""
-
-                const slashedWorkingPath = slashIt(checkedPath.workingPath)
-                const improvedInput = input.value.replace(...checkedPath.replacement)
-                const ending = improvedInput.slice(slashedWorkingPath.length)
-                if (ending === "") {
-                    addSuggestions(
-                        [{ name: "" }, ...(checkedPath?.nextDirs ?? [])],
-                        // checkedPath.workingPath
-                        slashedWorkingPath
-                    )
-                    moveSelection(true)
-                    return
-                }
-                const sorted = sortByNeedlePosition(ending, checkedPath.nextDirs) as nextDetails[]
-                console.log(ending, sorted)
-
-                if (sorted.length > 0) {
-                    addSuggestions(sorted, slashedWorkingPath)
-                    moveSelection(true)
-
-                    if (sorted[0].name === ending) {
-                        pathIsValid.set(!sorted[0].isLocked)
-                    }
-                } else {
-                    console.log("DO SOMETHING!")
-                }
-            }
-        }
-    }
+    if (checkedPath?.inputPath === input.value) evaluatePath()
+    // else new handleInput() call should have been done
 }
 input.addEventListener("input", handleInput)
+
+function implementSelection(scroll = true) {
+    selected.classList.add("selected")
+    if (scroll) selected.scrollIntoView({ behavior: "smooth", block: "center" })
+    setAccessWidget(selected.classList.contains("locked") ? "locked" : "unlocked")
+}
 
 async function moveSelection(down: boolean) {
     // if (suggestions.parentElement.classList.contains("hidden")) return
@@ -236,44 +253,64 @@ async function moveSelection(down: boolean) {
         selected = suggestions.firstElementChild
     }
 
-    if (selected) {
-        selected.classList.add("selected")
-        selected.scrollIntoView({ behavior: "smooth", block: "center" })
-        // checkUser()
-        setAccessWidget(selected.classList.contains("locked") ? "locked" : "unlocked")
-    }
-    // console.log(approvedPath.current, selected?.textContent)
+    if (selected) implementSelection()
 }
 
-function select(): boolean {
-    if (!selected) return false
-    if (selected.classList.contains("locked")) return false
+function selectFirst() {
+    const first = suggestions.firstElementChild
+    if (selected === first) {
+        setAccessWidget(selected.classList.contains("locked") ? "locked" : "unlocked")
+        return
+    }
+    if (selected) {
+        selected.classList.remove("selected")
+    }
+
+    selected = first
+    implementSelection()
+}
+
+function selectOrHideByClick(e: MouseEvent) {
+    const target = e.target as HTMLElement
+    // console.log(target)
+    // console.log(target.closest("#suggestions-box"))
+    if (!target.closest("#suggestions-box")) return hideSuggesions()
+
+    if (!target.classList.contains("suggestion")) return
+
+    selected?.classList.remove("selected")
+    selected = target
+
+    implementSelection(false)
+    useSelected()
+}
+
+// function useSelected(): boolean {
+function useSelected() {
+    if (!selected) return
+    if (selected.classList.contains("locked")) return
 
     const suggName = selected.textContent
-    // const prePath =
-    //     checkedPath.current === "ok" ? slashIt(input.value) : slashIt(checkedPath.current)
-    // const prePath = checkedPath.workingPath
-    //     ? slashIt(checkedPath.workingPath)
-    //     : slashIt(input.value)
     const prePath = !checkedPath.workingPath
         ? slashIt(input.value)
         : checkedPath.replacement
           ? ""
           : slashIt(checkedPath.workingPath)
 
-    // input.value = `${prePath}${suggName}/`
     input.value = `${prePath}${slashIt(suggName)}`
-    // we need to check for changes!
+    // we need to check for changes?
     // input.className = "ok"
     // isOk = true
     // pathIsValid.set(true)
 
-    return true
+    // return true
+    handleInput()
 }
 
 async function handlePathInput(e: KeyboardEvent) {
     if (e.key === "ArrowRight") {
-        if (select()) handleInput()
+        // if (useSelected()) handleInput()
+        useSelected()
     } else if (e.key === "Enter") {
         e.preventDefault()
 
@@ -281,7 +318,8 @@ async function handlePathInput(e: KeyboardEvent) {
         if (pathIsValid.get() === null) await handleInput()
 
         if (selected) {
-            if (select()) handleInput()
+            // if (useSelected()) handleInput()
+            useSelected()
             // } else if (isOk) {
         } else if (pathIsValid.get() === true) {
             hideSuggesions()
@@ -310,23 +348,10 @@ document.addEventListener("keydown", async e => {
     if (st === "done") {
         if (e.key === "Enter" && e.ctrlKey) {
             e.preventDefault()
-            console.log("here we go!")
             status.set("ready")
         }
 
         return
     }
     handlePathInput(e)
-})
-
-suggestions.addEventListener("click", e => {
-    const target = e.target as HTMLElement
-    console.log(target)
-    if (!target.classList.contains("suggestion")) return
-
-    selected?.classList.remove("selected")
-    selected = target
-
-    target.classList.add("selected")
-    // checkUser()
 })

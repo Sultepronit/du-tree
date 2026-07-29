@@ -97,6 +97,11 @@ export async function renderTree(path: string) {
 
     const data = (await doFetch("/dir", { path: "", pages: 1 })) as DataNode
     console.log(data)
+    if (!data) {
+        // one of cases -- dir without the access
+        status.set("done")
+        return
+    }
 
     rebuildTree(data, path)
     if (data.temp) initUpdates()
