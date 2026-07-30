@@ -9,7 +9,7 @@ import (
 func main() {
 	port := flag.String("p", "51200", "The server port")
 	path := flag.String("s", "", "The scan path")
-	apparentSize := flag.Bool("A", false, "To get apparent size of files instead of the default block size")
+	apparentSize := flag.Bool("A", false, "To get the apparent size of files instead of the default block size")
 	flag.Parse()
 
 	// if *path != "" {
