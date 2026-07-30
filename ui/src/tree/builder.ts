@@ -119,7 +119,7 @@ function createLi(data: DataNode, path: string): string {
 
 export function createBranch(data: DataNode, prePath: string): DocumentFragment {
     // if (!node.content) return
-    if (!data.content) {
+    if (!data?.content) {
         const templ = document.createElement("template")
         templ.innerHTML = `<ul class="dir-content"></ul>`
 

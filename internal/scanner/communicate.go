@@ -3,12 +3,17 @@ package scanner
 import (
 	"du-tree/internal/helpers"
 	"du-tree/internal/models"
+	"errors"
 	"strings"
 )
 
 func getBranch(path string) *viewNode {
 	parts := strings.Split(path, "/")
 	target := data.viewTree
+	// fmt.Println(target)
+	if target == nil {
+		return nil
+	}
 
 	for _, name := range parts {
 		// fmt.Println(name)
@@ -39,6 +44,10 @@ func GetDir(path string, pages int) (*models.Node, error) {
 	req := data.request
 
 	branch := getBranch(path)
+	if branch == nil {
+		data.mu.Unlock()
+		return nil, errors.New("the branch does not exist")
+	}
 	// fmt.Println("branch:", branch)
 
 	if branch.Files == nil {
@@ -50,18 +59,9 @@ func GetDir(path string, pages int) (*models.Node, error) {
 		branch.Files = files
 	}
 
-	// re := parseDirNode(branch.dirNode)
-	// re.Content = make([]*models.Node, 0, pageSize*pages)
-	// for _, n := range branch.Dirs {
-	// 	re.Content = append(re.Content, parseDirNode(n))
-	// }
-	// for _, n := range branch.Files {
-	// 	re.Content = append(re.Content, parseFileNode(n))
-	// }
 	re := parseViewNode(branch, true)
 	data.mu.Unlock()
 
-	// sortContent(re.Content)
 	helpers.SortBySizeThenName(re.Content)
 
 	contLen := pageSize * pages
@@ -92,12 +92,6 @@ func GetUpdate(req []models.Request) []*models.Node {
 
 	for i, r := range req {
 		b := getBranch(r.Path)
-		// re[i] = parseDirNode(b.dirNode)
-		// re[i].Name = r.Path
-		// for _, n := range b.Dirs {
-		// 	re[i].Content = append(re[i].Content, parseDirNode(n))
-		// }
-		// sortContent(re[i].Content)
 		re[i] = parseViewNode(b, false)
 		re[i].Name = r.Path
 
