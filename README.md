@@ -24,7 +24,7 @@ Usage of ./du-tree:
 
 ### Usage
 
-Grab the latest release for your architecture from the **[Releases](../../releases)** page.
+Grab the latest release from the **[Releases](../../releases)** page.
 
 *The version is 0.1.0. And I promise there will be more! So. No stability. No detailed manual, because tomorrow there would be new details! Try it. Test it. Leave your feedback. **Thank you!***
 
