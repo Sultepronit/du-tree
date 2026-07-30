@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 	"syscall"
 	"time"
 )
@@ -173,6 +174,9 @@ func scanDir(ctx context.Context, path string, node *dirNode, reqBlockSize bool)
 }
 
 func Init(req models.Request) (*models.Node, error) {
+	if !strings.HasSuffix(req.Path, "/") {
+		req.Path += "/"
+	}
 	log.Println("Scanning:", req.Path)
 	data.mu.Lock()
 

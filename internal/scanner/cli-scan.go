@@ -13,26 +13,29 @@ func InitCLI(path string, apparentSize bool) {
 		return
 	}
 	time.Sleep(time.Millisecond * 20)
-	fmt.Println(path)
+	// fmt.Println(path)
 	// path += "/"
 	checked := explorer.CheckPath2(path + "/")
 	// helpers.TempPrinAsJson(checked)
-	cleaned := checked.WorkingPath
-	if cleaned == "" {
-		cleaned = checked.InputPath
+	// fmt.Println(checked.InputPath)
+	// fmt.Println(checked.WorkingPath)
+
+	working := checked.InputPath
+	if checked.WorkingPath != "" {
+		working = checked.WorkingPath
 	}
 	if checked.IsLocked {
-		log.Println("Failed to scan:", cleaned)
+		log.Println("Failed to scan:", working)
 		fmt.Println("You do not have permission to access this directory! Run as root to gain access.")
 		return
 	} else if !explorer.IsAccessible(path, "") {
 		log.Println("Failed to scan:", path)
-		fmt.Println("Path exists up to:", cleaned)
+		fmt.Println("Path exists up to:", working)
 		return
 	}
 
 	Init(models.Request{
-		Path:    cleaned,
+		Path:    working,
 		Pages:   1,
 		Options: models.ReqOptions{BlockSize: !apparentSize},
 	})
