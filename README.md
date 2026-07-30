@@ -1,7 +1,7 @@
 # DU Tree
 > **Designed for Linux. Tested on Linux.**
 
-Yes. Another look at the classic du & tree utilities.
+Yet another look at the classic `du` & `tree` utilities.
 
 The idea is simple! Single binary. Written in Go with almost no dependencies. You execute it. With the ability to set the scan path immediately (the `-s` flag). And here is the total size in bytes.
 <img width="1241" height="281" alt="image" src="https://github.com/user-attachments/assets/b5c73055-adb7-4856-9cd4-41af744714b3" />
