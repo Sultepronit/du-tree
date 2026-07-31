@@ -1,3 +1,36 @@
+function round(value: number, more: boolean) {
+    let decimals = 0
+    if (more) {
+        if (value <= 9.95) decimals = 1
+        return value.toFixed(decimals)
+    }
+
+    if (value <= 9.995) decimals = 2
+    else if (value < 99.95) decimals = 1
+    return value.toFixed(decimals)
+}
+
+function testRound() {
+    // for (let i = 9900; i < 10000; i++) {
+    //     const v = i / 1000
+    // for (let i = 9900; i < 10000; i++) {
+    // const v = i / 100
+    //     console.log(v, round(v, false))
+    // }
+
+    for (let i = 9900; i < 10000; i++) {
+        const v = i / 1000
+        console.log(v, round(v, true))
+    }
+    // console.log(99.94, round(99.94, false))
+    // console.log(99.945, round(99.945, false))
+    // console.log(99.95, round(99.95, false))
+    // console.log(99.94, round(99.94, false))
+    // console.log(99.945, round(99.945, false))
+    // console.log(99.95, round(99.95, false))
+}
+// testRound()
+
 export default function handleBytes(bytes: number, more = false) {
     if (bytes < 1024) return `${more ? "≥" : ""}${bytes} B`
 
@@ -12,18 +45,22 @@ export default function handleBytes(bytes: number, more = false) {
         i++
     }
 
-    const rounded = Math.round(value)
-    let decimals = 0
-    if (more) {
-        if (rounded < 10) decimals = 1
-        return `≥${value.toFixed(decimals)} ${units[i]}`
-    }
+    // const rounded = Math.round(value)
+    // // console.log(value, rounded, value.toFixed(2), value.toFixed(1))
+    // let decimals = 0
+    // if (more) {
+    //     if (rounded < 10) decimals = 1
+    //     return `≥${value.toFixed(decimals)} ${units[i]}`
+    // }
 
-    if (rounded < 10) decimals = 2
-    else if (rounded < 100) decimals = 1
+    // // if (rounded < 10) decimals = 2
+    // // else if (rounded < 100) decimals = 1
+    // if (value < 9.99) decimals = 2
+    // else if (value < 99.95) decimals = 1
     // console.log(value)
 
-    return `${value.toFixed(decimals)} ${units[i]}`
+    // return `${value.toFixed(decimals)} ${units[i]}`
+    return `${round(value, more)} ${units[i]}`
 }
 // console.log(handleBytes(999))
 // console.log(handleBytes(1023))
@@ -34,3 +71,4 @@ export default function handleBytes(bytes: number, more = false) {
 // console.log(handleBytes(2000))
 // console.log(handleBytes(11245413))
 // console.log(handleBytes(102387))
+// console.log(handleBytes(10331750400))

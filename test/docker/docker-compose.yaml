@@ -18,3 +18,15 @@ services:
     volumes:
       - ../../:/app:ro
     user: "1000:1000"
+
+  debian-du-tree:
+    build:
+      context: ./debian
+      dockerfile: Dockerfile
+    ports:
+      - "51204:51204"
+    volumes:
+      - /:/outer
+    # - ../../:/app:ro
+
+    user: "1000:1000"
