@@ -1,2 +1,3 @@
 improved size formatting for consistency
 refactored project structure
+added .deb package as option

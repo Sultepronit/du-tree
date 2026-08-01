@@ -1,5 +1,5 @@
 import formatSize from "../utils/formatSize"
-import type { DataNode, ElNode, UpdateBranch } from "../types"
+import type { DataNode, ViewNode, UpdateBranch } from "../types"
 
 const totalSize = document.getElementById("total-size") as HTMLDivElement
 const totalLocked = document.getElementById("lock-widget") as HTMLDivElement
@@ -186,54 +186,49 @@ export function appendBranch(data: DataNode, button: HTMLButtonElement, pages: n
     soFar.textContent = (pages * pageSize).toString()
 }
 
-function updateLocked(elNode: ElNode, oldD: DataNode, newD: DataNode) {
+function updateLocked(elNode: ViewNode, oldD: DataNode, newD: DataNode) {
     if (oldD.locked === newD.locked) return
-    // if (!elNode.entry) elNode.entry = elNode.shoot.querySelector(".fd-entry")
 
     elNode.shoot.classList.add("locked")
     const details = genLockedDetails(newD).join("\n")
     if (newD.locked === -1) {
         elNode.shoot.classList.add("itself")
-        // elNode.entry.title += "\n" + details
         elNode.shoot.title += "\n" + details
     } else {
-        // elNode.entry.title = genTitle(newD, elNode.shoot.dataset.path)
         elNode.shoot.title = genTitle(newD, elNode.shoot.dataset.path)
     }
 }
 
-function updateShootSize(elNode: ElNode, oldD: DataNode | null, newD: DataNode) {
+function updateShootSize(viewNode: ViewNode, oldD: DataNode | null, newD: DataNode) {
     if (oldD?.size !== newD.size) {
-        elNode.shoot.style.setProperty("--size", `${newD.size}%`)
-        if (!elNode.size) elNode.size = elNode.shoot.querySelector(".fd-size")
-        elNode.size.textContent = handleBytesExt(newD)
-        elNode.size.title = `${newD.size} B`
+        viewNode.shoot.style.setProperty("--size", `${newD.size}%`)
+        if (!viewNode.size) viewNode.size = viewNode.shoot.querySelector(".fd-size")
+        viewNode.size.textContent = handleBytesExt(newD)
+        viewNode.size.title = `${newD.size} B`
     } else if (oldD?.temp !== newD.temp || oldD?.locked !== newD.locked) {
-        if (!elNode.size) elNode.size = elNode.shoot.querySelector(".fd-size")
-        elNode.size.textContent = handleBytesExt(newD)
+        if (!viewNode.size) viewNode.size = viewNode.shoot.querySelector(".fd-size")
+        viewNode.size.textContent = handleBytesExt(newD)
     }
 
     if (newD.temp) {
-        elNode.shoot.classList.add("temp")
+        viewNode.shoot.classList.add("temp")
         if (newD.temp === 2) {
-            elNode.shoot.classList.add("unavailable")
+            viewNode.shoot.classList.add("unavailable")
         } else {
-            elNode.shoot.classList.remove("unavailable")
+            viewNode.shoot.classList.remove("unavailable")
         }
     } else {
-        elNode.shoot.classList.remove("temp", "unavailable")
+        viewNode.shoot.classList.remove("temp", "unavailable")
     }
 }
 
-function resetTitle(elNode: ElNode, data: DataNode) {
-    // if (!elNode.entry) elNode.entry = elNode.shoot.querySelector(".fd-entry")
-    // elNode.entry.title = genTitle(data, elNode.shoot.dataset.path)
-    elNode.shoot.title = genTitle(data, elNode.shoot.dataset.path)
-}
+// function resetTitle(elNode: ViewNode, data: DataNode) {
+//     elNode.shoot.title = genTitle(data, elNode.shoot.dataset.path)
+// }
 
-function resetShoot(elNode: ElNode, data: DataNode) {
-    delete elNode.shoot.dataset.nested
-    elNode.shoot.querySelector("ul")?.remove() // remove the branch too?
+function resetShoot(viewNode: ViewNode, data: DataNode) {
+    delete viewNode.shoot.dataset.nested
+    viewNode.shoot.querySelector("ul")?.remove() // remove the branch too?
 
     const classes = [`shoot t${data.type}`]
     if (data.locked) {
@@ -243,16 +238,18 @@ function resetShoot(elNode: ElNode, data: DataNode) {
         classes.push("hardlink")
         if (data.isNeglected) classes.push("neglected")
     }
-    elNode.shoot.className = classes.join(" ")
+    viewNode.shoot.className = classes.join(" ")
 
-    elNode.shoot.dataset.name = data.name
-    elNode.shoot.querySelector(".fd-name").textContent = data.name
+    viewNode.shoot.dataset.name = data.name
+    viewNode.shoot.querySelector(".fd-name").textContent = data.name
 
-    updateShootSize(elNode, null, data)
-    resetTitle(elNode, data)
+    updateShootSize(viewNode, null, data)
+    // resetTitle(viewNode, data)
+    viewNode.shoot.title = genTitle(data, viewNode.shoot.dataset.path)
 }
 
-async function updateBranch(branchUpdate: DataNode) {
+// async function updateBranch(branchUpdate: DataNode) {
+function updateBranch(branchUpdate: DataNode) {
     if (!branchUpdate?.content) return // user navigates dirs before scan
 
     console.log("branch update:", branchUpdate)
@@ -283,20 +280,20 @@ async function updateBranch(branchUpdate: DataNode) {
 
     if (!branch.ul) {
         branch.ul = treeBlock.querySelector(`ul[data-path="${branchUpdate.name}"]`)
-        branch.elShoots = new Map()
+        branch.viewShoots = new Map()
 
         const shootEls = branch.ul.querySelectorAll(
             `.shoot[data-path="${branchUpdate.name}"]`
         ) as NodeListOf<HTMLDivElement>
         // console.log(shootEls)
         shootEls.forEach(shoot => {
-            branch.elShoots.set(shoot.dataset.name, { shoot })
+            branch.viewShoots.set(shoot.dataset.name, { shoot })
         })
     }
 
     branch.ul.style.display = "none"
 
-    if (branch.elShoots.size < actual.length) {
+    if (branch.viewShoots.size < actual.length) {
         const newNodes = actual.filter(s => !branch.dataShoots.has(s.name))
         console.log(newNodes)
 
@@ -316,8 +313,8 @@ async function updateBranch(branchUpdate: DataNode) {
             // if (!branch.elNodes.get(data.name)) {
             //     console.log(data)
             // }
-            let elNode = branch.elShoots.get(data.name)
-            if (!elNode) {
+            let viewNode = branch.viewShoots.get(data.name)
+            if (!viewNode) {
                 const shoot = branch.ul.querySelector(
                     `.shoot[data-name="${data.name}"]`
                 ) as HTMLDivElement
@@ -329,10 +326,10 @@ async function updateBranch(branchUpdate: DataNode) {
                     return
                 }
 
-                elNode = { shoot }
-                branch.elShoots.set(data.name, elNode)
+                viewNode = { shoot }
+                branch.viewShoots.set(data.name, viewNode)
             }
-            const shootEl = elNode.shoot
+            const shootEl = viewNode.shoot
             const liCont = branch.ul.childNodes[i].childNodes[0]
 
             // if li does not contain the shoot we need
@@ -345,8 +342,8 @@ async function updateBranch(branchUpdate: DataNode) {
                 console.log("moved")
             }
 
-            updateShootSize(elNode, old, data)
-            updateLocked(elNode, old, data)
+            updateShootSize(viewNode, old, data)
+            updateLocked(viewNode, old, data)
         }
     })
     // console.log(store.childNodes)
@@ -360,12 +357,12 @@ async function updateBranch(branchUpdate: DataNode) {
                 branch.ul.childNodes[i].appendChild(shootEl)
             }
             const elNode =
-                branch.elShoots.get(shootEl.dataset.name) ||
+                branch.viewShoots.get(shootEl.dataset.name) ||
                 ({
                     shoot: shootEl
-                } as ElNode)
-            branch.elShoots.delete(shootEl.dataset.name)
-            branch.elShoots.set(data.name, elNode)
+                } as ViewNode)
+            branch.viewShoots.delete(shootEl.dataset.name)
+            branch.viewShoots.set(data.name, elNode)
 
             resetShoot(elNode, data)
             console.log("reset")

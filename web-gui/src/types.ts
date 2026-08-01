@@ -15,15 +15,14 @@ export type DataNode = {
     contentCount?: number
 }
 
-export type ElNode = {
+export type ViewNode = {
     shoot: HTMLDivElement
     size?: HTMLDivElement
-    // entry?: HTMLDivElement
 }
 
 export type UpdateBranch = {
     dataShoots: Map<string, DataNode>
-    elShoots?: Map<string, ElNode>
+    viewShoots?: Map<string, ViewNode>
     ul?: HTMLUListElement
     pages?: number
 }

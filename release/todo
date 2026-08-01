@@ -1,4 +1,7 @@
 make sure that reset of shoot is total & clean!
+confirmed: old nested dirs can leave their garbadge behid!
+updated: nobody knows when & why it could happen... it's crazy rare thing!
+
 make unfolded dirs persistent in the output?
 
 do something with the entities that are removed while scannng & after!

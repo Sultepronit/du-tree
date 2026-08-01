@@ -112,7 +112,7 @@ func scanDir(ctx context.Context, path string, node *dirNode, reqBlockSize bool)
 	dirs := make([]*dirNode, 0, len(entries))
 
 	for _, entry := range entries {
-		// time.Sleep(time.Millisecond * 10)
+		// time.Sleep(time.Millisecond * 30)
 		size, err := calcSize(entry, reqBlockSize, path)
 		if err != nil {
 			fmt.Println("run/calcSize:", err)
