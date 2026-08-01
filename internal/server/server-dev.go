@@ -30,6 +30,7 @@ func Start(port string) {
 	go jscss.StartCSSWhatcher("./web-gui/style")
 	http.HandleFunc("/sse-css", jscss.SseHandler)
 	http.HandleFunc("/main.js", jscss.UseEsbuild)
+	http.HandleFunc("/style.css", jscss.UseEsbuild)
 
 	http.HandleFunc("/init", handleInit)
 	http.HandleFunc("/user", checkUser)
