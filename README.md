@@ -31,8 +31,8 @@ wget https://github.com/Sultepronit/du-tree/releases/download/v0.1.0/du-tree
 chmod +x du-tree
 ```
 ```bash
-curl -LO https://github.com/Sultepronit/du-tree/releases/download/v0.2.0-dev/du-tree.deb
-sudo dpkg -i du-tree.deb
+wget https://github.com/Sultepronit/du-tree/releases/download/v0.2.0-dev/du-tree_v0.2.0-dev.1.deb
+sudo dpkg -i du-tree*.deb
 ```
 
 *The version is 0.1.0+. (And I promise there will be more!) So. No stability. No detailed manual, because tomorrow there would be new details! Try it. Test it. Leave your feedback. **Thank you!***
