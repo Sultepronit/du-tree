@@ -1,8 +1,0 @@
-Package: du-tree
-Version: 0.1.0
-Section: utils
-Priority: optional
-Architecture: amd64
-Maintainer: Sultepronit <sulteptonit@gmail.com>
-Description: DU Tree — CLI & Web GUI disk usage analyzer with tree-like interface.
- Yet another look at the classic du & tree utilities.

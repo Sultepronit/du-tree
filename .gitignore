@@ -1,3 +1,5 @@
 **/dist
 du-tree
 *.deb
+release/deb/
+bundler

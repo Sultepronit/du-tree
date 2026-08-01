@@ -13,7 +13,7 @@ import (
 func printMsg(port string) {
 	url := "http://localhost:" + port
 	// fmt.Printf("du-tree server started. Open Web UI: \033[36m%s\033[0m\n", url)
-	fmt.Printf("du-tree server started. Open Web UI:\n\033[36m%s\033[0m", url)
+	fmt.Printf("DU-Tree v0.2.0-dev.1 started. Open Web GUI:\n\033[36m%s\033[0m", url)
 
 	ip, err := utils.GetLocalIP()
 	if err != nil {
