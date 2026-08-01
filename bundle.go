@@ -12,7 +12,7 @@ func main() {
 	fmt.Println("Bundling JS...")
 
 	result := api.Build(api.BuildOptions{
-		EntryPoints:       []string{"./ui/src/main.ts"},
+		EntryPoints:       []string{"./web-gui/src/main.ts"},
 		Outfile:           "./internal/embeded/dist/main.js",
 		Bundle:            true,
 		Write:             true,

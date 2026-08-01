@@ -17,21 +17,20 @@ function testRound() {
     // const v = i / 100
     //     console.log(v, round(v, false))
     // }
-
-    for (let i = 9900; i < 10000; i++) {
-        const v = i / 1000
-        console.log(v, round(v, true))
-    }
-    // console.log(99.94, round(99.94, false))
-    // console.log(99.945, round(99.945, false))
-    // console.log(99.95, round(99.95, false))
-    // console.log(99.94, round(99.94, false))
-    // console.log(99.945, round(99.945, false))
-    // console.log(99.95, round(99.95, false))
+    // for (let i = 9900; i < 10000; i++) {
+    //     const v = i / 1000
+    //     console.log(v, round(v, true))
+    // }
+    console.log(99.94, round(99.94, false))
+    console.log(99.945, round(99.945, false))
+    console.log(99.95, round(99.95, false))
+    console.log(9.9945, round(9.9945, false))
+    console.log(9.995, round(9.995, false))
+    console.log(9.99501, round(9.99501, false))
 }
 // testRound()
 
-export default function handleBytes(bytes: number, more = false) {
+export default function formatSize(bytes: number, more = false) {
     if (bytes < 1024) return `${more ? "≥" : ""}${bytes} B`
 
     const k = 1024
@@ -60,7 +59,7 @@ export default function handleBytes(bytes: number, more = false) {
     // console.log(value)
 
     // return `${value.toFixed(decimals)} ${units[i]}`
-    return `${round(value, more)} ${units[i]}`
+    return `${more ? "≥" : ""}${round(value, more)} ${units[i]}`
 }
 // console.log(handleBytes(999))
 // console.log(handleBytes(1023))

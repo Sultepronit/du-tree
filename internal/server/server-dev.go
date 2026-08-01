@@ -27,7 +27,7 @@ func printMsg(port string) {
 }
 
 func Start(port string) {
-	go jscss.StartCSSWhatcher("./ui/style")
+	go jscss.StartCSSWhatcher("./web-gui/style")
 	http.HandleFunc("/sse-css", jscss.SseHandler)
 	http.HandleFunc("/main.js", jscss.UseEsbuild)
 
@@ -40,7 +40,7 @@ func Start(port string) {
 	http.HandleFunc("/cancel", handleCancel)
 	http.HandleFunc("/exit", handleExit)
 
-	fs := http.FileServer(http.Dir("./ui"))
+	fs := http.FileServer(http.Dir("./web-gui"))
 	http.Handle("/", fs)
 
 	if port == "51200" {

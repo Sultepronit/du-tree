@@ -1,4 +1,4 @@
-import handleBytes from "../helpers/handleBytes"
+import formatSize from "../utils/formatSize"
 import type { DataNode, ElNode, UpdateBranch } from "../types"
 
 const totalSize = document.getElementById("total-size") as HTMLDivElement
@@ -82,7 +82,7 @@ function genTitle(data: DataNode, path: string) {
 }
 
 const handleBytesExt = (data: DataNode) => {
-    return handleBytes(data.size, data.temp > 0 || data.locked !== undefined)
+    return formatSize(data.size, data.temp > 0 || data.locked !== undefined)
 }
 
 function createLi(data: DataNode, path: string): string {
@@ -391,7 +391,7 @@ let totalSizeVal = -7
 function updateTreeRoot(data: DataNode) {
     if (data?.size !== totalSizeVal) {
         totalSize.title = `${data.size} B`
-        totalSize.textContent = handleBytes(data.size)
+        totalSize.textContent = formatSize(data.size)
         totalSizeVal = data.size
     }
 
