@@ -1,4 +1,4 @@
-package jscss
+package dev
 
 import (
 	"fmt"
@@ -9,17 +9,24 @@ import (
 )
 
 func buildAssets() api.BuildResult {
+	// version := "0.2.0-dev.2"
+	version := "0"
 	return api.Build(api.BuildOptions{
 		EntryPoints: []string{"./web-gui/src/main-dev.ts"},
 		Bundle:      true,
 		Write:       false,
-		Outdir:      "out",
-		Target:      api.ES2020,
+		Target:      api.ES2022,
 		Sourcemap:   api.SourceMapInline,
 
+		Outdir:  "out",
+		Outbase: "..",
+
+		EntryNames: fmt.Sprintf("app-v%s", version),
+		AssetNames: "[dir]/[name]",
+
 		Loader: map[string]api.Loader{
-			".ttf": api.LoaderDataURL,
-			".svg": api.LoaderDataURL,
+			".ttf": api.LoaderFile,
+			".svg": api.LoaderFile,
 		},
 	})
 }
@@ -63,13 +70,12 @@ func UseEsbuild(w http.ResponseWriter, r *http.Request) {
 	// w.Write(result.OutputFiles[0].Contents)
 
 	for _, file := range result.OutputFiles {
-		// Якщо браузер попросив /style.css, шукаємо згенерований .css файл
+		fmt.Printf("Output file: %s\n", file.Path)
 		if r.URL.Path == "/style.css" && strings.HasSuffix(file.Path, ".css") {
 			w.Header().Set("Content-Type", "text/css")
 			w.Write(file.Contents)
 			return
 		}
-		// Якщо попросив /main.js, шукаємо згенерований .js файл
 		if r.URL.Path == "/main.js" && strings.HasSuffix(file.Path, ".js") {
 			w.Header().Set("Content-Type", "application/javascript")
 			w.Write(file.Contents)

@@ -1,16 +1,16 @@
-package jscss
+package dev
 
 import (
 	"fmt"
 	"log"
 	"net/http"
-	"path/filepath"
 	"time"
 
 	"github.com/fsnotify/fsnotify"
 )
 
-var cssChan = make(chan string)
+// var cssChan = make(chan string)
+var cssChan = make(chan bool)
 
 func StartCSSWhatcher(path string) {
 	wcr, err := fsnotify.NewWatcher()
@@ -37,7 +37,8 @@ func StartCSSWhatcher(path string) {
 					isWaiting = true
 
 					select {
-					case cssChan <- filepath.Base(event.Name):
+					// case cssChan <- filepath.Base(event.Name):
+					case cssChan <- true:
 					default:
 					}
 
@@ -74,8 +75,10 @@ func SseHandler(w http.ResponseWriter, r *http.Request) {
 
 	for {
 		select {
-		case fileName := <-cssChan:
-			fmt.Fprintf(w, "event: css-update\ndata: %s\n\n", fileName)
+		// case fileName := <-cssChan:
+		case <-cssChan:
+			// fmt.Fprintf(w, "event: css-update\ndata: %s\n\n", fileName)
+			fmt.Fprintf(w, "event: css-update\ndata: ***\n\n")
 			flusher.Flush()
 		case <-r.Context().Done():
 			log.Println("Browser disconnected")

@@ -61,13 +61,13 @@ export default function formatSize(bytes: number, more = false) {
     // return `${value.toFixed(decimals)} ${units[i]}`
     return `${more ? "≥" : ""}${round(value, more)} ${units[i]}`
 }
-// console.log(handleBytes(999))
-// console.log(handleBytes(1023))
-// console.log(handleBytes(1000))
-// console.log(handleBytes(1023 * 1024))
-// console.log(handleBytes(1123))
-// console.log(handleBytes(1900))
-// console.log(handleBytes(2000))
-// console.log(handleBytes(11245413))
-// console.log(handleBytes(102387))
-// console.log(handleBytes(10331750400))
+// console.log(formatSize(999))
+// console.log(formatSize(1023))
+// console.log(formatSize(1000))
+// console.log(formatSize(1023 * 1024))
+// console.log(formatSize(1123))
+// console.log(formatSize(1900))
+// console.log(formatSize(2000))
+// console.log(formatSize(11245413))
+// console.log(formatSize(102387))
+// console.log(formatSize(10331750400))
