@@ -12,16 +12,6 @@ func main() {
 	apparentSize := flag.Bool("A", false, "To get the apparent size of files instead of the default block size")
 	flag.Parse()
 
-	// if *path != "" {
-	// 	go func() {
-	// 		time.Sleep(time.Millisecond * 20)
-	// 		scanner.Init(models.Request{
-	// 			Path:    *path,
-	// 			Pages:   1,
-	// 			Options: models.ReqOptions{BlockSize: !*apparentSize},
-	// 		})
-	// 	}()
-	// }
 	go scanner.InitCLI(*path, *apparentSize)
 
 	// fmt.Println(os.Hostname())

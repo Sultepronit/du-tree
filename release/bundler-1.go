@@ -1,34 +1,44 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/evanw/esbuild/pkg/api"
 )
 
-func main() {
-	version := "0.2.0-dev.2"
-	fmt.Println("Bundling JS...")
+var Version = "-"
 
-	err := os.RemoveAll("./dist")
+func main() {
+	fmt.Println("Bundling web...")
+
+	version := flag.String("v", "~", "version")
+	flag.Parse()
+
+	// outdir := "./dist"
+	outdir := "./internal/embeded/dist"
+	err := os.RemoveAll(outdir)
 	if err != nil {
 		fmt.Println("Error removing dist directory:", err)
 		return
 	}
 
 	result := api.Build(api.BuildOptions{
-		// EntryPoints: []string{"./web-gui/src/main.ts"},
-		// EntryPoints: []string{"../web-gui/src/main-dev.ts"},
-		EntryPointsAdvanced: []api.EntryPoint{
-			{
-				// InputPath:  "../web-gui/src/main-dev.ts",
-				InputPath:  "../web-gui/src/main.ts",
-				OutputPath: fmt.Sprintf("app-v%s", version),
-			},
+		EntryPoints: []string{
+			"./web-gui/src/main.ts",
+			"./web-gui/style/bundle.css",
 		},
+		// EntryPointsAdvanced: []api.EntryPoint{
+		// 	{
+		// 		InputPath:  "../web-gui/src/main.ts",
+		// 		OutputPath: fmt.Sprintf("app-v%s", version),
+		// 	},
+		// },
 		// Outfile:           "./internal/embeded/dist/main.js",
-		Outdir:            "./dist",
+		Outdir:            outdir,
 		Bundle:            true,
 		Write:             true,
 		MinifyWhitespace:  true,
@@ -37,6 +47,7 @@ func main() {
 		Target:            api.ES2022,
 		Sourcemap:         api.SourceMapLinked,
 
+		EntryNames: fmt.Sprintf("app-v%s", *version),
 		AssetNames: "assets/[name]",
 
 		Loader: map[string]api.Loader{
@@ -52,8 +63,18 @@ func main() {
 		return
 	}
 
-	for _, file := range result.OutputFiles {
-		fmt.Printf("Output file: %s\n", file.Path)
+	// for _, file := range result.OutputFiles {
+	// 	fmt.Printf("Output file: %s\n", file.Path)
+	// }
+
+	htmlBytes, err := os.ReadFile("./web-gui/index.html")
+	if err != nil {
+		panic("Error reading index.html: " + err.Error())
+	}
+	html := strings.ReplaceAll(string(htmlBytes), "{{VERSION}}", Version)
+	err = os.WriteFile(filepath.Join(outdir, "index.html"), []byte(html), 0644)
+	if err != nil {
+		panic("Error saving index.html: " + err.Error())
 	}
 
 	fmt.Println("Success!")

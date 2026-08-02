@@ -4,28 +4,26 @@ package server
 
 import (
 	"du-tree/internal/dev"
-	"du-tree/internal/utils"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"strings"
 )
 
-func printMsg(port string) {
-	url := "http://localhost:" + port
-	fmt.Printf("Dev du-tree server started. Open Web GUI:\n\033[36m%s\033[0m", url)
+// func printMsg(port string) {
+// 	url := "http://localhost:" + port
+// 	fmt.Printf("Dev du-tree server started. Open Web GUI:\n\033[36m%s\033[0m", url)
 
-	ip, err := utils.GetLocalIP()
-	if err != nil {
-		fmt.Println("\n" + err.Error())
-		return
-	} else {
-		fmt.Printf("\t\033[36mhttp://%s:%s\033[0m\n", ip, port)
-	}
+// 	ip, err := utils.GetLocalIP()
+// 	if err != nil {
+// 		fmt.Println("\n" + err.Error())
+// 		return
+// 	} else {
+// 		fmt.Printf("\t\033[36mhttp://%s:%s\033[0m\n", ip, port)
+// 	}
 
-	fmt.Print("\033[3mTo exit press \033[0mCtrl+C\n\n")
-}
+// 	fmt.Print("\033[3mTo exit press \033[0mCtrl+C\n\n")
+// }
 
 func Start(port string) {
 	go dev.StartCSSWhatcher("./web-gui/style")

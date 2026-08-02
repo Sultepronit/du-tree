@@ -1,20 +1,20 @@
-V ?= 0.1.0
+# V ?= 0.1.0
+V := $(shell cat version | tr -d '\r\n')
+VAR_PATH := du-tree/internal/server.version
+
 
 run:
 	CGO_ENABLED=0 go run .
 
-release/bundler: release/bundler.go
-	CGO_ENABLED=0 go build -o release/bundler release/bundler.go
+release/bundler: release/bundler-1.go
+	CGO_ENABLED=0 go build -ldflags="-s -w" -o release/bundler release/bundler-1.go
 
 bundle: release/bundler
-	@rm -rf internal/embeded/dist
-	@./release/bundler
-	@cp -r web-gui/index.html internal/embeded/dist
+	@./release/bundler -v "$(V)"
 	@cp -r web-gui/icon.svg internal/embeded/dist
-	@cp -r web-gui/style internal/embeded/dist
 
 build-bin: bundle
-	CGO_ENABLED=0 go build -tags production -o du-tree .
+	CGO_ENABLED=0 go build -ldflags="-X '$(VAR_PATH)=$(V)'" -tags production -o du-tree .
 
 build: build-bin
 	cd release/deb && make deb V=$(V)

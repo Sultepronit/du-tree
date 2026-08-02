@@ -4,27 +4,9 @@ package server
 
 import (
 	"du-tree/internal/embeded"
-	"du-tree/internal/utils"
-	"fmt"
 	"log"
 	"net/http"
 )
-
-func printMsg(port string) {
-	url := "http://localhost:" + port
-	// fmt.Printf("du-tree server started. Open Web UI: \033[36m%s\033[0m\n", url)
-	fmt.Printf("DU-Tree v0.2.0-dev.1 started. Open Web GUI:\n\033[36m%s\033[0m", url)
-
-	ip, err := utils.GetLocalIP()
-	if err != nil {
-		fmt.Println("\n" + err.Error())
-		return
-	} else {
-		fmt.Printf("\t\033[36mhttp://%s:%s\033[0m\n", ip, port)
-	}
-
-	fmt.Print("\033[3mTo exit press \033[0mCtrl+C\n\n")
-}
 
 func Start(port string) {
 	http.HandleFunc("/init", handleInit)
