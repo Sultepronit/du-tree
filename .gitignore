@@ -1,5 +1,5 @@
 **/dist
 du-tree
-*.deb
-release/deb/
 bundler
+*.deb
+DEBIAN/

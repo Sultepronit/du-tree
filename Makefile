@@ -16,5 +16,5 @@ bundle: release/bundler
 bin: bundle
 	CGO_ENABLED=0 go build -ldflags="-X '$(VAR_PATH)=$(V)'" -tags production -o du-tree .
 
-all: build-bin
+all: bin
 	cd release/deb && make deb V=$(V)
