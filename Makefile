@@ -4,10 +4,10 @@ VAR_PATH := du-tree/internal/server.version
 
 
 run:
-	CGO_ENABLED=0 go run .
+	CGO_ENABLED=0 go run -ldflags="-X '$(VAR_PATH)=$(V)'" .
 
-release/bundler: release/bundler-1.go
-	CGO_ENABLED=0 go build -ldflags="-s -w" -o release/bundler release/bundler-1.go
+release/bundler: release/bundler.go
+	CGO_ENABLED=0 go build -ldflags="-s -w" -o release/bundler release/bundler.go
 
 bundle: release/bundler
 	@./release/bundler -v "$(V)"

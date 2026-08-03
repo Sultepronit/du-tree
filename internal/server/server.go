@@ -21,9 +21,6 @@ func Start(port string) {
 	fs := embeded.GetSubFSHandler()
 	http.Handle("/", fs)
 
-	// url := "http://localhost:" + port
-	// fmt.Printf("du-tree server started. Open Web UI: \033[36m%s\033[0m\n", url)
-	// fmt.Print("\033[3mTo exit press Ctrl+C\033[0m\n\n")
 	printMsg(port)
 
 	err := http.ListenAndServe(":"+port, nil)
