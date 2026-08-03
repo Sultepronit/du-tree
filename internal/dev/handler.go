@@ -1,6 +1,7 @@
 package dev
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -24,8 +25,7 @@ func parseHtml() string {
 		return "Error reading index.html"
 	}
 	html := strings.Replace(string(htmlBytes), "app-v{{VERSION}}.css", "style/app.css", 1)
-	// html = strings.ReplaceAll(html, "{{VERSION}}", version)
-	html = strings.Replace(html, "{{VERSION}}", version, 3)
+	html = strings.Replace(html, "{{VERSION}}", version, 2)
 
 	return html
 }
@@ -35,16 +35,16 @@ func DevHandler(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
 		w.Write([]byte(parseHtml()))
-		// http.ServeFile(w, r, "./web-gui/index.html")
 	} else if r.URL.Path == "/sse-css" {
 		http.HandleFunc("/sse-css", SseHandler)
+	} else if r.URL.Path == "/style/app.css" {
+		w.Header().Set("Content-Type", "text/css")
+		w.Write(ParseCSS())
 	} else if strings.HasSuffix(r.URL.Path, ".js") {
 		w.Header().Set("Content-Type", "application/javascript")
 		w.Write(ParseTS())
-	} else if strings.HasSuffix(r.URL.Path, ".css") {
-		w.Header().Set("Content-Type", "text/css")
-		w.Write(ParseCSS())
 	} else {
+		fmt.Println(r.URL.Path)
 		fsHandler.ServeHTTP(w, r)
 	}
 }

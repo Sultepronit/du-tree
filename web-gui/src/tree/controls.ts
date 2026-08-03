@@ -206,5 +206,10 @@ document.getElementById("tree").addEventListener("click", async e => {
 })
 
 document.getElementById("use-animation").addEventListener("click", e => {
-    toggleCSS("./style/animations.css", "animations-css", (e.target as HTMLInputElement).checked)
+    // toggleCSS("./style/animations.css", "animations-css", (e.target as HTMLInputElement).checked)
+    if ((e.target as HTMLInputElement).checked) {
+        document.body.classList.add("animation")
+    } else {
+        document.body.classList.remove("animation")
+    }
 })

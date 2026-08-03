@@ -10,8 +10,6 @@ import (
 	"github.com/evanw/esbuild/pkg/api"
 )
 
-var Version = "-"
-
 func main() {
 	fmt.Println("Bundling web...")
 
@@ -71,7 +69,7 @@ func main() {
 	if err != nil {
 		panic("Error reading index.html: " + err.Error())
 	}
-	html := strings.ReplaceAll(string(htmlBytes), "{{VERSION}}", Version)
+	html := strings.ReplaceAll(string(htmlBytes), "{{VERSION}}", *version)
 	err = os.WriteFile(filepath.Join(outdir, "index.html"), []byte(html), 0644)
 	if err != nil {
 		panic("Error saving index.html: " + err.Error())
