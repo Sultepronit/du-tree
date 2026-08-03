@@ -423,21 +423,25 @@ export async function rebuildTree(data: DataNode, path: string) {
 // move to controls?..
 export function setCanceled() {
     canceled = true
-    document.documentElement.style.setProperty("--temp-dir-icon", `url("icons/folder-x.svg")`)
-    document.documentElement.style.setProperty(
-        "--unavailable-dir-icon",
-        `url("icons/folder-x.svg")`
-    )
-    document.documentElement.style.setProperty("--unavailable-cursor", "not-allowed")
-    statePannel.classList.add("canceled")
+    document.body.classList.add("canceled")
     statePannel.classList.remove("temp")
+
+    // document.documentElement.style.setProperty("--temp-dir-icon", `url("icons/folder-x.svg")`)
+    // document.documentElement.style.setProperty(
+    //     "--unavailable-dir-icon",
+    //     `url("icons/folder-x.svg")`
+    // )
+    // document.documentElement.style.setProperty("--unavailable-cursor", "not-allowed")
+    // statePannel.classList.add("canceled")
 }
 
 export function removeCanceled() {
     if (!canceled) return
     canceled = false
-    document.documentElement.style.removeProperty("--temp-dir-icon")
-    document.documentElement.style.removeProperty("--unavailable-dir-icon")
-    document.documentElement.style.removeProperty("--unavailable-cursor")
-    statePannel.classList.remove("canceled")
+    document.body.classList.remove("canceled")
+
+    // document.documentElement.style.removeProperty("--temp-dir-icon")
+    // document.documentElement.style.removeProperty("--unavailable-dir-icon")
+    // document.documentElement.style.removeProperty("--unavailable-cursor")
+    // statePannel.classList.remove("canceled")
 }

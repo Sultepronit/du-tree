@@ -122,12 +122,6 @@
     content: "≥";
 }
 
-/* .canceled #total-size::after {
-    animation: none;
-    mask-image: url("icons/refresh-cw-off.svg");
-    -webkit-mask-image: url("icons/refresh-cw-off.svg");
-} */
-
 #lock-widget {
     color: red;
 }

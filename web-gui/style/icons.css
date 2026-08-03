@@ -170,10 +170,20 @@
 }
 
 .td.unavailable::before {
-    cursor: var(--unavailable-cursor, progress);
+    /* cursor: var(--unavailable-cursor, progress); */
+    cursor: progress;
     background-color: var(--temp-color);
     -webkit-mask-image: var(--unavailable-dir-icon);
     mask-image: var(--unavailable-dir-icon);
+}
+
+.canceled .td.unavailable::before {
+    cursor: not-allowed;
+}
+
+.canceled .td.temp::before {
+    -webkit-mask-image: url("icons/folder-x.svg");
+    mask-image: url("icons/folder-x.svg");
 }
 
 .td.unfold::before {
