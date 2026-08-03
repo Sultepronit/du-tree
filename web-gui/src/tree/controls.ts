@@ -187,13 +187,20 @@ async function unfoldDir(target: HTMLElement) {
         const data = (await doFetch("/dir", { path, pages: 1 })) as DataNode
         console.log(data)
 
+        if (dataset.name !== data.name) {
+            // orphans of reseted entry!
+            // console.log(dataset.name, data.name)
+            // console.warn("GHOST!")
+            return
+        }
+
         populateUpdates(data, dataset.path, dataset.name)
 
         const branch = createBranch(data, dataset.path)
         if (branch) shoot.appendChild(branch)
     } else {
         target.classList.toggle("unfold")
-        shoot.querySelector<HTMLDivElement>(".dir-content")!.hidden =
+        shoot.querySelector<HTMLDivElement>(".dir-content").hidden =
             !target.classList.contains("unfold")
     }
 }
