@@ -3,28 +3,16 @@ import type { DataNode, ViewNode, UpdateBranch } from "../types"
 
 const totalSize = document.getElementById("total-size") as HTMLDivElement
 const totalLocked = document.getElementById("lock-widget") as HTMLDivElement
-const statePannel = totalSize.parentElement
+// const statePannel = totalSize.parentElement
 const treeBlock = document.getElementById("tree")!
 
 const pageSize = 100
 
 let max = 1
 
-let canceled = false
-
 let branches2 = {} as Record<string, UpdateBranch>
 
 let rootPath = ""
-
-document.addEventListener("mode", (e: CustomEvent) => {
-    if (e.detail === "results") {
-        treeBlock.style.opacity = "1"
-        statePannel.style.opacity = "1"
-    } else if (e.detail === "preparations") {
-        treeBlock.style.opacity = "0.5"
-        statePannel.style.opacity = "0.5"
-    }
-})
 
 function genLockedDetails(node: DataNode) {
     const re = []
@@ -406,42 +394,21 @@ function updateTreeRoot(data: DataNode) {
     else totalSize.parentElement.classList.remove("probably-bigger")
 }
 
-export async function rebuildTree(data: DataNode, path: string) {
+export function buildTree(data: DataNode, path: string) {
     rootPath = path
-
-    removeCanceled()
-    treeBlock.innerHTML = ""
-    max = 1
-    branches2 = {}
-    totalSizeVal = -7
-
     updateTreeRoot(data)
-
     treeBlock.appendChild(createBranch(data, ""))
 }
 
-// move to controls?..
-export function setCanceled() {
-    canceled = true
-    document.body.classList.add("canceled")
-    statePannel.classList.remove("temp")
-
-    // document.documentElement.style.setProperty("--temp-dir-icon", `url("icons/folder-x.svg")`)
-    // document.documentElement.style.setProperty(
-    //     "--unavailable-dir-icon",
-    //     `url("icons/folder-x.svg")`
-    // )
-    // document.documentElement.style.setProperty("--unavailable-cursor", "not-allowed")
-    // statePannel.classList.add("canceled")
+export function simulateScan() {
+    updateTreeRoot({ name: "", size: 0, temp: 1 } as DataNode)
 }
 
-export function removeCanceled() {
-    if (!canceled) return
-    canceled = false
-    document.body.classList.remove("canceled")
-
-    // document.documentElement.style.removeProperty("--temp-dir-icon")
-    // document.documentElement.style.removeProperty("--unavailable-dir-icon")
-    // document.documentElement.style.removeProperty("--unavailable-cursor")
-    // statePannel.classList.remove("canceled")
+export function resetTree() {
+    treeBlock.innerHTML = ""
+    max = 1
+    branches2 = {}
+    updateTreeRoot({ name: "", size: -7 } as DataNode)
+    totalSize.title = ""
+    totalSize.textContent = ""
 }

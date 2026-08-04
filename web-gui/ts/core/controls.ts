@@ -1,20 +1,28 @@
 import { doFetch } from "../api/fetch"
 
 import type { DataNode, reqOptions } from "../types"
-import { appendBranch, createBranch, rebuildTree, setCanceled, updateTree } from "./treeBuilder"
+import {
+    appendBranch,
+    createBranch,
+    buildTree,
+    updateTree,
+    simulateScan,
+    resetTree
+} from "./treeBuilder"
 
 const useBlockSize = document.getElementById("use-block-size") as HTMLInputElement
 const scanButton = document.getElementById("scan") as HTMLButtonElement
 const autoExit = document.getElementById("auto-exit") as HTMLInputElement
+const treeRoot = document.getElementById("tree-root") as HTMLElement
 
 let rootPath = ""
 
+// page close
 window.addEventListener("pagehide", () => {
     if (autoExit.checked) {
         navigator.sendBeacon("/exit")
     }
 })
-// navigator.sendBeacon("/exit")
 
 export function setOptions(options: reqOptions) {
     useBlockSize.checked = options.blockSize ?? false
@@ -28,8 +36,10 @@ function disableEdit() {
 function enableEdit() {
     document.dispatchEvent(new CustomEvent("mode", { detail: "preparations" }))
     useBlockSize.disabled = false
+    resetTree()
 }
 
+// is there need for "blank"?
 type statusType = "blank" | "setting" | "ready" | "scanning" | "done"
 const status = {
     _val: "blank",
@@ -48,6 +58,8 @@ const status = {
             scanButton.title = "Scan\t[Enter]"
         } else if (newVal === "scanning") {
             disableEdit()
+            removeCanceled()
+            simulateScan()
             scanButton.disabled = true
             scanButton.title = ""
         } else if (newVal === "done") {
@@ -58,10 +70,8 @@ const status = {
 }
 export { status }
 
-// scanButton.addEventListener("click", initNewScan)
 scanButton.addEventListener("click", () => {
     const st = status.get()
-    // if (st === "ready" || st === "done") initTree(rootPath)
     if (st === "ready") {
         initTree(rootPath)
     } else if (st === "done") {
@@ -69,7 +79,7 @@ scanButton.addEventListener("click", () => {
     }
 })
 
-export async function initTree(path: string) {
+export async function initTree(path: string, initScan = true) {
     rootPath = path
     status.set("scanning")
 
@@ -78,23 +88,14 @@ export async function initTree(path: string) {
         options.blockSize = true
     }
 
-    const data = (await doFetch("/scan", {
+    const req = initScan ? "/scan" : "/dir"
+    // yes, if "/dir" case options mean nothing
+    // const data = (await doFetch("/scan", {
+    const data = (await doFetch(req, {
         path,
         pages: 1,
         options
     })) as DataNode
-    console.log(data)
-
-    rebuildTree(data, path)
-    if (data.temp) initUpdates()
-    else status.set("done")
-}
-
-export async function renderTree(path: string) {
-    rootPath = path
-    status.set("scanning")
-
-    const data = (await doFetch("/dir", { path: "", pages: 1 })) as DataNode
     console.log(data)
     if (!data) {
         // one of cases -- dir without the access
@@ -102,19 +103,52 @@ export async function renderTree(path: string) {
         return
     }
 
-    rebuildTree(data, path)
+    buildTree(data, path)
     if (data.temp) initUpdates()
     else status.set("done")
+}
+
+// export async function renderTree(path: string) {
+//     rootPath = path
+//     status.set("scanning")
+
+//     const data = (await doFetch("/dir", { path: "", pages: 1 })) as DataNode
+//     console.log(data)
+//     if (!data) {
+//         // one of cases -- dir without the access
+//         status.set("done")
+//         return
+//     }
+
+//     rebuildTree(data, path)
+//     if (data.temp) initUpdates()
+//     else status.set("done")
+// }
+
+let canceled = false
+export function setCanceled() {
+    canceled = true
+    document.body.classList.add("canceled")
+    treeRoot.classList.remove("temp")
+}
+
+export function removeCanceled() {
+    if (!canceled) return
+    canceled = false
+    document.body.classList.remove("canceled")
 }
 
 let interval = 200
 document.getElementById("cancel").addEventListener("click", async () => {
     interval = 100
+    setCanceled()
     const re = await doFetch("/cancel")
     console.log(re)
-    if (re?.status === "canceled") setCanceled()
+    // if (re?.status === "canceled") setCanceled()
+    if (re?.status !== "canceled") removeCanceled()
 })
 
+// REFACTORING POINT!
 async function update() {
     await new Promise(resolve => setTimeout(resolve, interval))
     if (interval < 900) interval += 100
