@@ -1,7 +1,7 @@
 import { doFetch } from "../api/fetch"
 import arraysOfObjectsAreEqual from "../helpers/compareArrays"
-import { initTree, status } from "../tree/controls"
-import sortByNeedlePosition from "./sortSuggesions"
+import { initTree, status } from "./controls"
+import sortByNeedlePosition from "../utils/sortByNeedlePosition"
 
 const accessWidget = document.getElementById("access-widged")
 const input = document.getElementById("path") as HTMLInputElement

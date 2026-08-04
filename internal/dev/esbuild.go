@@ -11,7 +11,7 @@ import (
 func ParseTS() []byte {
 
 	result := api.Build(api.BuildOptions{
-		EntryPoints: []string{"./web-gui/src/main-dev.ts"},
+		EntryPoints: []string{"./web-gui/ts/main-dev.ts"},
 		Bundle:      true,
 		Write:       false,
 		Target:      api.ES2022,

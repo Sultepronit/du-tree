@@ -1,8 +1,7 @@
 import { doFetch } from "../api/fetch"
 
 import type { DataNode, reqOptions } from "../types"
-import toggleCSS from "../utils/toggleCss"
-import { appendBranch, createBranch, rebuildTree, setCanceled, updateTree } from "./builder"
+import { appendBranch, createBranch, rebuildTree, setCanceled, updateTree } from "./treeBuilder"
 
 const useBlockSize = document.getElementById("use-block-size") as HTMLInputElement
 const scanButton = document.getElementById("scan") as HTMLButtonElement
