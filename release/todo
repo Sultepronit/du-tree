@@ -2,8 +2,6 @@ make sure that reset of shoot is total & clean!
 
 do something with the entities that are removed while scannng & after!
 
-change entity accessibility check method?
-
 network troubles are real! test & improve all possible cases!
 
 refactor nested dirs mechanics: add pending state
