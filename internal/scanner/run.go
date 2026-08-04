@@ -84,14 +84,8 @@ func scanDir(ctx context.Context, path string, node *dirNode, reqBlockSize bool)
 	default:
 	}
 
-	// to check if the dir is locked, without looking at node.Locked
-	if !explorer.IsAccessible(path, "") {
-		return nil
-	}
-
 	entries, err := os.ReadDir(path)
 	if err != nil {
-		// fmt.Println("errr reading", err)
 		if os.IsPermission(err) {
 			data.mu.Lock()
 			node.Locked = -1
@@ -100,6 +94,12 @@ func scanDir(ctx context.Context, path string, node *dirNode, reqBlockSize bool)
 			for p := node.Parent; p != nil; p = p.Parent {
 				p.Locked++
 			}
+			data.mu.Unlock()
+			return nil
+		} else if os.IsNotExist(err) {
+			data.mu.Lock()
+			node.IsRemoved = true // TO DO!
+			node.Temp = 0
 			data.mu.Unlock()
 			return nil
 		}
@@ -118,12 +118,6 @@ func scanDir(ctx context.Context, path string, node *dirNode, reqBlockSize bool)
 			fmt.Println("run/calcSize:", err)
 		}
 
-		if size > 0 {
-			for n := node; n != nil; n = n.Parent {
-				n.Size += size
-			}
-		}
-
 		if entry.IsDir() {
 			child := dirNode{
 				Parent: node,
@@ -132,8 +126,25 @@ func scanDir(ctx context.Context, path string, node *dirNode, reqBlockSize bool)
 				Temp:   2,
 			}
 
-			locked := !explorer.IsAccessible(path, entry.Name())
-			if locked {
+			// locked := !explorer.IsAccessible(path, entry.Name())
+			// if locked {
+			// 	child.Locked = -1
+			// 	child.Temp = 0
+
+			// 	for p := node; p != nil; p = p.Parent {
+			// 		p.Locked++
+			// 	}
+			// }
+			// dirs = append(dirs, &child)
+			status := explorer.CheckDirStatus(filepath.Join(path, entry.Name()))
+			if status == explorer.NotFound {
+				continue
+			}
+
+			switch status {
+			case explorer.Empty:
+				child.Temp = 0
+			case explorer.Forbidden:
 				child.Locked = -1
 				child.Temp = 0
 
@@ -141,7 +152,14 @@ func scanDir(ctx context.Context, path string, node *dirNode, reqBlockSize bool)
 					p.Locked++
 				}
 			}
+
 			dirs = append(dirs, &child)
+		}
+
+		if size > 0 {
+			for n := node; n != nil; n = n.Parent {
+				n.Size += size
+			}
 		}
 	}
 
@@ -150,13 +168,17 @@ func scanDir(ctx context.Context, path string, node *dirNode, reqBlockSize bool)
 
 	node.Temp = 1
 
-	content := make([]*dirNode, len(node.Dirs))
-	copy(content, node.Dirs)
+	recursive := make([]*dirNode, 0, len(node.Dirs))
+	// copy(recursive, node.Dirs)
+	for _, d := range node.Dirs {
+		if d.Temp > 0 {
+			recursive = append(recursive, d)
+		}
+	}
 
 	data.mu.Unlock()
-	// fmt.Println(node.Dirs)
-	// for _, child := range node.Dirs {
-	for _, child := range content {
+
+	for _, child := range recursive {
 		fullPath := filepath.Join(path, child.Name)
 		err := scanDir(ctx, fullPath, child, reqBlockSize)
 		if err != nil {
