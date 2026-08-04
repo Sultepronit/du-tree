@@ -1,18 +1,18 @@
 package models
 
-type PathDetail struct {
+type PathSugg struct {
 	Name     string `json:"name"`
 	Link     string `json:"link,omitempty"`
 	IsLocked bool   `json:"isLocked,omitempty"`
+	IsEmpty  bool   `json:"isEmpty,omitempty"`
 }
 
 type Path struct {
-	InputPath   string       `json:"inputPath"`
-	WorkingPath string       `json:"workingPath,omitempty"`
-	Replacement []string     `json:"replacement,omitempty"`
-	NextDirs    []PathDetail `json:"nextDirs,omitempty"`
-	IsLocked    bool         `json:"isLocked,omitempty"`
-	IsRemoved   bool         `json:"isRemoved,omitempty"` // TODO!
+	InputPath   string     `json:"inputPath"`
+	WorkingPath string     `json:"workingPath,omitempty"`
+	Replacement []string   `json:"replacement,omitempty"`
+	NextDirs    []PathSugg `json:"nextDirs,omitempty"`
+	IsLocked    bool       `json:"isLocked,omitempty"`
 }
 
 type ReqOptions struct {

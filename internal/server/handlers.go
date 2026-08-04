@@ -40,8 +40,7 @@ func checkPath(w http.ResponseWriter, r *http.Request) {
 	}
 	// fmt.Println(req)
 
-	// sendResult(w, explorer.CheckPath(req.Path))
-	sendResult(w, explorer.CheckPath2(req.Path))
+	sendResult(w, explorer.CheckPath(req.Path, false))
 }
 
 func handleScan(w http.ResponseWriter, r *http.Request) {
