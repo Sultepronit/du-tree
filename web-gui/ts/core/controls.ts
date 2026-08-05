@@ -148,11 +148,10 @@ document.getElementById("cancel").addEventListener("click", async () => {
     if (re?.status !== "canceled") removeCanceled()
 })
 
-// REFACTORING POINT!
 async function update() {
     await new Promise(resolve => setTimeout(resolve, interval))
     if (interval < 900) interval += 100
-    const updates = await doFetch("/update", updateBranches)
+    const updates = await doFetch("/update", updateList)
     // console.log(updates)
     if (!updates) {
         status.set("done")
@@ -161,7 +160,7 @@ async function update() {
     }
 
     updateTree(updates)
-    sanitizeUpdates(updates)
+    sanitizeUpdateList(updates)
 
     if (!updates[0].temp) {
         // syncing = false
@@ -172,23 +171,23 @@ async function update() {
     update()
 }
 
-let updateBranches = [] as { path: string; pages: number }[]
+let updateList = [] as { path: string; pages: number }[]
 function initUpdates() {
-    updateBranches = [{ path: "", pages: 1 }]
+    updateList = [{ path: "", pages: 1 }]
     interval = 200
     update()
 }
 
-function populateUpdates(data: DataNode, prePath: string, dirname: string) {
+function populateUpdateList(data: DataNode, prePath: string, dirname: string) {
     if (status.get() === "scanning" && data.temp) {
         const path = prePath ? `${prePath}/${dirname}` : dirname
-        updateBranches.push({ path, pages: 1 })
+        updateList.push({ path, pages: 1 })
     }
 }
 
-function sanitizeUpdates(results: DataNode[]) {
-    updateBranches = updateBranches.filter((_, i) => !results[i] || results[i].temp)
-    // remove also branch on DOM manipulations side?
+function sanitizeUpdateList(results: DataNode[]) {
+    updateList = updateList.filter((_, i) => !results[i] || results[i].temp)
+    // remove also branches on DOM manipulations side?
 }
 
 async function addMore(button: HTMLButtonElement) {
@@ -199,42 +198,52 @@ async function addMore(button: HTMLButtonElement) {
 
     appendBranch(data, button, pages)
 
-    const branch = updateBranches.find(b => b.path === button.dataset.path)
+    const branch = updateList.find(b => b.path === button.dataset.path)
     if (branch) branch.pages = pages
 }
 
 async function unfoldDir(target: HTMLElement) {
-    if (target.classList.contains("itself")) return
-    if (target.classList.contains("link")) return
-    if (target.classList.contains("unavailable")) return
+    // if (target.classList.contains("itself")) return
+    // if (target.classList.contains("link")) return
+    // if (target.classList.contains("unavailable")) return
+    const l = target.classList
+    if (l.contains("itself") || l.contains("link") || l.contains("unavailable")) return
 
     const shoot = target.closest("div.shoot") as HTMLDivElement
     const dataset = shoot?.dataset
 
     if (!dataset.nested) {
         dataset.nested = "true"
-        target.classList.add("unfold")
+        target.classList.add("pending", "unfold")
 
         const path = dataset.path ? `${dataset.path}/${dataset.name}` : dataset.name
 
         const data = (await doFetch("/dir", { path, pages: 1 })) as DataNode
-        console.log(data)
+        console.log("dir:", data)
 
         if (dataset.name !== data.name) {
             // orphans of reseted entry!
-            // console.log(dataset.name, data.name)
-            // console.warn("GHOST!")
             return
         }
 
-        populateUpdates(data, dataset.path, dataset.name)
+        populateUpdateList(data, dataset.path, dataset.name)
 
         const branch = createBranch(data, dataset.path)
-        if (branch) shoot.appendChild(branch)
+        // if (branch) shoot.appendChild(branch)
+        if (branch) {
+            if (!target.classList.contains("unfold")) {
+                branch.querySelector(".dir-content").classList.add("hidden")
+            }
+            shoot.appendChild(branch)
+        }
+        target.classList.remove("pending")
     } else {
         target.classList.toggle("unfold")
-        shoot.querySelector<HTMLDivElement>(".dir-content").hidden =
-            !target.classList.contains("unfold")
+        if (target.classList.contains("pending")) return
+
+        // shoot.querySelector<HTMLDivElement>(".dir-content").hidden =
+        //     !target.classList.contains("unfold")
+        shoot.querySelector<HTMLDivElement>(".dir-content").classList.toggle("hidden")
     }
 }
 

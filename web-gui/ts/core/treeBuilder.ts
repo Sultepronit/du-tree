@@ -132,7 +132,7 @@ export function createBranch(data: DataNode, prePath: string): DocumentFragment 
     if (data.contentCount) {
         // lis.push(`<li class="show-more" title="${path ? path + "/" : "Root"}">
         lis.push(`<li class="show-more">
-            <span class="so-far">${data.content.length}</span>/${data.contentCount}
+            <span class="so-far">${data.content.length}/${data.contentCount}</span>
             <button name="add-more" data-path="${path}" data-pages="1">
                 Show more
             </button>
@@ -171,7 +171,8 @@ export function appendBranch(data: DataNode, button: HTMLButtonElement, pages: n
     }
     button.dataset.pages = pages.toString()
     const soFar = li.querySelector(".so-far")
-    soFar.textContent = (pages * pageSize).toString()
+    // soFar.textContent = (pages * pageSize).toString()
+    soFar.textContent = `${pages * pageSize}/${data.contentCount}`
 }
 
 function updateLocked(elNode: ViewNode, oldD: DataNode, newD: DataNode) {
