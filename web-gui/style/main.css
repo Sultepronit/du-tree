@@ -61,6 +61,22 @@ label:has(input:checked) {
     color: black;
 }
 
+label:has(input:checked:disabled) {
+    margin-left: 0.8em;
+    position: relative;
+}
+
+label:has(input:checked:disabled)::before {
+    content: "";
+    position: absolute;
+    left: -0.85em;
+    top: 0.28em;
+    width: 0.6em;
+    height: 0.6em;
+    background-color: black;
+    border-radius: 50%;
+}
+
 button {
     cursor: pointer;
     border: none;
@@ -90,7 +106,12 @@ input[type="checkbox"] {
     margin-left: 0;
 }
 
-input[type="checkbox"]:not(:checked):disabled {
+/* input[type="checkbox"]:not(:checked):disabled { */
+input[type="checkbox"]:disabled {
+    display: none;
+}
+
+input[type="radio"]:disabled {
     display: none;
 }
 

@@ -76,7 +76,8 @@ func calcSize(entry os.DirEntry, reqBlockSize bool, path string) (int64, error) 
 	return size, nil
 }
 
-func scanDir(ctx context.Context, path string, node *dirNode, reqBlockSize bool) error {
+// func scanDir(ctx context.Context, path string, node *dirNode, reqBlockSize bool) error {
+func scanDir(ctx context.Context, path string, node *dirNode, options models.ReqOptions) error {
 	// fmt.Println("scanning:", path)
 	select {
 	case <-ctx.Done():
@@ -112,8 +113,12 @@ func scanDir(ctx context.Context, path string, node *dirNode, reqBlockSize bool)
 	dirs := make([]*dirNode, 0, len(entries))
 
 	for _, entry := range entries {
+		if options.ExcludeHidden && strings.HasPrefix(entry.Name(), ".") {
+			continue
+		}
 		// time.Sleep(time.Millisecond * 30)
-		size, err := calcSize(entry, reqBlockSize, path)
+		// size, err := calcSize(entry, reqBlockSize, path)
+		size, err := calcSize(entry, options.BlockSize, path)
 		if err != nil {
 			fmt.Println("run/calcSize:", err)
 		}
@@ -145,8 +150,8 @@ func scanDir(ctx context.Context, path string, node *dirNode, reqBlockSize bool)
 			case explorer.Empty:
 				child.Temp = 0
 			case explorer.Forbidden:
-				child.Locked = -1
 				child.Temp = 0
+				child.Locked = -1
 
 				for p := node; p != nil; p = p.Parent {
 					p.Locked++
@@ -180,7 +185,8 @@ func scanDir(ctx context.Context, path string, node *dirNode, reqBlockSize bool)
 
 	for _, child := range recursive {
 		fullPath := filepath.Join(path, child.Name)
-		err := scanDir(ctx, fullPath, child, reqBlockSize)
+		// err := scanDir(ctx, fullPath, child, reqBlockSize)
+		err := scanDir(ctx, fullPath, child, options)
 		if err != nil {
 			return err
 		}
@@ -230,7 +236,8 @@ func Init(req models.Request) (*models.Node, error) {
 	data.mu.Unlock()
 
 	go func() {
-		err := scanDir(ctx, data.request.Path, data.scanTree, req.Options.BlockSize)
+		// err := scanDir(ctx, data.request.Path, data.scanTree, req.Options.BlockSize)
+		err := scanDir(ctx, data.request.Path, data.scanTree, req.Options)
 		if err != nil {
 			fmt.Println("run/scanDir:", err)
 		}

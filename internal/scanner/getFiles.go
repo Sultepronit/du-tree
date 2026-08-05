@@ -3,13 +3,16 @@ package scanner
 import (
 	"du-tree/internal/explorer"
 	"du-tree/internal/helpers"
+	"du-tree/internal/models"
 	"errors"
 	"os"
 	"path/filepath"
+	"strings"
 	"syscall"
 )
 
-func getFiles(path string, blockSizeReq bool) ([]*fileNode, error) {
+// func getFiles(path string, blockSizeReq bool) ([]*fileNode, error) {
+func getFiles(path string, options models.ReqOptions) ([]*fileNode, error) {
 	entries, err := os.ReadDir(path)
 	if err != nil {
 		return nil, err
@@ -18,6 +21,10 @@ func getFiles(path string, blockSizeReq bool) ([]*fileNode, error) {
 
 	for _, e := range entries {
 		if e.IsDir() {
+			continue
+		}
+
+		if options.ExcludeHidden && strings.HasPrefix(e.Name(), ".") {
 			continue
 		}
 
@@ -52,7 +59,8 @@ func getFiles(path string, blockSizeReq bool) ([]*fileNode, error) {
 			}
 		}
 
-		if blockSizeReq {
+		// if blockSizeReq {
+		if options.BlockSize {
 			node.Size = stat.Blocks * 512
 		} else {
 			node.Size = info.Size()

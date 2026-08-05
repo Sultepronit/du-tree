@@ -29,6 +29,7 @@ window.addEventListener("pagehide", () => {
 export function setOptions(inputOptions: ReqOptions) {
     // useBlockSize.checked = inputOptions.blockSize ?? false
     optionsForm["size-type"].value = inputOptions.blockSize ? "block" : "apparent"
+    optionsForm["exclude-hidden"].checked = inputOptions.excludeHidden
 }
 
 function disableEdit() {
@@ -82,11 +83,16 @@ export async function initTree(path: string, initScan = true) {
     rootPath = path
     status.set("scanning")
 
-    const options = {} as ReqOptions
+    // const options = {} as ReqOptions
     // if (useBlockSize.checked) {
-    if (optionsForm["size-type"].value === "block") {
-        options.blockSize = true
-    }
+    // if (optionsForm["size-type"].value === "block") {
+    //     options.blockSize = true
+    // }
+
+    const options = {
+        blockSize: optionsForm["size-type"].value === "block",
+        excludeHidden: optionsForm["exclude-hidden"].checked
+    } as ReqOptions
 
     const req = initScan ? "/scan" : "/dir"
     // yes, if "/dir" case options mean nothing

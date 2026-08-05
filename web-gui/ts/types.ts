@@ -14,7 +14,9 @@ export type PathDetails = {
 }
 
 export type ReqOptions = {
-    blockSize?: true
+    // blockSize?: true
+    blockSize?: boolean
+    excludeHidden?: boolean
 }
 
 export type DataNode = {
