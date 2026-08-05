@@ -14,10 +14,12 @@ const pathIsValid = {
     get(): boolean | null {
         return this._val
     },
-    set(valid: boolean) {
+    set(valid: boolean, quiet = false) {
         this._val = valid
-        // status.set(valid ? "ready" : "setting")
-        document.dispatchEvent(new CustomEvent("path-status", { detail: valid ? "valid" : "" }))
+        if (!quiet) {
+            document.dispatchEvent(new CustomEvent("path-status", { detail: valid ? "valid" : "" }))
+        }
+
         if (valid) {
             // input.className = "ok"
             input.classList.add("ok")
@@ -68,22 +70,13 @@ export function setPath(val: string) {
     input.value = val
 }
 
-// document.addEventListener("mode", (e: CustomEvent) => {
-//     if (e.detail === "results") {
-//         input.disabled = true
-//     } else if (e.detail === "preparations") {
-//         input.disabled = false
-//         input.focus()
-//     }
-// })
-
 export function disablePathInput() {
     input.disabled = true
 }
 
 export function enablePathInput() {
     input.disabled = false
-    pathIsValid.set(true)
+    pathIsValid.set(true, true)
     input.focus()
 }
 

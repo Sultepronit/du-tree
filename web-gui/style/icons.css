@@ -33,13 +33,13 @@
     -webkit-mask-image: url("icons/search.svg");
 }
 
-#scan.scanning {
+/* #scan.scanning {
     mask-size: 90% 90%;
     -webkit-mask-size: 90% 90%;
     mask-image: url("icons/sync.svg");
     -webkit-mask-image: url("icons/sync.svg");
     opacity: 1;
-}
+} */
 
 /* #lock-widget::before { */
 #lock-widget::after {
@@ -124,10 +124,37 @@
     display: block;
 }
 
-.canceled .scan-progress {
+/* .canceled .scan-progress {
     display: block;
+    background-color: red;
     mask-image: url("icons/refresh-cw-off.svg");
     -webkit-mask-image: url("icons/refresh-cw-off.svg");
+} */
+
+#rescan-button {
+    display: none;
+}
+
+.canceled #rescan-button {
+    display: block;
+    margin-top: 0.1em;
+    width: 1.15em;
+    height: 1.15em;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    background-color: red;
+    mask-image: url("icons/refresh-cw-off.svg");
+    -webkit-mask-image: url("icons/refresh-cw-off.svg");
+
+    padding: 0;
+    border-radius: 0;
+    opacity: 1;
+}
+
+#rescan-button:hover {
+    background-color: black;
+    mask-image: url("icons/refresh-cw.svg");
+    -webkit-mask-image: url("icons/refresh-cw.svg");
 }
 
 /* tree design ----------------------- */

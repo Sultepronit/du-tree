@@ -30,13 +30,11 @@ export function setOptions(options: ReqOptions) {
 }
 
 function disableEdit() {
-    // document.dispatchEvent(new CustomEvent("mode", { detail: "results" }))
     useBlockSize.disabled = true
     disablePathInput()
 }
 
 function enableEdit() {
-    document.dispatchEvent(new CustomEvent("mode", { detail: "preparations" }))
     useBlockSize.disabled = false
     enablePathInput()
     resetTree()
@@ -76,15 +74,6 @@ document.addEventListener("path-status", (e: CustomEvent) => {
     status.set(e.detail === "valid" ? "ready" : "setting")
 })
 
-scanButton.addEventListener("click", () => {
-    const st = status.get()
-    if (st === "ready") {
-        initTree(rootPath)
-    } else if (st === "done") {
-        status.set("ready")
-    }
-})
-
 export async function initTree(path: string, initScan = true) {
     rootPath = path
     status.set("scanning")
@@ -117,6 +106,23 @@ document.addEventListener("scan-request", (e: CustomEvent) => {
     initTree(e.detail)
 })
 
+scanButton.addEventListener("click", () => {
+    const st = status.get()
+    if (st === "ready") {
+        initTree(rootPath)
+    } else if (st === "done") {
+        status.set("ready")
+    }
+})
+
+function rescan() {
+    removeCanceled()
+    resetTree()
+    simulateScan()
+    initTree(rootPath)
+}
+document.getElementById("rescan-button").addEventListener("click", rescan)
+
 // export async function renderTree(path: string) {
 //     rootPath = path
 //     status.set("scanning")
@@ -148,14 +154,15 @@ export function removeCanceled() {
 }
 
 let interval = 200
-document.getElementById("cancel").addEventListener("click", async () => {
+async function cancel() {
     interval = 100
     setCanceled()
     const re = await doFetch("/cancel")
     console.log(re)
     // if (re?.status === "canceled") setCanceled()
     if (re?.status !== "canceled") removeCanceled()
-})
+}
+document.getElementById("cancel").addEventListener("click", cancel)
 
 async function update() {
     await new Promise(resolve => setTimeout(resolve, interval))
@@ -280,14 +287,24 @@ document.addEventListener("keydown", async e => {
     }
 
     const st = status.get()
-    if (st === "scanning") return
-    if (st === "done") {
-        if (e.key === "Enter" && e.ctrlKey) {
+    // if (st === "scanning") return
+    if (st === "scanning") {
+        if (e.key === "Escape") cancel()
+    } else if (st === "done") {
+        // if (e.key === "Enter" && e.ctrlKey) {
+        //     e.preventDefault()
+        //     status.set("ready")
+        // }
+        if (e.key === "Enter") {
             e.preventDefault()
-            status.set("ready")
-        }
 
-        return
+            if (e.ctrlKey) {
+                status.set("ready")
+            } else if (e.shiftKey && canceled) {
+                rescan()
+            }
+        }
+    } else {
+        handlePathInput(e)
     }
-    handlePathInput(e)
 })

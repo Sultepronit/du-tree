@@ -111,16 +111,15 @@
 
 .tree-root {
     display: flex;
-    gap: 0.5em;
+    gap: 0.9em;
 }
-
-/* #total-size {
-    z-index: 100;
-} */
 
 .temp #total-size {
     color: var(--temp-color);
-    /* animation: wave-pulse 2s infinite ease-in-out; */
+}
+
+.canceled #total-size {
+    color: var(--temp-color);
 }
 
 .probably-bigger #total-size::before {

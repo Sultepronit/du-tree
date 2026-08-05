@@ -5,3 +5,5 @@ added .deb package as option
 added versioned app*.js & app*.css
 BUG FIX: attaching orphans of reseted dirs in case of bad connection [v0.1.1]
 refacotred the back end: removed golang.org/x/sys as accessibility checker; improved stability
+untangled core modules of web-gui
+improved UX & fixed several small interface bugs
