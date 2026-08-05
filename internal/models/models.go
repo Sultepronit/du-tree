@@ -18,6 +18,7 @@ type Path struct {
 type ReqOptions struct {
 	BlockSize     bool `json:"blockSize,omitempty"`
 	ExcludeHidden bool `json:"excludeHidden,omitempty"`
+	OneFS         bool `json:"oneFS,omitempty"`
 }
 
 type Request struct {

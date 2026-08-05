@@ -17,6 +17,7 @@ export type ReqOptions = {
     // blockSize?: true
     blockSize?: boolean
     excludeHidden?: boolean
+    oneFS?: boolean
 }
 
 export type DataNode = {

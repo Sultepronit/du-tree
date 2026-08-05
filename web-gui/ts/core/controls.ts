@@ -30,6 +30,7 @@ export function setOptions(inputOptions: ReqOptions) {
     // useBlockSize.checked = inputOptions.blockSize ?? false
     optionsForm["size-type"].value = inputOptions.blockSize ? "block" : "apparent"
     optionsForm["exclude-hidden"].checked = inputOptions.excludeHidden
+    optionsForm["one-fs"].checked = inputOptions.oneFS
 }
 
 function disableEdit() {
@@ -91,7 +92,8 @@ export async function initTree(path: string, initScan = true) {
 
     const options = {
         blockSize: optionsForm["size-type"].value === "block",
-        excludeHidden: optionsForm["exclude-hidden"].checked
+        excludeHidden: optionsForm["exclude-hidden"].checked,
+        oneFS: optionsForm["one-fs"].checked
     } as ReqOptions
 
     const req = initScan ? "/scan" : "/dir"
