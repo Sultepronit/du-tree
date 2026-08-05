@@ -1,6 +1,6 @@
 import { checkPath, doFetch } from "../api/fetch"
 import arraysOfObjectsAreEqual from "../helpers/compareArrays"
-import { initTree, status } from "./controls"
+// import { initTree, status } from "./controls"
 import sortByNeedlePosition from "../utils/sortByNeedlePosition"
 import type { PathDetails, PathSugg } from "../types"
 
@@ -253,7 +253,6 @@ function implementSelection(scroll = true) {
 }
 
 async function moveSelection(down: boolean) {
-    // if (suggestions.parentElement.classList.contains("hidden")) return
     if (suggestions.parentElement.classList.contains("hidden")) {
         if (down) await handleInput()
         else return
@@ -304,7 +303,6 @@ function selectOrHideByClick(e: MouseEvent) {
     useSelected()
 }
 
-// function useSelected(): boolean {
 function useSelected() {
     if (!selected) return
     if (selected.classList.contains("locked")) return
@@ -317,18 +315,12 @@ function useSelected() {
           : slashIt(checkedPath.workingPath)
 
     input.value = `${prePath}${slashIt(suggName)}`
-    // we need to check for changes?
-    // input.className = "ok"
-    // isOk = true
-    // pathIsValid.set(true)
 
-    // return true
     handleInput()
 }
 
-async function handlePathInput(e: KeyboardEvent) {
+export async function handlePathInput(e: KeyboardEvent) {
     if (e.key === "ArrowRight") {
-        // if (useSelected()) handleInput()
         useSelected()
     } else if (e.key === "Enter") {
         e.preventDefault()
@@ -336,12 +328,13 @@ async function handlePathInput(e: KeyboardEvent) {
         if (pathIsValid.get() === null) await handleInput()
 
         if (selected) {
-            // if (useSelected()) handleInput()
             useSelected()
-            // } else if (isOk) {
         } else if (pathIsValid.get() === true) {
             hideSuggesions()
-            initTree(slashIt(input.value))
+            // initTree(slashIt(input.value))
+            document.dispatchEvent(
+                new CustomEvent("scan-request", { detail: slashIt(input.value) })
+            )
         }
     } else if (e.key === "ArrowDown") {
         e.preventDefault()
@@ -354,22 +347,22 @@ async function handlePathInput(e: KeyboardEvent) {
     }
 }
 
-const autoExit = document.getElementById("auto-exit") as HTMLInputElement // yeah it shouldn't be there!
-document.addEventListener("keydown", async e => {
-    // console.log(e.key)
-    // console.log(e.code)
-    if (e.ctrlKey && e.code === "KeyQ") {
-        autoExit.checked = !autoExit.checked
-    }
-    const st = status.get()
-    if (st === "scanning") return
-    if (st === "done") {
-        if (e.key === "Enter" && e.ctrlKey) {
-            e.preventDefault()
-            status.set("ready")
-        }
+// const autoExit = document.getElementById("auto-exit") as HTMLInputElement // yeah it shouldn't be there!
+// document.addEventListener("keydown", async e => {
+//     // console.log(e.key)
+//     // console.log(e.code)
+//     if (e.ctrlKey && e.code === "KeyQ") {
+//         autoExit.checked = !autoExit.checked
+//     }
+//     const st = status.get()
+//     if (st === "scanning") return
+//     if (st === "done") {
+//         if (e.key === "Enter" && e.ctrlKey) {
+//             e.preventDefault()
+//             status.set("ready")
+//         }
 
-        return
-    }
-    handlePathInput(e)
-})
+//         return
+//     }
+//     handlePathInput(e)
+// })

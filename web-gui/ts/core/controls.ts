@@ -1,7 +1,7 @@
 import { doFetch } from "../api/fetch"
 
 import type { DataNode, ReqOptions } from "../types"
-import { disablePathInput, enablePathInput } from "./pathInput"
+import { disablePathInput, enablePathInput, handlePathInput } from "./pathInput"
 import {
     appendBranch,
     createBranch,
@@ -113,6 +113,9 @@ export async function initTree(path: string, initScan = true) {
     if (data.temp) initUpdates()
     else status.set("done")
 }
+document.addEventListener("scan-request", (e: CustomEvent) => {
+    initTree(e.detail)
+})
 
 // export async function renderTree(path: string) {
 //     rootPath = path
@@ -267,4 +270,24 @@ document.getElementById("use-animation").addEventListener("click", e => {
     } else {
         document.body.classList.remove("animation")
     }
+})
+
+document.addEventListener("keydown", async e => {
+    // console.log(e.key)
+    // console.log(e.code)
+    if (e.ctrlKey && e.code === "KeyQ") {
+        autoExit.checked = !autoExit.checked
+    }
+
+    const st = status.get()
+    if (st === "scanning") return
+    if (st === "done") {
+        if (e.key === "Enter" && e.ctrlKey) {
+            e.preventDefault()
+            status.set("ready")
+        }
+
+        return
+    }
+    handlePathInput(e)
 })
