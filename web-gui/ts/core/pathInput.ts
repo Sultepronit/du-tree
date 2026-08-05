@@ -1,7 +1,8 @@
-import { doFetch } from "../api/fetch"
+import { checkPath, doFetch } from "../api/fetch"
 import arraysOfObjectsAreEqual from "../helpers/compareArrays"
 import { initTree, status } from "./controls"
 import sortByNeedlePosition from "../utils/sortByNeedlePosition"
+import type { PathDetails, PathSugg } from "../types"
 
 const accessWidget = document.getElementById("access-widged")
 const input = document.getElementById("path") as HTMLInputElement
@@ -15,13 +16,16 @@ const pathIsValid = {
     },
     set(valid: boolean) {
         this._val = valid
-        status.set(valid ? "ready" : "setting")
+        // status.set(valid ? "ready" : "setting")
+        document.dispatchEvent(new CustomEvent("path-status", { detail: valid ? "valid" : "" }))
         if (valid) {
-            input.className = "ok"
+            // input.className = "ok"
+            input.classList.add("ok")
             // input.title = `The path is valid.`
             input.title = ""
         } else {
-            input.className = "almost"
+            // input.className = "almost"
+            input.classList.remove("ok")
             input.title = `Enter or select an available directory path.`
         }
     }
@@ -39,20 +43,19 @@ export function setAccessWidget(val: "root" | "nonroot" | "locked" | "unlocked")
         accessWidget.title = "Non-root user"
     } else if (val === "locked") {
         accessWidget.classList.add("locked")
-        // accessWidget.title =
         accessWidget.parentElement.title =
             "You do not have permission to access this directory!\n Run as root to gain access."
         accessWidget.removeAttribute("title")
 
         pathIsValid.set(false)
-        input.classList.add("wrong")
+        input.classList.add("locked")
         input.removeAttribute("title")
     } else if (val === "unlocked") {
         accessWidget.classList.remove("locked")
-        input.classList.remove("wrong")
         accessWidget.parentElement.title = ""
-        // accessWidget.title = ""
         setAccessWidget(user)
+
+        input.classList.remove("locked")
     }
 }
 
@@ -65,27 +68,23 @@ export function setPath(val: string) {
     input.value = val
 }
 
-document.addEventListener("mode", (e: CustomEvent) => {
-    if (e.detail === "results") {
-        input.disabled = true
-    } else if (e.detail === "preparations") {
-        input.disabled = false
-        input.focus()
-    }
-})
+// document.addEventListener("mode", (e: CustomEvent) => {
+//     if (e.detail === "results") {
+//         input.disabled = true
+//     } else if (e.detail === "preparations") {
+//         input.disabled = false
+//         input.focus()
+//     }
+// })
 
-type nextDirDetails = {
-    name: string
-    link?: string
-    isLocked?: true
+export function disablePathInput() {
+    input.disabled = true
 }
-type pathHint = {
-    inputPath: string
-    workingPath?: string
-    replacement?: [string, string]
-    nextDirs?: nextDirDetails[]
-    isLocked?: true
-    isRemoved?: true
+
+export function enablePathInput() {
+    input.disabled = false
+    pathIsValid.set(true)
+    input.focus()
 }
 
 function slashIt(path: string) {
@@ -104,24 +103,22 @@ function hideSuggesions() {
     selected?.classList.remove("selected")
     selected = null
     document.removeEventListener("click", selectOrHideByClick)
-    // handleInput() // DON'T DO THIS!
+    // handleInput() // DON'T DO THIS! // And now there is no need, right?
 }
 
-let lastSugg = [] as nextDirDetails[]
-function addSuggestions(sugg: nextDirDetails[], select?: boolean, prefix?: string) {
+let actualSugg = [] as PathSugg[]
+function addSuggestions(sugg: PathSugg[], select?: boolean, prefix?: string) {
     if (!sugg || sugg.length === 0) {
         hideSuggesions()
         return
     }
 
-    if (arraysOfObjectsAreEqual(sugg, lastSugg)) {
-        // suggestions.parentElement.classList.remove("hidden")
-        // if (select) selectFirst()
+    if (arraysOfObjectsAreEqual(sugg, actualSugg)) {
         showSuggestions(select)
         return
     }
 
-    lastSugg = sugg
+    actualSugg = sugg
 
     selected = null
     const html = sugg
@@ -137,6 +134,10 @@ function addSuggestions(sugg: nextDirDetails[], select?: boolean, prefix?: strin
                 title.push("You cannot access this dir!")
                 classes.push("locked")
             }
+            if (s.isEmpty) {
+                title.push("The directory is empty")
+                classes.push("empty")
+            }
 
             return `<div
                 class="suggestion ${classes.join(" ")}"
@@ -145,12 +146,11 @@ function addSuggestions(sugg: nextDirDetails[], select?: boolean, prefix?: strin
         })
         .join("")
     suggestions.innerHTML = html
-    // if (select) selectFirst()
-    // suggestions.parentElement.classList.remove("hidden")
+
     showSuggestions(select)
 }
 
-let checkedPath = null as pathHint
+let checkedPath = null as PathDetails
 function evaluatePath(canBeValid = true) {
     if (checkedPath.isLocked) {
         setAccessWidget("locked")
@@ -171,7 +171,7 @@ function evaluatePath(canBeValid = true) {
             pre.textContent = slashedWorkingPath
 
             const ending = input.value.slice(slashedWorkingPath.length)
-            const sorted = sortByNeedlePosition(ending, checkedPath.nextDirs) as nextDirDetails[]
+            const sorted = sortByNeedlePosition(ending, checkedPath.nextDirs) as PathSugg[]
             // console.log(ending, sorted)
 
             if (sorted.length > 0) {
@@ -204,7 +204,7 @@ function evaluatePath(canBeValid = true) {
                 )
                 return
             }
-            const sorted = sortByNeedlePosition(ending, checkedPath.nextDirs) as nextDirDetails[]
+            const sorted = sortByNeedlePosition(ending, checkedPath.nextDirs) as PathSugg[]
             // console.log(ending, sorted)
 
             if (sorted.length > 0) {
@@ -216,11 +216,9 @@ function evaluatePath(canBeValid = true) {
     }
 }
 
-// split this thing for cases when we need to just validate the input
 async function handleInput() {
     pathIsValid.set(false)
-    // checkUser()
-    // console.log(input.value)
+
     if (!input.value) {
         hideSuggesions()
         setAccessWidget("unlocked")
@@ -230,11 +228,12 @@ async function handleInput() {
     if (
         input.value.startsWith(checkedPath?.inputPath) ||
         (checkedPath?.replacement && input.value.startsWith(checkedPath.replacement[0]))
-    )
+    ) {
         evaluatePath(false)
+    }
 
-    checkedPath = (await doFetch("/path", { path: input.value })) as pathHint
-    // console.log(approvedPath)
+    // checkedPath = (await doFetch("/path", { path: input.value })) as PathDetails
+    checkedPath = (await checkPath(input.value)) as PathDetails
 
     if (checkedPath?.inputPath === input.value) evaluatePath()
     // else new handleInput() call should have been done
@@ -244,7 +243,13 @@ input.addEventListener("input", handleInput)
 function implementSelection(scroll = true) {
     selected.classList.add("selected")
     if (scroll) selected.scrollIntoView({ behavior: "smooth", block: "center" })
-    setAccessWidget(selected.classList.contains("locked") ? "locked" : "unlocked")
+    // setAccessWidget(selected.classList.contains("locked") ? "locked" : "unlocked")
+    if (selected.classList.contains("locked")) {
+        setAccessWidget("locked")
+    } else {
+        setAccessWidget("unlocked")
+        pathIsValid.set(true)
+    }
 }
 
 async function moveSelection(down: boolean) {

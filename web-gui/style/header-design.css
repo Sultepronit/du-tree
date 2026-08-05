@@ -22,6 +22,7 @@
 #path,
 #path:focus {
     width: 100%;
+    color: gray;
     border: 1px solid black;
     border-radius: 3px;
     outline: none;
@@ -29,20 +30,20 @@
 }
 
 #path:disabled {
-    /* border: none; */
     color: black;
     border-color: white;
-    /* border-color: aliceblue; */
-    /* background-color: white; */
     background-color: aliceblue;
-    /* text-decoration: underline; */
 }
 
-#path.almost {
+/* #path.almost {
     color: gray;
+} */
+
+#path.ok {
+    color: black;
 }
 
-#path.wrong {
+#path.locked {
     color: red;
 }
 
@@ -94,8 +95,12 @@
     color: red;
 }
 
+.suggestion.empty {
+    opacity: 0.5;
+}
+
 .suggestion.selected {
-    background-color: aqua;
+    background-color: #0fa;
 }
 
 .flex1 {

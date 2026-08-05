@@ -1,4 +1,19 @@
-export type reqOptions = {
+export type PathSugg = {
+    name: string
+    link?: string
+    isLocked?: true
+    isEmpty?: true
+}
+export type PathDetails = {
+    inputPath: string
+    workingPath?: string
+    replacement?: [string, string]
+    nextDirs?: PathSugg[]
+    isLocked?: true
+    isRemoved?: true
+}
+
+export type ReqOptions = {
     blockSize?: true
 }
 

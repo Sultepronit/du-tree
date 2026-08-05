@@ -1,6 +1,7 @@
 import { doFetch } from "../api/fetch"
 
-import type { DataNode, reqOptions } from "../types"
+import type { DataNode, ReqOptions } from "../types"
+import { disablePathInput, enablePathInput } from "./pathInput"
 import {
     appendBranch,
     createBranch,
@@ -24,18 +25,20 @@ window.addEventListener("pagehide", () => {
     }
 })
 
-export function setOptions(options: reqOptions) {
+export function setOptions(options: ReqOptions) {
     useBlockSize.checked = options.blockSize ?? false
 }
 
 function disableEdit() {
-    document.dispatchEvent(new CustomEvent("mode", { detail: "results" }))
+    // document.dispatchEvent(new CustomEvent("mode", { detail: "results" }))
     useBlockSize.disabled = true
+    disablePathInput()
 }
 
 function enableEdit() {
     document.dispatchEvent(new CustomEvent("mode", { detail: "preparations" }))
     useBlockSize.disabled = false
+    enablePathInput()
     resetTree()
 }
 
@@ -53,12 +56,12 @@ const status = {
             scanButton.disabled = true
             scanButton.title = ""
         } else if (newVal === "ready") {
+            removeCanceled()
             enableEdit()
             scanButton.disabled = false
             scanButton.title = "Scan\t[Enter]"
         } else if (newVal === "scanning") {
             disableEdit()
-            removeCanceled()
             simulateScan()
             scanButton.disabled = true
             scanButton.title = ""
@@ -69,6 +72,9 @@ const status = {
     }
 }
 export { status }
+document.addEventListener("path-status", (e: CustomEvent) => {
+    status.set(e.detail === "valid" ? "ready" : "setting")
+})
 
 scanButton.addEventListener("click", () => {
     const st = status.get()
@@ -83,7 +89,7 @@ export async function initTree(path: string, initScan = true) {
     rootPath = path
     status.set("scanning")
 
-    const options = {} as reqOptions
+    const options = {} as ReqOptions
     if (useBlockSize.checked) {
         options.blockSize = true
     }
