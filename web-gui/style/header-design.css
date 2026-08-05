@@ -103,12 +103,6 @@
     background-color: #0fa;
 }
 
-.flex1 {
-    display: flex;
-    justify-content: space-between;
-    margin: 0.1em 0;
-}
-
 .tree-root {
     display: flex;
     gap: 0.9em;
@@ -150,6 +144,11 @@
 }
 
 .options {
+    display: flex;
+    gap: 0.8em;
+}
+
+#scanset {
     display: flex;
     gap: 0.8em;
 }

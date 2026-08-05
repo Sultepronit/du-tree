@@ -29,6 +29,12 @@ body {
     font-family: "Ubuntu Mono", monospace;
 }
 
+fieldset {
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+
 input,
 button {
     font: inherit;
@@ -42,19 +48,16 @@ label {
 }
 
 label {
-    /* opacity: 0.5; */
-    /* text-decoration: line-through; */
     color: #000c;
 }
 
 label:has(input:not(:checked):disabled) {
-    text-decoration: line-through;
-    color: black;
+    /* text-decoration: line-through;
+    color: black; */
+    display: none;
 }
 
 label:has(input:checked) {
-    /* text-decoration: underline; */
-    /* opacity: 1; */
     color: black;
 }
 

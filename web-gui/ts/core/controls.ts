@@ -11,7 +11,8 @@ import {
     resetTree
 } from "./treeBuilder"
 
-const useBlockSize = document.getElementById("use-block-size") as HTMLInputElement
+const optionsForm = document.getElementById("options") as HTMLFormElement
+// const useBlockSize = document.getElementById("use-block-size") as HTMLInputElement
 const scanButton = document.getElementById("scan") as HTMLButtonElement
 const autoExit = document.getElementById("auto-exit") as HTMLInputElement
 const treeRoot = document.getElementById("tree-root") as HTMLElement
@@ -25,17 +26,20 @@ window.addEventListener("pagehide", () => {
     }
 })
 
-export function setOptions(options: ReqOptions) {
-    useBlockSize.checked = options.blockSize ?? false
+export function setOptions(inputOptions: ReqOptions) {
+    // useBlockSize.checked = inputOptions.blockSize ?? false
+    optionsForm["size-type"].value = inputOptions.blockSize ? "block" : "apparent"
 }
 
 function disableEdit() {
-    useBlockSize.disabled = true
+    optionsForm.scanset.disabled = true
+    // useBlockSize.disabled = true
     disablePathInput()
 }
 
 function enableEdit() {
-    useBlockSize.disabled = false
+    // useBlockSize.disabled = false
+    optionsForm.scanset.disabled = false
     enablePathInput()
     resetTree()
 }
@@ -79,7 +83,8 @@ export async function initTree(path: string, initScan = true) {
     status.set("scanning")
 
     const options = {} as ReqOptions
-    if (useBlockSize.checked) {
+    // if (useBlockSize.checked) {
+    if (optionsForm["size-type"].value === "block") {
         options.blockSize = true
     }
 
