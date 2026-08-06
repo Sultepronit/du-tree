@@ -29,6 +29,12 @@ body {
     font-family: "Ubuntu Mono", monospace;
 }
 
+fieldset {
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+
 input,
 button {
     font: inherit;
@@ -42,20 +48,33 @@ label {
 }
 
 label {
-    /* opacity: 0.5; */
-    /* text-decoration: line-through; */
     color: #000c;
 }
 
 label:has(input:not(:checked):disabled) {
-    text-decoration: line-through;
-    color: black;
+    /* text-decoration: line-through;
+    color: black; */
+    display: none;
 }
 
 label:has(input:checked) {
-    /* text-decoration: underline; */
-    /* opacity: 1; */
     color: black;
+}
+
+label:has(input:checked:disabled) {
+    margin-left: 0.8em;
+    position: relative;
+}
+
+label:has(input:checked:disabled)::before {
+    content: "";
+    position: absolute;
+    left: -0.85em;
+    top: 0.28em;
+    width: 0.6em;
+    height: 0.6em;
+    background-color: black;
+    border-radius: 50%;
 }
 
 button {
@@ -87,7 +106,18 @@ input[type="checkbox"] {
     margin-left: 0;
 }
 
-input[type="checkbox"]:not(:checked):disabled {
+input[type="radio"] {
+    height: 0.8em;
+    width: 0.8em;
+    /* margin-top: 0.1em; */
+}
+
+/* input[type="checkbox"]:not(:checked):disabled { */
+input[type="checkbox"]:disabled {
+    display: none;
+}
+
+input[type="radio"]:disabled {
     display: none;
 }
 

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/fsnotify/fsnotify"
 )
@@ -19,7 +18,7 @@ func StartCSSWhatcher(path string) {
 	}
 	defer wcr.Close()
 
-	var isWaiting bool
+	// var isWaiting bool
 
 	go func() {
 		for {
@@ -29,12 +28,12 @@ func StartCSSWhatcher(path string) {
 					return
 				}
 				if event.Has(fsnotify.Write) {
-					if isWaiting {
-						continue
-					}
+					// if isWaiting {
+					// 	continue
+					// }
 
 					log.Println("CSS file changed:", event.Name)
-					isWaiting = true
+					// isWaiting = true
 
 					select {
 					// case cssChan <- filepath.Base(event.Name):
@@ -42,7 +41,7 @@ func StartCSSWhatcher(path string) {
 					default:
 					}
 
-					time.AfterFunc(100*time.Millisecond, func() { isWaiting = false })
+					// time.AfterFunc(100*time.Millisecond, func() { isWaiting = false })
 				}
 			case err, ok := <-wcr.Errors:
 				if !ok {

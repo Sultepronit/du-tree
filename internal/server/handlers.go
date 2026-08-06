@@ -26,8 +26,17 @@ func checkUser(w http.ResponseWriter, _ *http.Request) {
 	sendResult(w, map[string]bool{"root": os.Getuid() == 0})
 }
 
+// var systemContext models.SystemContext
+
 func handleInit(w http.ResponseWriter, _ *http.Request) {
-	sendResult(w, scanner.GetState())
+	// sendResult(w, scanner.GetState())
+	sendResult(w, struct {
+		Scan    models.Request       `json:"scan"`
+		Context models.SystemContext `json:"context"`
+	}{
+		scanner.GetState(),
+		systemContext,
+	})
 }
 
 func checkPath(w http.ResponseWriter, r *http.Request) {
@@ -40,8 +49,7 @@ func checkPath(w http.ResponseWriter, r *http.Request) {
 	}
 	// fmt.Println(req)
 
-	// sendResult(w, explorer.CheckPath(req.Path))
-	sendResult(w, explorer.CheckPath2(req.Path))
+	sendResult(w, explorer.CheckPath(req.Path, false))
 }
 
 func handleScan(w http.ResponseWriter, r *http.Request) {
@@ -69,7 +77,7 @@ func handleDir(w http.ResponseWriter, r *http.Request) {
 	}
 	// fmt.Println(req)
 
-	re, err := scanner.GetDir(req.Path, req.Pages)
+	re, err := scanner.PresentDir(req.Path, req.Pages)
 	if err != nil {
 		log.Println(err)
 	}

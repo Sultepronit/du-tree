@@ -23,5 +23,5 @@
 
         "allowArbitraryExtensions": true
     },
-    "include": ["src"]
+    "include": ["ts"]
 }

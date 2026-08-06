@@ -41,32 +41,59 @@
                 </div>
             </div>
 
-            <div class="flex1">
-                <div class="tree-root">
-                    <div id="total-size"></div>
-                    <div
-                        id="lock-widget"
-                        class="hidden"
-                        title="Counter of dirs with no access, meaning no size evaluation.&#10; Run as root to get the full size."
-                    ></div>
-                    <div class="scan-progress"></div>
-                    <button id="cancel">Cancel</button>
-                </div>
-                <div class="options">
+            <!-- <div class="options"> -->
+            <form id="options">
+                <fieldset id="scanset">
+                    <div>
+                        <label>
+                            <input type="radio" name="size-type" value="block" checked />
+                            Block size
+                        </label>
+                        <label>
+                            <input type="radio" name="size-type" value="apparent" />
+                            Apparent size
+                        </label>
+                    </div>
+
                     <label>
-                        <input type="checkbox" name="use-block-size" id="use-block-size" checked />
-                        block size
+                        <input type="checkbox" name="exclude-hidden" autocomplete="off" />
+                        Exclude hidden
                     </label>
+
                     <label>
-                        <input
-                            type="checkbox"
-                            name="use-animation"
-                            id="use-animation"
-                            autocomplete="on"
-                        />
-                        animations
+                        <input type="checkbox" name="one-fs" autocomplete="off" />
+                        One FS
                     </label>
-                </div>
+                </fieldset>
+
+                <label>
+                    <input
+                        type="checkbox"
+                        name="use-animation"
+                        id="use-animation"
+                        autocomplete="on"
+                    />
+                    Animations
+                </label>
+            </form>
+
+            <!-- </div> -->
+
+            <div class="tree-root" id="tree-root">
+                <div id="total-size"></div>
+                <div
+                    id="lock-widget"
+                    class="hidden"
+                    title="Counter of dirs with no access, meaning no size evaluation.&#10; Run as root to get the full size."
+                ></div>
+                <div class="scan-progress"></div>
+                <button
+                    class="icon-button"
+                    id="rescan-button"
+                    title="The scan was canceled.&#10; Click to rescan&#9;[Shift+Enter]"
+                ></button>
+                <!-- <button id="rescan-button"></button> -->
+                <button id="cancel" title="[Esc]">Cancel</button>
             </div>
         </div>
 

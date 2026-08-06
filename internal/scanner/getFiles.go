@@ -3,13 +3,17 @@ package scanner
 import (
 	"du-tree/internal/explorer"
 	"du-tree/internal/helpers"
+	"du-tree/internal/models"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"syscall"
 )
 
-func getFiles(path string, blockSizeReq bool) ([]*fileNode, error) {
+// func getFiles(path string, blockSizeReq bool) ([]*fileNode, error) {
+func getFiles(path string, options models.ReqOptions) ([]*fileNode, error) {
 	entries, err := os.ReadDir(path)
 	if err != nil {
 		return nil, err
@@ -18,6 +22,25 @@ func getFiles(path string, blockSizeReq bool) ([]*fileNode, error) {
 
 	for _, e := range entries {
 		if e.IsDir() {
+			continue
+		}
+
+		if options.ExcludeHidden && strings.HasPrefix(e.Name(), ".") {
+			continue
+		}
+
+		info, err := e.Info()
+		if err != nil {
+			return nil, err
+		}
+
+		stat, ok := info.Sys().(*syscall.Stat_t)
+		if !ok {
+			return nil, errors.New("no file info")
+		}
+
+		if options.OneFS && stat != nil && stat.Dev != rootDev {
+			fmt.Println("dev:", stat.Dev)
 			continue
 		}
 
@@ -32,15 +55,7 @@ func getFiles(path string, blockSizeReq bool) ([]*fileNode, error) {
 			node.Type += typ
 			node.LinkPath = realPath
 		}
-		info, err := e.Info()
-		if err != nil {
-			return nil, err
-		}
 
-		stat, ok := info.Sys().(*syscall.Stat_t)
-		if !ok {
-			return nil, errors.New("no file info")
-		}
 		// fmt.Println(stat.Nlink, stat.Ino)
 		if stat.Nlink > 1 {
 			node.Nlink = stat.Nlink
@@ -52,7 +67,8 @@ func getFiles(path string, blockSizeReq bool) ([]*fileNode, error) {
 			}
 		}
 
-		if blockSizeReq {
+		// if blockSizeReq {
+		if options.BlockSize {
 			node.Size = stat.Blocks * 512
 		} else {
 			node.Size = info.Size()

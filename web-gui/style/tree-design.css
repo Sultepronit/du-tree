@@ -48,6 +48,14 @@ li {
     cursor: auto;
 }
 
+.td.pending.unfold {
+    cursor: progress;
+}
+
+.td.pending.unfold::after {
+    content: "Loading content...";
+}
+
 .fd-entry {
     display: grid;
     grid-template-columns: 4.2em auto;

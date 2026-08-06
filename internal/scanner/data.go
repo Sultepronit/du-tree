@@ -7,12 +7,13 @@ import (
 )
 
 type dirNode struct {
-	Parent *dirNode   `json:"-"`
-	Name   string     `json:"name"`
-	Size   int64      `json:"size"`
-	Locked int        `json:"locked,omitempty"` // -1 means locked itself >=1 means locked children count
-	Dirs   []*dirNode `json:"content,omitempty"`
-	Temp   int8       `json:"temp,omitempty"`
+	Parent    *dirNode   `json:"-"`
+	Name      string     `json:"name"`
+	Size      int64      `json:"size"`
+	Locked    int        `json:"locked,omitempty"` // -1 means locked itself >=1 means locked children count
+	Dirs      []*dirNode `json:"content,omitempty"`
+	Temp      int8       `json:"temp,omitempty"`
+	IsRemoved bool       `json:"isRemoved,omitempty"`
 }
 
 func (n *dirNode) GetName() string { return n.Name }

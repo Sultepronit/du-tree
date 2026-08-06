@@ -39,7 +39,7 @@ func getBranch(path string) *viewNode {
 
 var pageSize = 100
 
-func GetDir(path string, pages int) (*models.Node, error) {
+func PresentDir(path string, pages int) (*models.Node, error) {
 	data.mu.Lock()
 	req := data.request
 
@@ -51,7 +51,8 @@ func GetDir(path string, pages int) (*models.Node, error) {
 	// fmt.Println("branch:", branch)
 
 	if branch.Files == nil {
-		files, err := getFiles(req.Path+path, req.Options.BlockSize)
+		// files, err := getFiles(req.Path+path, req.Options.BlockSize)
+		files, err := getFiles(req.Path+path, req.Options)
 		if err != nil {
 			data.mu.Unlock()
 			return nil, err

@@ -1,7 +1,6 @@
 package dev
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -44,7 +43,7 @@ func DevHandler(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/javascript")
 		w.Write(ParseTS())
 	} else {
-		fmt.Println(r.URL.Path)
+		// fmt.Println(r.URL.Path)
 		fsHandler.ServeHTTP(w, r)
 	}
 }

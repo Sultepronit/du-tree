@@ -26,7 +26,7 @@ func main() {
 
 	result := api.Build(api.BuildOptions{
 		EntryPoints: []string{
-			"./web-gui/src/main.ts",
+			"./web-gui/ts/main.ts",
 			"./web-gui/style/bundle.css",
 		},
 		// EntryPointsAdvanced: []api.EntryPoint{

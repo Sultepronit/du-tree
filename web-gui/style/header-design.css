@@ -22,6 +22,7 @@
 #path,
 #path:focus {
     width: 100%;
+    color: gray;
     border: 1px solid black;
     border-radius: 3px;
     outline: none;
@@ -29,20 +30,20 @@
 }
 
 #path:disabled {
-    /* border: none; */
     color: black;
     border-color: white;
-    /* border-color: aliceblue; */
-    /* background-color: white; */
     background-color: aliceblue;
-    /* text-decoration: underline; */
 }
 
-#path.almost {
+/* #path.almost {
     color: gray;
+} */
+
+#path.ok {
+    color: black;
 }
 
-#path.wrong {
+#path.locked {
     color: red;
 }
 
@@ -94,28 +95,25 @@
     color: red;
 }
 
-.suggestion.selected {
-    background-color: aqua;
+.suggestion.empty {
+    opacity: 0.5;
 }
 
-.flex1 {
-    display: flex;
-    justify-content: space-between;
-    margin: 0.1em 0;
+.suggestion.selected {
+    background-color: #0fa;
 }
 
 .tree-root {
     display: flex;
-    gap: 0.5em;
+    gap: 0.9em;
 }
-
-/* #total-size {
-    z-index: 100;
-} */
 
 .temp #total-size {
     color: var(--temp-color);
-    /* animation: wave-pulse 2s infinite ease-in-out; */
+}
+
+.canceled #total-size {
+    color: var(--temp-color);
 }
 
 .probably-bigger #total-size::before {
@@ -145,7 +143,13 @@
     background-color: red;
 }
 
-.options {
+/* .options { */
+#options {
     display: flex;
-    gap: 0.8em;
+    gap: 0.2em 0.8em;
+    flex-wrap: wrap;
+}
+
+#scanset {
+    display: contents;
 }

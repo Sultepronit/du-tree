@@ -1,4 +1,3 @@
-// export default function sortByNeedlePosition(needle: string, list: string[]) {
 export default function sortByNeedlePosition(needle: string, list: { name: string }[] | null) {
     if (!list || list?.length < 1) return []
     const re = []

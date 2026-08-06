@@ -1,28 +1,35 @@
 package models
 
-type PathDetail struct {
+type SystemContext struct {
+	IsRoot bool   `json:"isRoot"`
+	User   string `json:"user,omitempty"`
+	Host   string `json:"host,omitempty"`
+}
+
+type PathSugg struct {
 	Name     string `json:"name"`
 	Link     string `json:"link,omitempty"`
 	IsLocked bool   `json:"isLocked,omitempty"`
+	IsEmpty  bool   `json:"isEmpty,omitempty"`
 }
 
 type Path struct {
-	InputPath   string       `json:"inputPath"`
-	WorkingPath string       `json:"workingPath,omitempty"`
-	Replacement []string     `json:"replacement,omitempty"`
-	NextDirs    []PathDetail `json:"nextDirs,omitempty"`
-	IsLocked    bool         `json:"isLocked,omitempty"`
-	IsRemoved   bool         `json:"isRemoved,omitempty"` // TODO!
+	InputPath   string     `json:"inputPath"`
+	WorkingPath string     `json:"workingPath,omitempty"`
+	Replacement []string   `json:"replacement,omitempty"`
+	NextDirs    []PathSugg `json:"nextDirs,omitempty"`
+	IsLocked    bool       `json:"isLocked,omitempty"`
 }
 
 type ReqOptions struct {
-	BlockSize bool `json:"blockSize,omitempty"`
+	BlockSize     bool `json:"blockSize,omitempty"`
+	ExcludeHidden bool `json:"excludeHidden,omitempty"`
+	OneFS         bool `json:"oneFS,omitempty"`
 }
 
 type Request struct {
-	Path  string `json:"path"`
-	Pages int    `json:"pages"`
-	// Options  []string `json:"options"`
+	Path    string     `json:"path,omitempty"`
+	Pages   int        `json:"pages,omitempty"`
 	Options ReqOptions `json:"options"`
 }
 

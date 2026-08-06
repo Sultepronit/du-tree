@@ -21,10 +21,14 @@
 
 .animation .temp #total-size {
     color: black;
-    animation: wave-pulse 2s infinite ease-in-out;
+    animation: wave-pulse 2.1s infinite ease-in-out;
 }
 
 .animation .temp .scan-progress {
     transform-origin: center center;
-    animation: spin-counter 2s linear infinite;
+    animation: spin-counter 2.2s linear infinite;
+}
+
+.animation .td.pending.unfold::after {
+    animation: wave-pulse 2s infinite ease-in-out;
 }
