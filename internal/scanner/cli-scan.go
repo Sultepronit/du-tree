@@ -41,7 +41,8 @@ import (
 // 	})
 // }
 
-func InitCLI(path string, apparentSize bool) {
+// func InitCLI(path string, apparentSize bool) {
+func InitCLI(path string, options models.ReqOptions) {
 	if path == "" {
 		return
 	}
@@ -68,8 +69,9 @@ func InitCLI(path string, apparentSize bool) {
 	}
 
 	Init(models.Request{
-		Path:    working,
-		Pages:   1,
-		Options: models.ReqOptions{BlockSize: !apparentSize},
+		Path:  working,
+		Pages: 1,
+		// Options: models.ReqOptions{BlockSize: !apparentSize},
+		Options: options,
 	})
 }

@@ -21,7 +21,7 @@ func getRoot(target string) (size int64, err error) {
 	}
 	if stat, ok := info.Sys().(*syscall.Stat_t); ok {
 		rootDev = stat.Dev
-		fmt.Println("root dev:", rootDev)
+		// fmt.Println("root dev:", rootDev)
 		return stat.Blocks * 512, nil
 	}
 
