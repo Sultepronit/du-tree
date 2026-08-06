@@ -1,5 +1,11 @@
 package models
 
+type SystemContext struct {
+	IsRoot bool   `json:"isRoot"`
+	User   string `json:"user,omitempty"`
+	Host   string `json:"host,omitempty"`
+}
+
 type PathSugg struct {
 	Name     string `json:"name"`
 	Link     string `json:"link,omitempty"`
@@ -22,9 +28,8 @@ type ReqOptions struct {
 }
 
 type Request struct {
-	Path  string `json:"path"`
-	Pages int    `json:"pages"`
-	// Options  []string `json:"options"`
+	Path    string     `json:"path,omitempty"`
+	Pages   int        `json:"pages,omitempty"`
 	Options ReqOptions `json:"options"`
 }
 

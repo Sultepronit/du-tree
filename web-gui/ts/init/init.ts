@@ -1,16 +1,18 @@
 import { doFetch } from "../api/fetch"
-import { checkUser, setPath } from "../core/pathInput"
+import { setPath, setSystemContext } from "../core/pathInput"
 import { initTree, setOptions } from "../core/controls"
 
 export async function checkState() {
-    checkUser()
+    // checkUser()
 
     const state = await doFetch("/init")
     console.log(state)
-    if (state?.path) {
-        setOptions(state.options)
-        setPath(state.path)
-        // renderTree(state.path)
-        initTree(state.path, false)
+
+    if (state?.context) setSystemContext(state.context)
+
+    if (state?.scan?.path) {
+        setOptions(state.scan.options)
+        setPath(state.scan.path)
+        initTree(state.scan.path, false)
     }
 }

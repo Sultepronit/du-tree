@@ -1,3 +1,9 @@
+export type SystemContext = {
+    isRoot: boolean
+    user?: string
+    host?: string
+}
+
 export type PathSugg = {
     name: string
     link?: string

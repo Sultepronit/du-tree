@@ -1,8 +1,7 @@
 import { checkPath, doFetch } from "../api/fetch"
 import arraysOfObjectsAreEqual from "../helpers/compareArrays"
-// import { initTree, status } from "./controls"
 import sortByNeedlePosition from "../utils/sortByNeedlePosition"
-import type { PathDetails, PathSugg } from "../types"
+import type { PathDetails, PathSugg, SystemContext } from "../types"
 
 const accessWidget = document.getElementById("access-widged")
 const input = document.getElementById("path") as HTMLInputElement
@@ -33,17 +32,11 @@ const pathIsValid = {
     }
 }
 
-let user = "nonroot" as "root" | "nonroot"
-export function setAccessWidget(val: "root" | "nonroot" | "locked" | "unlocked") {
-    if (val === "root") {
-        user = val
-        accessWidget.classList.add("root")
-        accessWidget.title = "Root user!"
-    } else if (val === "nonroot") {
-        user = val
-        accessWidget.classList.remove("root")
-        accessWidget.title = "Non-root user"
-    } else if (val === "locked") {
+// let user = "nonroot" as "root" | "nonroot"
+let systemContext = null as SystemContext
+// function setAccessWidget(val: "root" | "nonroot" | "locked" | "unlocked") {
+function setAccessWidget(val: "locked" | "unlocked") {
+    if (val === "locked") {
         accessWidget.classList.add("locked")
         accessWidget.parentElement.title =
             "You do not have permission to access this directory!\n Run as root to gain access."
@@ -52,19 +45,36 @@ export function setAccessWidget(val: "root" | "nonroot" | "locked" | "unlocked")
         pathIsValid.set(false)
         input.classList.add("locked")
         input.removeAttribute("title")
-    } else if (val === "unlocked") {
+        // } else if (val === "unlocked") {
+    } else {
         accessWidget.classList.remove("locked")
         accessWidget.parentElement.title = ""
-        setAccessWidget(user)
+        // setAccessWidget(user)
+        setSystemContext()
 
         input.classList.remove("locked")
     }
 }
 
-export async function checkUser() {
-    const user = await doFetch("/user")
-    setAccessWidget(user?.root ? "root" : "nonroot")
+export function setSystemContext(val = systemContext) {
+    systemContext = val
+    accessWidget.title = `${val.user || "unknown"}@${val.host || "unknown"}`
+
+    if (val.isRoot) {
+        accessWidget.classList.add("root")
+        // accessWidget.title = "Root user!"
+        accessWidget.title += "\nFull system access!"
+    } else {
+        accessWidget.classList.remove("root")
+        // accessWidget.title = "Non-root user"
+        accessWidget.title += "\nLimited read permissions"
+    }
 }
+
+// export async function checkUser() {
+//     const user = await doFetch("/user")
+//     setAccessWidget(user?.root ? "root" : "nonroot")
+// }
 
 export function setPath(val: string) {
     input.value = val

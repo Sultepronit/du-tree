@@ -14,7 +14,5 @@ func main() {
 
 	go scanner.InitCLI(*path, *apparentSize)
 
-	// fmt.Println(os.Hostname())
-
 	server.Start(*port)
 }

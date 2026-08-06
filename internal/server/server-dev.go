@@ -4,13 +4,19 @@ package server
 
 import (
 	"du-tree/internal/dev"
+	"du-tree/internal/models"
+	"du-tree/internal/utils"
 	"log"
 	"net/http"
 )
 
+var systemContext models.SystemContext
+
 func Start(port string) {
+	systemContext = utils.GetSystemContext()
+
 	http.HandleFunc("/init", handleInit)
-	http.HandleFunc("/user", checkUser)
+	// http.HandleFunc("/user", checkUser)
 	http.HandleFunc("POST /path", checkPath)
 	http.HandleFunc("POST /scan", handleScan)
 	http.HandleFunc("POST /dir", handleDir)
