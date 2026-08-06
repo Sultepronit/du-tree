@@ -5,6 +5,7 @@ import (
 	"du-tree/internal/helpers"
 	"du-tree/internal/models"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -28,6 +29,21 @@ func getFiles(path string, options models.ReqOptions) ([]*fileNode, error) {
 			continue
 		}
 
+		info, err := e.Info()
+		if err != nil {
+			return nil, err
+		}
+
+		stat, ok := info.Sys().(*syscall.Stat_t)
+		if !ok {
+			return nil, errors.New("no file info")
+		}
+
+		if options.OneFS && stat != nil && stat.Dev != rootDev {
+			fmt.Println("dev:", stat.Dev)
+			continue
+		}
+
 		node := &fileNode{
 			Name: e.Name(),
 			Type: e.Type().String()[0:1],
@@ -39,15 +55,7 @@ func getFiles(path string, options models.ReqOptions) ([]*fileNode, error) {
 			node.Type += typ
 			node.LinkPath = realPath
 		}
-		info, err := e.Info()
-		if err != nil {
-			return nil, err
-		}
 
-		stat, ok := info.Sys().(*syscall.Stat_t)
-		if !ok {
-			return nil, errors.New("no file info")
-		}
 		// fmt.Println(stat.Nlink, stat.Ino)
 		if stat.Nlink > 1 {
 			node.Nlink = stat.Nlink

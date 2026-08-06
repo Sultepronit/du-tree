@@ -145,8 +145,9 @@ func scanDir(ctx context.Context, path string, node *dirNode, options models.Req
 			continue
 		}
 
-		if options.OneFS && stat != nil && entry.IsDir() && stat.Dev != rootDev {
-			fmt.Println("dev:", stat.Dev)
+		// if options.OneFS && stat != nil && entry.IsDir() && stat.Dev != rootDev {
+		if options.OneFS && stat != nil && stat.Dev != rootDev {
+			fmt.Println("dev:", stat.Dev, entry.Name())
 			continue
 		}
 

@@ -58,7 +58,10 @@ func Init(req models.Request) (*models.Node, error) {
 			// data.mu.Unlock()
 			// return nil, nil
 		}
-		data.scanTree.Size = rootSize
+		if req.Options.BlockSize {
+			data.scanTree.Size = rootSize
+		}
+
 	}
 	data.mu.Unlock()
 
