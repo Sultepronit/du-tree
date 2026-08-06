@@ -68,7 +68,7 @@ func handleDir(w http.ResponseWriter, r *http.Request) {
 	}
 	// fmt.Println(req)
 
-	re, err := scanner.GetDir(req.Path, req.Pages)
+	re, err := scanner.PresentDir(req.Path, req.Pages)
 	if err != nil {
 		log.Println(err)
 	}

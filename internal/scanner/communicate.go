@@ -39,7 +39,7 @@ func getBranch(path string) *viewNode {
 
 var pageSize = 100
 
-func GetDir(path string, pages int) (*models.Node, error) {
+func PresentDir(path string, pages int) (*models.Node, error) {
 	data.mu.Lock()
 	req := data.request
 
