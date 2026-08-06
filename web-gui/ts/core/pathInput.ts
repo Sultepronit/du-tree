@@ -250,8 +250,12 @@ function implementSelection(scroll = true) {
     if (selected.classList.contains("locked")) {
         setAccessWidget("locked")
     } else {
-        setAccessWidget("unlocked")
-        pathIsValid.set(true)
+        if (accessWidget.classList.contains("locked")) {
+            handleInput()
+        }
+        // setAccessWidget("unlocked")
+        // pathIsValid.set(true)
+        // handleInput()
     }
 }
 

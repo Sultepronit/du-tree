@@ -41,36 +41,31 @@
                 </div>
             </div>
 
-            <div class="options">
-                <form id="options">
-                    <fieldset id="scanset">
-                        <div>
-                            <label>
-                                <input type="radio" name="size-type" value="block" checked />
-                                Block size
-                            </label>
-                            <label>
-                                <input type="radio" name="size-type" value="apparent" />
-                                Apparent size
-                            </label>
-                        </div>
-
+            <!-- <div class="options"> -->
+            <form id="options">
+                <fieldset id="scanset">
+                    <div>
                         <label>
-                            <input type="checkbox" name="exclude-hidden" autocomplete="off" />
-                            Exclude hidden
+                            <input type="radio" name="size-type" value="block" checked />
+                            Block size
                         </label>
-
                         <label>
-                            <input type="checkbox" name="one-fs" autocomplete="off" />
-                            One FS
+                            <input type="radio" name="size-type" value="apparent" />
+                            Apparent size
                         </label>
-                    </fieldset>
-                </form>
+                    </div>
 
-                <!-- <label>
-                    <input type="checkbox" name="use-block-size" id="use-block-size" checked />
-                    Block size
-                </label> -->
+                    <label>
+                        <input type="checkbox" name="exclude-hidden" autocomplete="off" />
+                        Exclude hidden
+                    </label>
+
+                    <label>
+                        <input type="checkbox" name="one-fs" autocomplete="off" />
+                        One FS
+                    </label>
+                </fieldset>
+
                 <label>
                     <input
                         type="checkbox"
@@ -80,7 +75,9 @@
                     />
                     Animations
                 </label>
-            </div>
+            </form>
+
+            <!-- </div> -->
 
             <div class="tree-root" id="tree-root">
                 <div id="total-size"></div>

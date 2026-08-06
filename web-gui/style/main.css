@@ -106,6 +106,12 @@ input[type="checkbox"] {
     margin-left: 0;
 }
 
+input[type="radio"] {
+    height: 0.8em;
+    width: 0.8em;
+    /* margin-top: 0.1em; */
+}
+
 /* input[type="checkbox"]:not(:checked):disabled { */
 input[type="checkbox"]:disabled {
     display: none;

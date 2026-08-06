@@ -143,12 +143,13 @@
     background-color: red;
 }
 
-.options {
+/* .options { */
+#options {
     display: flex;
-    gap: 0.8em;
+    gap: 0.2em 0.8em;
+    flex-wrap: wrap;
 }
 
 #scanset {
-    display: flex;
-    gap: 0.8em;
+    display: contents;
 }

@@ -48,6 +48,10 @@ li {
     cursor: auto;
 }
 
+.td.pending.unfold {
+    cursor: progress;
+}
+
 .td.pending.unfold::after {
     content: "Loading content...";
 }
