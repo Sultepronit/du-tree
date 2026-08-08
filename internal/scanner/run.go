@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"syscall"
 )
 
@@ -99,7 +100,8 @@ func calcSize2(entry os.DirEntry, info fs.FileInfo, stat *syscall.Stat_t, reqBlo
 }
 
 // func scanDir(ctx context.Context, path string, node *dirNode, reqBlockSize bool) error {
-func scanDir(ctx context.Context, path string, node *dirNode, options models.ReqOptions) error {
+func scanDir(ctx context.Context, path string, node *dirNode, options models.ReqOptions, wg *sync.WaitGroup) error {
+	defer wg.Done()
 	// fmt.Println("scanning:", path)
 	select {
 	case <-ctx.Done():
@@ -227,14 +229,19 @@ func scanDir(ctx context.Context, path string, node *dirNode, options models.Req
 
 	data.mu.Unlock()
 
+	cwg := &sync.WaitGroup{}
 	for _, child := range recursive {
 		fullPath := filepath.Join(path, child.Name)
-		// err := scanDir(ctx, fullPath, child, reqBlockSize)
-		err := scanDir(ctx, fullPath, child, options)
-		if err != nil {
-			return err
-		}
+		// err := scanDir(ctx, fullPath, child, options)
+		// if err != nil {
+		// 	return err
+		// }
+		activeJobs.Add(1)
+		cwg.Add(1)
+		jobs <- job{path: fullPath, node: child, wg: cwg}
 	}
+
+	cwg.Wait()
 
 	data.mu.Lock()
 	node.Temp = 0
