@@ -5,8 +5,8 @@ services:
       dockerfile: ./alpine/Dockerfile
     ports:
       - "51202:51202"
-    volumes:
-      - ../../:/app:ro
+    # volumes:
+    #   - ../../:/app:ro
     user: "1000:1000"
 
   fedora-du-tree:
