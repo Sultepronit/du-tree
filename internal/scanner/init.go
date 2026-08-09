@@ -34,9 +34,12 @@ func Init(req models.Request) (*models.Node, error) {
 	}
 	log.Println("Scanning:", req.Path)
 	data.scanMu.Lock()
+	data.viewMu.Lock()
+	data.indesMu.Lock()
 
 	if data.cancel != nil {
 		log.Println("Previous scan is still running!")
+		// return?
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -52,11 +55,10 @@ func Init(req models.Request) (*models.Node, error) {
 	data.viewTree = &viewNode{dirNode: data.scanTree}
 
 	if req.Options.BlockSize || req.Options.OneFS {
-		rootSize, err := getRoot(data.request.Path)
+		// rootSize, err := getRoot(data.request.Path)
+		rootSize, err := getRoot(req.Path)
 		if err != nil {
 			fmt.Println("init/getRootBlockSize:", err)
-			// data.mu.Unlock()
-			// return nil, nil
 		}
 		if req.Options.BlockSize {
 			data.scanTree.Size = rootSize
@@ -64,6 +66,8 @@ func Init(req models.Request) (*models.Node, error) {
 
 	}
 	data.scanMu.Unlock()
+	data.viewMu.Unlock()
+	data.indesMu.Unlock()
 
 	go func() {
 		// err := scanDir(ctx, data.request.Path, data.scanTree, req.Options)

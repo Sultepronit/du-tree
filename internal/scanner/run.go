@@ -8,6 +8,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"sync"
 	"syscall"
@@ -116,9 +117,11 @@ func collectDirs(dirs []*dirNode, entry os.DirEntry, parent *dirNode, size int64
 
 // var sem = make(chan struct{}, 2)
 
-var sem = make(chan struct{}, 8)
+// var sem = make(chan struct{}, 8)
 
 // var sem = make(chan struct{}, 1)
+
+var sem = make(chan struct{}, runtime.NumCPU()*2)
 
 func scanDir(ctx context.Context, path string, node *dirNode, options models.ReqOptions) error {
 	// fmt.Println("scanning:", path)
