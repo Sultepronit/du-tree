@@ -38,15 +38,19 @@ type viewNode struct {
 }
 
 type scanData struct {
-	mu      sync.RWMutex
-	cancel  context.CancelFunc
-	request models.Request
+	viewMu   sync.RWMutex
+	request  models.Request
+	viewTree *viewNode
+
+	scanMu   sync.RWMutex
+	cancel   context.CancelFunc
+	scanTree *dirNode
+
 	// inodes  map[uint64]bool
 	// inodes   map[uint64][]string
 	// inodes   map[uint64]string
+	indesMu   sync.RWMutex
 	devInodes map[uint64]map[uint64]string
-	scanTree  *dirNode
-	viewTree  *viewNode
 }
 
 var data scanData

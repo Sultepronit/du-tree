@@ -1,7 +1,6 @@
 package scanner
 
 import (
-	"du-tree/internal/helpers"
 	"du-tree/internal/models"
 )
 
@@ -27,14 +26,17 @@ func parseFileNode(node *fileNode) *models.Node {
 }
 
 func parseViewNode(branch *viewNode, includeFiles bool) *models.Node {
+	data.scanMu.RLock()
 	re := parseDirNode(branch.dirNode)
 	re.Content = make([]*models.Node, 0, 10)
 
-	helpers.SortBySizeThenName(branch.Dirs)
+	// to avoid interfering with the scanning!!!
+	// helpers.SortBySizeThenName(branch.Dirs)
 
 	for _, n := range branch.Dirs {
 		re.Content = append(re.Content, parseDirNode(n))
 	}
+	data.scanMu.RUnlock()
 
 	if includeFiles {
 		for _, n := range branch.Files {

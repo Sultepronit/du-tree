@@ -17,20 +17,20 @@ func handleReadDir(path string, node *dirNode) ([]os.DirEntry, error) {
 	entries, err := os.ReadDir(path)
 	if err != nil {
 		if os.IsPermission(err) {
-			data.mu.Lock()
+			data.scanMu.Lock()
 			node.Locked = -1
 			node.Temp = 0
 
 			for p := node.Parent; p != nil; p = p.Parent {
 				p.Locked++
 			}
-			data.mu.Unlock()
+			data.scanMu.Unlock()
 			return nil, nil
 		} else if os.IsNotExist(err) {
-			data.mu.Lock()
+			data.scanMu.Lock()
 			node.IsRemoved = true // TO DO!
 			node.Temp = 0
-			data.mu.Unlock()
+			data.scanMu.Unlock()
 			return nil, nil
 		}
 
@@ -63,6 +63,7 @@ func calcSize(entry os.DirEntry, info fs.FileInfo, stat *syscall.Stat_t, reqBloc
 	}
 
 	if stat.Nlink > 1 && !entry.IsDir() {
+		data.indesMu.Lock()
 		if data.devInodes[stat.Dev] == nil {
 			data.devInodes[stat.Dev] = make(map[uint64]string)
 			data.devInodes[stat.Dev][stat.Ino] = path
@@ -71,6 +72,7 @@ func calcSize(entry os.DirEntry, info fs.FileInfo, stat *syscall.Stat_t, reqBloc
 		} else {
 			size = 0
 		}
+		data.indesMu.Unlock()
 	}
 
 	return size
@@ -100,19 +102,22 @@ func collectDirs(dirs []*dirNode, entry os.DirEntry, parent *dirNode, size int64
 		child.Temp = 0
 		child.Locked = -1
 
+		data.scanMu.Lock()
 		for p := parent; p != nil; p = p.Parent {
 			p.Locked++
 		}
+		data.scanMu.Unlock()
 	}
 
 	return append(dirs, &child)
 }
 
-var sem = make(chan struct{}, 4)
+// var sem = make(chan struct{}, 4)
 
 // var sem = make(chan struct{}, 2)
 
-// var sem = make(chan struct{}, 8)
+var sem = make(chan struct{}, 8)
+
 // var sem = make(chan struct{}, 1)
 
 func scanDir(ctx context.Context, path string, node *dirNode, options models.ReqOptions) error {
@@ -123,6 +128,7 @@ func scanDir(ctx context.Context, path string, node *dirNode, options models.Req
 	default:
 	}
 
+	// start := time.Now()
 	entries, err := handleReadDir(path, node)
 	if err != nil {
 		return err
@@ -130,10 +136,11 @@ func scanDir(ctx context.Context, path string, node *dirNode, options models.Req
 	if entries == nil {
 		return nil
 	}
+	// fmt.Println("read dir:", time.Since(start))
 
-	dirs := make([]*dirNode, 0, len(entries))
+	dirsOversized := make([]*dirNode, 0, len(entries))
 
-	data.mu.Lock()
+	// data.treeMu.Lock()
 
 	for _, entry := range entries {
 		if options.ExcludeHidden && strings.HasPrefix(entry.Name(), ".") {
@@ -160,29 +167,39 @@ func scanDir(ctx context.Context, path string, node *dirNode, options models.Req
 
 		size := calcSize(entry, info, stat, options.BlockSize, fullPath)
 
-		dirs = collectDirs(dirs, entry, node, size, fullPath)
+		dirsOversized = collectDirs(dirsOversized, entry, node, size, fullPath)
 
+		data.scanMu.Lock()
 		if size > 0 {
 			for n := node; n != nil; n = n.Parent {
 				n.Size += size
 			}
 		}
+		data.scanMu.Unlock()
 	}
 
-	node.Dirs = make([]*dirNode, len(dirs))
-	copy(node.Dirs, dirs)
+	// node.Dirs = make([]*dirNode, len(dirsOversized))
+	// copy(node.Dirs, dirsOversized)
 
-	node.Temp = 1
+	// node.Temp = 1
 
-	recursive := make([]*dirNode, 0, len(node.Dirs))
-	// copy(recursive, node.Dirs)
-	for _, d := range node.Dirs {
+	dirs := make([]*dirNode, len(dirsOversized))
+	copy(dirs, dirsOversized)
+
+	// recursive := make([]*dirNode, 0, len(node.Dirs))
+	recursive := make([]*dirNode, 0, len(dirs))
+	for _, d := range dirs {
 		if d.Temp > 0 {
 			recursive = append(recursive, d)
 		}
 	}
 
-	data.mu.Unlock()
+	data.scanMu.Lock()
+	node.Dirs = dirs
+	node.Temp = 1
+	data.scanMu.Unlock()
+
+	// fmt.Println("parse dir:", time.Since(start))
 
 	var wg sync.WaitGroup
 
@@ -196,7 +213,7 @@ func scanDir(ctx context.Context, path string, node *dirNode, options models.Req
 		case sem <- struct{}{}:
 			wg.Add(1)
 			go func() {
-				fmt.Print(1)
+				// fmt.Print(1)
 				defer wg.Done()
 				defer func() { <-sem }()
 				err := scanDir(ctx, fullPath, child, options)
@@ -205,7 +222,7 @@ func scanDir(ctx context.Context, path string, node *dirNode, options models.Req
 				}
 			}()
 		default:
-			fmt.Print(0)
+			// fmt.Print(0)
 			err := scanDir(ctx, fullPath, child, options)
 			if err != nil {
 				return err
@@ -215,9 +232,9 @@ func scanDir(ctx context.Context, path string, node *dirNode, options models.Req
 
 	wg.Wait()
 
-	data.mu.Lock()
+	data.scanMu.Lock()
 	node.Temp = 0
-	data.mu.Unlock()
+	data.scanMu.Unlock()
 
 	// helpers.TempPrinAsJson(data.result)
 	// helpers.TempPrinAsJson(data.devInodes)

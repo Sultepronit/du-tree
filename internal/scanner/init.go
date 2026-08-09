@@ -33,7 +33,7 @@ func Init(req models.Request) (*models.Node, error) {
 		req.Path += "/"
 	}
 	log.Println("Scanning:", req.Path)
-	data.mu.Lock()
+	data.scanMu.Lock()
 
 	if data.cancel != nil {
 		log.Println("Previous scan is still running!")
@@ -63,7 +63,7 @@ func Init(req models.Request) (*models.Node, error) {
 		}
 
 	}
-	data.mu.Unlock()
+	data.scanMu.Unlock()
 
 	go func() {
 		// err := scanDir(ctx, data.request.Path, data.scanTree, req.Options)
@@ -72,11 +72,11 @@ func Init(req models.Request) (*models.Node, error) {
 			fmt.Println("init/scanDir:", err)
 		}
 
-		data.mu.Lock()
+		data.scanMu.Lock()
 		data.cancel = nil
 		// helpers.TempPrinAsJson(data.devInodes)
-		log.Println("\nTotal:", data.scanTree.Size)
-		data.mu.Unlock()
+		log.Println("Total:", data.scanTree.Size)
+		data.scanMu.Unlock()
 	}()
 
 	// helpers.TempPrinAsJson(data.scanTree)
@@ -85,8 +85,8 @@ func Init(req models.Request) (*models.Node, error) {
 }
 
 func Stop() {
-	data.mu.Lock()
-	defer data.mu.Unlock()
+	data.scanMu.Lock()
+	defer data.scanMu.Unlock()
 
 	if data.cancel != nil {
 		log.Println("Stopping scan...")

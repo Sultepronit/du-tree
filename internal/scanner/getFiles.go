@@ -12,7 +12,6 @@ import (
 	"syscall"
 )
 
-// func getFiles(path string, blockSizeReq bool) ([]*fileNode, error) {
 func getFiles(path string, options models.ReqOptions) ([]*fileNode, error) {
 	entries, err := os.ReadDir(path)
 	if err != nil {
@@ -58,6 +57,7 @@ func getFiles(path string, options models.ReqOptions) ([]*fileNode, error) {
 
 		// fmt.Println(stat.Nlink, stat.Ino)
 		if stat.Nlink > 1 {
+			data.indesMu.RLock()
 			node.Nlink = stat.Nlink
 			// if (data.inodes[stat.Ino][0] != filepath.Join(path, node.Name)) {
 			// if data.inodes[stat.Ino] != filepath.Join(path, node.Name) {
@@ -65,6 +65,7 @@ func getFiles(path string, options models.ReqOptions) ([]*fileNode, error) {
 				// if data.inodes[stat.Ino] {
 				node.IsHardlink = true
 			}
+			data.indesMu.RUnlock()
 		}
 
 		// if blockSizeReq {
