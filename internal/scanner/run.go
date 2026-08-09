@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"syscall"
 )
 
@@ -107,6 +108,13 @@ func collectDirs(dirs []*dirNode, entry os.DirEntry, parent *dirNode, size int64
 	return append(dirs, &child)
 }
 
+var sem = make(chan struct{}, 4)
+
+// var sem = make(chan struct{}, 2)
+
+// var sem = make(chan struct{}, 8)
+// var sem = make(chan struct{}, 1)
+
 func scanDir(ctx context.Context, path string, node *dirNode, options models.ReqOptions) error {
 	// fmt.Println("scanning:", path)
 	select {
@@ -176,13 +184,36 @@ func scanDir(ctx context.Context, path string, node *dirNode, options models.Req
 
 	data.mu.Unlock()
 
+	var wg sync.WaitGroup
+
 	for _, child := range recursive {
 		fullPath := filepath.Join(path, child.Name)
-		err := scanDir(ctx, fullPath, child, options)
-		if err != nil {
-			return err
+		// err := scanDir(ctx, fullPath, child, options)
+		// if err != nil {
+		// 	return err
+		// }
+		select {
+		case sem <- struct{}{}:
+			wg.Add(1)
+			go func() {
+				fmt.Print(1)
+				defer wg.Done()
+				defer func() { <-sem }()
+				err := scanDir(ctx, fullPath, child, options)
+				if err != nil {
+					fmt.Println("run/ScanDir:", err)
+				}
+			}()
+		default:
+			fmt.Print(0)
+			err := scanDir(ctx, fullPath, child, options)
+			if err != nil {
+				return err
+			}
 		}
 	}
+
+	wg.Wait()
 
 	data.mu.Lock()
 	node.Temp = 0

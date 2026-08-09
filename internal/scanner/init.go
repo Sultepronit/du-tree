@@ -75,7 +75,7 @@ func Init(req models.Request) (*models.Node, error) {
 		data.mu.Lock()
 		data.cancel = nil
 		// helpers.TempPrinAsJson(data.devInodes)
-		log.Println("Total:", data.scanTree.Size)
+		log.Println("\nTotal:", data.scanTree.Size)
 		data.mu.Unlock()
 	}()
 
