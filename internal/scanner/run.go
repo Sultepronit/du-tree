@@ -9,7 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
+	"sync/atomic"
 	"syscall"
 )
 
@@ -99,9 +99,27 @@ func calcSize2(entry os.DirEntry, info fs.FileInfo, stat *syscall.Stat_t, reqBlo
 	return size
 }
 
+func releaseParent(activeSiblings *atomic.Int64, node *dirNode) {
+	remaining := activeSiblings.Add(-1)
+	// fmt.Println("rem:", remaining)
+	if remaining == 0 {
+		data.mu.Lock()
+
+		if node.Parent != nil {
+			// fmt.Println(node.Parent.Name, node.Name)
+			node.Parent.Temp = 0
+		} else {
+			// fmt.Println("orphan*", node.Name)
+		}
+		data.mu.Unlock()
+	}
+}
+
 // func scanDir(ctx context.Context, path string, node *dirNode, reqBlockSize bool) error {
-func scanDir(ctx context.Context, path string, node *dirNode, options models.ReqOptions, wg *sync.WaitGroup) error {
-	defer wg.Done()
+// func scanDir(ctx context.Context, path string, node *dirNode, options models.ReqOptions, wg *sync.WaitGroup) error {
+func scanDir(ctx context.Context, path string, node *dirNode, options models.ReqOptions, activeSiblings *atomic.Int64) error {
+	// defer wg.Done()
+	defer releaseParent(activeSiblings, node)
 	// fmt.Println("scanning:", path)
 	select {
 	case <-ctx.Done():
@@ -229,7 +247,8 @@ func scanDir(ctx context.Context, path string, node *dirNode, options models.Req
 
 	data.mu.Unlock()
 
-	cwg := &sync.WaitGroup{}
+	// cwg := &sync.WaitGroup{}
+	activeChildren := atomic.Int64{}
 	for _, child := range recursive {
 		fullPath := filepath.Join(path, child.Name)
 		// err := scanDir(ctx, fullPath, child, options)
@@ -237,15 +256,23 @@ func scanDir(ctx context.Context, path string, node *dirNode, options models.Req
 		// 	return err
 		// }
 		activeJobs.Add(1)
-		cwg.Add(1)
-		jobs <- job{path: fullPath, node: child, wg: cwg}
+		// cwg.Add(1)
+		activeChildren.Add(1)
+		// jobs <- job{path: fullPath, node: child, wg: cwg}
+		jobs <- job{path: fullPath, node: child, activeSiblings: &activeChildren}
 	}
 
-	cwg.Wait()
+	if len(recursive) < 1 {
+		data.mu.Lock()
+		node.Temp = 0
+		data.mu.Unlock()
+	}
 
-	data.mu.Lock()
-	node.Temp = 0
-	data.mu.Unlock()
+	// cwg.Wait()
+
+	// data.mu.Lock()
+	// node.Temp = 0
+	// data.mu.Unlock()
 
 	// helpers.TempPrinAsJson(data.result)
 	// helpers.TempPrinAsJson(data.devInodes)
