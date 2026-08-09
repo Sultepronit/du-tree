@@ -19,6 +19,7 @@ func parseFileNode(node *fileNode) *models.Node {
 		Name:        node.Name,
 		Size:        node.Size,
 		Type:        node.Type,
+		ModTime:     node.ModTime,
 		LinkPath:    node.LinkPath,
 		Nlink:       node.Nlink,
 		IsNeglected: node.IsHardlink,

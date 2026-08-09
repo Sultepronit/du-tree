@@ -23,6 +23,7 @@ type fileNode struct {
 	Name       string `json:"name"`
 	Size       int64  `json:"size"`
 	Type       string `json:"type"`
+	ModTime    int64  `json:"modTime"`
 	LinkPath   string `json:"linkPath,omitempty"`
 	Nlink      uint64 `json:"nlink,omitempty"`
 	IsHardlink bool   `json:"isHardlink,omitempty"`

@@ -44,8 +44,9 @@ func getFiles(path string, options models.ReqOptions) ([]*fileNode, error) {
 		}
 
 		node := &fileNode{
-			Name: e.Name(),
-			Type: e.Type().String()[0:1],
+			Name:    e.Name(),
+			ModTime: info.ModTime().Unix(),
+			Type:    e.Type().String()[0:1],
 		}
 		oversized = append(oversized, node)
 
