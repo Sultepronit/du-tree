@@ -66,8 +66,8 @@ func Init(req models.Request) (*models.Node, error) {
 	data.mu.Unlock()
 
 	go func() {
-		// err := scanDir(ctx, data.request.Path, data.scanTree, req.Options.BlockSize)
-		err := scanDir(ctx, data.request.Path, data.scanTree, req.Options)
+		// err := scanDir(ctx, data.request.Path, data.scanTree, req.Options)
+		err := scanDir(ctx, req.Path, data.scanTree, req.Options)
 		if err != nil {
 			fmt.Println("init/scanDir:", err)
 		}

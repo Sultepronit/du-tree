@@ -12,55 +12,32 @@ import (
 	"syscall"
 )
 
-// func calcSize0(entry os.DirEntry, reqBlockSize bool, path string) (int64, error) {
-// 	info, err := entry.Info()
-// 	if err != nil {
-// 		if os.IsNotExist(err) {
-// 			return 0, nil
-// 		}
-// 		return 0, err
-// 	}
+func handleReadDir(path string, node *dirNode) ([]os.DirEntry, error) {
+	entries, err := os.ReadDir(path)
+	if err != nil {
+		if os.IsPermission(err) {
+			data.mu.Lock()
+			node.Locked = -1
+			node.Temp = 0
 
-// 	stat, ok := info.Sys().(*syscall.Stat_t)
-// 	if !ok {
-// 		return 0, nil
-// 	}
+			for p := node.Parent; p != nil; p = p.Parent {
+				p.Locked++
+			}
+			data.mu.Unlock()
+			return nil, nil
+		} else if os.IsNotExist(err) {
+			data.mu.Lock()
+			node.IsRemoved = true // TO DO!
+			node.Temp = 0
+			data.mu.Unlock()
+			return nil, nil
+		}
 
-// 	var size int64
-// 	if reqBlockSize {
-// 		size = stat.Blocks * 512
-// 	} else if !entry.IsDir() {
-// 		size = info.Size()
-// 	}
+		return nil, err
+	}
 
-// 	if stat.Nlink > 1 && !entry.IsDir() {
-// 		fullPath := filepath.Join(path, entry.Name())
-// 		// if data.inodes[sysStat.Ino] {
-// 		// if data.inodes[sysStat.Ino] != "" {
-// 		// if data.devInodes[stat.Dev][stat.Ino] != "" {
-// 		// 	// data.inodes[sysStat.Ino] = append(data.inodes[sysStat.Ino], fullPath)
-// 		// 	size = 0
-// 		// } else {
-// 		// 	// data.inodes[sysStat.Ino] = []string{fullPath}
-// 		// 	// data.inodes[sysStat.Ino] = true
-// 		// 	// data.inodes[stat.Ino] = fullPath
-// 		// 	data.devInodes[stat.Dev][stat.Ino] = fullPath
-// 		// }
-// 		if data.devInodes[stat.Dev] == nil {
-// 			data.devInodes[stat.Dev] = make(map[uint64]string)
-// 			data.devInodes[stat.Dev][stat.Ino] = fullPath
-// 		} else if data.devInodes[stat.Dev][stat.Ino] == "" {
-// 			data.devInodes[stat.Dev][stat.Ino] = fullPath
-// 		} else {
-// 			size = 0
-// 		}
-
-// 		// fmt.Println(sysStat.Nlink, sysStat.Ino)
-// 		// helpers.TempPrinAsJson(data.inodes[sysStat.Ino])
-// 	}
-
-// 	return size, nil
-// }
+	return entries, nil
+}
 
 func getInfo(entry os.DirEntry) (fs.FileInfo, *syscall.Stat_t, error) {
 	info, err := entry.Info()
@@ -76,7 +53,7 @@ func getInfo(entry os.DirEntry) (fs.FileInfo, *syscall.Stat_t, error) {
 	return info, nil, nil
 }
 
-func calcSize2(entry os.DirEntry, info fs.FileInfo, stat *syscall.Stat_t, reqBlockSize bool, fullPath string) int64 {
+func calcSize(entry os.DirEntry, info fs.FileInfo, stat *syscall.Stat_t, reqBlockSize bool, path string) int64 {
 	var size int64
 	if reqBlockSize {
 		size = stat.Blocks * 512
@@ -87,9 +64,9 @@ func calcSize2(entry os.DirEntry, info fs.FileInfo, stat *syscall.Stat_t, reqBlo
 	if stat.Nlink > 1 && !entry.IsDir() {
 		if data.devInodes[stat.Dev] == nil {
 			data.devInodes[stat.Dev] = make(map[uint64]string)
-			data.devInodes[stat.Dev][stat.Ino] = fullPath
+			data.devInodes[stat.Dev][stat.Ino] = path
 		} else if data.devInodes[stat.Dev][stat.Ino] == "" {
-			data.devInodes[stat.Dev][stat.Ino] = fullPath
+			data.devInodes[stat.Dev][stat.Ino] = path
 		} else {
 			size = 0
 		}
@@ -98,7 +75,38 @@ func calcSize2(entry os.DirEntry, info fs.FileInfo, stat *syscall.Stat_t, reqBlo
 	return size
 }
 
-// func scanDir(ctx context.Context, path string, node *dirNode, reqBlockSize bool) error {
+func collectDirs(dirs []*dirNode, entry os.DirEntry, parent *dirNode, size int64, fullPath string) []*dirNode {
+	if !entry.IsDir() {
+		return dirs
+	}
+
+	child := dirNode{
+		Parent: parent,
+		Name:   entry.Name(),
+		Size:   size,
+		Temp:   2,
+	}
+
+	status := explorer.CheckDirStatus(fullPath)
+	if status == explorer.NotFound {
+		return dirs
+	}
+
+	switch status {
+	case explorer.Empty:
+		child.Temp = 0
+	case explorer.Forbidden:
+		child.Temp = 0
+		child.Locked = -1
+
+		for p := parent; p != nil; p = p.Parent {
+			p.Locked++
+		}
+	}
+
+	return append(dirs, &child)
+}
+
 func scanDir(ctx context.Context, path string, node *dirNode, options models.ReqOptions) error {
 	// fmt.Println("scanning:", path)
 	select {
@@ -107,27 +115,12 @@ func scanDir(ctx context.Context, path string, node *dirNode, options models.Req
 	default:
 	}
 
-	entries, err := os.ReadDir(path)
+	entries, err := handleReadDir(path, node)
 	if err != nil {
-		if os.IsPermission(err) {
-			data.mu.Lock()
-			node.Locked = -1
-			node.Temp = 0
-
-			for p := node.Parent; p != nil; p = p.Parent {
-				p.Locked++
-			}
-			data.mu.Unlock()
-			return nil
-		} else if os.IsNotExist(err) {
-			data.mu.Lock()
-			node.IsRemoved = true // TO DO!
-			node.Temp = 0
-			data.mu.Unlock()
-			return nil
-		}
-
 		return err
+	}
+	if entries == nil {
+		return nil
 	}
 
 	dirs := make([]*dirNode, 0, len(entries))
@@ -148,7 +141,6 @@ func scanDir(ctx context.Context, path string, node *dirNode, options models.Req
 			continue
 		}
 
-		// if options.OneFS && stat != nil && entry.IsDir() && stat.Dev != rootDev {
 		if options.OneFS && stat != nil && stat.Dev != rootDev {
 			// fmt.Println("dev:", stat.Dev, entry.Name())
 			continue
@@ -158,52 +150,9 @@ func scanDir(ctx context.Context, path string, node *dirNode, options models.Req
 
 		fullPath := filepath.Join(path, entry.Name())
 
-		size := calcSize2(entry, info, stat, options.BlockSize, fullPath)
+		size := calcSize(entry, info, stat, options.BlockSize, fullPath)
 
-		// size, err := calcSize(entry, reqBlockSize, path)
-		// size, err := calcSize(entry, options.BlockSize, path)
-		// if err != nil {
-		// 	fmt.Println("run/calcSize:", err)
-		// }
-
-		if entry.IsDir() {
-			child := dirNode{
-				Parent: node,
-				Name:   entry.Name(),
-				Size:   size,
-				Temp:   2,
-			}
-
-			// locked := !explorer.IsAccessible(path, entry.Name())
-			// if locked {
-			// 	child.Locked = -1
-			// 	child.Temp = 0
-
-			// 	for p := node; p != nil; p = p.Parent {
-			// 		p.Locked++
-			// 	}
-			// }
-			// dirs = append(dirs, &child)
-			// status := explorer.CheckDirStatus(filepath.Join(path, entry.Name()))
-			status := explorer.CheckDirStatus(fullPath)
-			if status == explorer.NotFound {
-				continue
-			}
-
-			switch status {
-			case explorer.Empty:
-				child.Temp = 0
-			case explorer.Forbidden:
-				child.Temp = 0
-				child.Locked = -1
-
-				for p := node; p != nil; p = p.Parent {
-					p.Locked++
-				}
-			}
-
-			dirs = append(dirs, &child)
-		}
+		dirs = collectDirs(dirs, entry, node, size, fullPath)
 
 		if size > 0 {
 			for n := node; n != nil; n = n.Parent {
@@ -229,7 +178,6 @@ func scanDir(ctx context.Context, path string, node *dirNode, options models.Req
 
 	for _, child := range recursive {
 		fullPath := filepath.Join(path, child.Name)
-		// err := scanDir(ctx, fullPath, child, reqBlockSize)
 		err := scanDir(ctx, fullPath, child, options)
 		if err != nil {
 			return err
