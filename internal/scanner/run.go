@@ -9,7 +9,6 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
-	"strings"
 	"sync"
 	"syscall"
 	"time"
@@ -148,7 +147,11 @@ func scanDir(ctx context.Context, path string, node *dirNode, options models.Req
 	t := time.Now().UnixMilli()
 
 	for _, entry := range entries {
-		if options.ExcludeHidden && strings.HasPrefix(entry.Name(), ".") {
+		fullPath := filepath.Join(path, entry.Name())
+		// if options.ExcludeHidden && strings.HasPrefix(entry.Name(), ".") {
+		// 	continue
+		// }
+		if exc := exculde(options, fullPath, entry.Name()); exc {
 			continue
 		}
 
@@ -167,8 +170,6 @@ func scanDir(ctx context.Context, path string, node *dirNode, options models.Req
 		}
 
 		// time.Sleep(time.Millisecond * 30)
-
-		fullPath := filepath.Join(path, entry.Name())
 
 		sizeEtc := getSizeEtc(entry, info, stat, options.BlockSize, fullPath)
 

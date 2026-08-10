@@ -8,40 +8,6 @@ import (
 	"time"
 )
 
-// func InitCLI0(path string, apparentSize bool) {
-// 	if path == "" {
-// 		return
-// 	}
-// 	time.Sleep(time.Millisecond * 20)
-// 	// fmt.Println(path)
-// 	// path += "/"
-// 	checked := explorer.CheckPath(path+"/", true)
-// 	// helpers.TempPrinAsJson(checked)
-// 	// fmt.Println(checked.InputPath)
-// 	// fmt.Println(checked.WorkingPath)
-
-// 	working := checked.InputPath
-// 	if checked.WorkingPath != "" {
-// 		working = checked.WorkingPath
-// 	}
-// 	if checked.IsLocked {
-// 		log.Println("Failed to scan:", working)
-// 		fmt.Println("You do not have permission to access this directory! Run as root to gain access.")
-// 		return
-// 	} else if !explorer.IsAccessible(path, "") {
-// 		log.Println("Failed to scan:", path)
-// 		fmt.Println("Path is available up to:", working)
-// 		return
-// 	}
-
-// 	Init(models.Request{
-// 		Path:    working,
-// 		Pages:   1,
-// 		Options: models.ReqOptions{BlockSize: !apparentSize},
-// 	})
-// }
-
-// func InitCLI(path string, apparentSize bool) {
 func InitCLI(path string, options models.ReqOptions) {
 	if path == "" {
 		return
@@ -69,9 +35,8 @@ func InitCLI(path string, options models.ReqOptions) {
 	}
 
 	Init(models.Request{
-		Path:  working,
-		Pages: 1,
-		// Options: models.ReqOptions{BlockSize: !apparentSize},
+		Path:    working,
+		Pages:   1,
 		Options: options,
 	})
 }

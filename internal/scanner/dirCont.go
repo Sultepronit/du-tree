@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 )
 
@@ -28,7 +27,13 @@ func getDirCont(path string, options models.ReqOptions) (files []*fileNode, dirs
 		// 	continue
 		// }
 
-		if options.ExcludeHidden && strings.HasPrefix(e.Name(), ".") {
+		// if options.ExcludeHidden && strings.HasPrefix(e.Name(), ".") {
+		// 	continue
+		// }
+
+		fullPath := filepath.Join(path, e.Name())
+
+		if exc := exculde(options, fullPath, e.Name()); exc {
 			continue
 		}
 
@@ -74,7 +79,8 @@ func getDirCont(path string, options models.ReqOptions) (files []*fileNode, dirs
 		if stat.Nlink > 1 {
 			data.inodesMu.RLock()
 			node.Nlink = stat.Nlink
-			if data.devInodes[stat.Dev][stat.Ino] != filepath.Join(path, node.Name) {
+			// if data.devInodes[stat.Dev][stat.Ino] != filepath.Join(path, node.Name) {
+			if data.devInodes[stat.Dev][stat.Ino] != fullPath {
 				node.IsHardlink = true
 			}
 			data.inodesMu.RUnlock()

@@ -2,7 +2,6 @@ package scanner
 
 import (
 	"du-tree/internal/models"
-	"fmt"
 )
 
 func prepareViewDirs(times map[string]int64, node *viewNode) {
@@ -69,7 +68,7 @@ func parseViewNode(branch *viewNode, includeFiles bool) *models.Node {
 		re.Content = append(re.Content, parseViewDir(n))
 	}
 	// data.scanMu.RUnlock()
-	fmt.Println("files?", includeFiles)
+
 	if includeFiles {
 		for _, n := range branch.Files {
 			re.Content = append(re.Content, parseFileNode(n))
