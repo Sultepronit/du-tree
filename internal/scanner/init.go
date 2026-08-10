@@ -33,9 +33,10 @@ func Init(req models.Request) (*models.Node, error) {
 		req.Path += "/"
 	}
 	log.Println("Scanning:", req.Path)
+	start := time.Now()
 	data.scanMu.Lock()
 	data.viewMu.Lock()
-	data.indesMu.Lock()
+	data.inodesMu.Lock()
 
 	if data.cancel != nil {
 		log.Println("Previous scan is still running!")
@@ -67,7 +68,7 @@ func Init(req models.Request) (*models.Node, error) {
 	}
 	data.scanMu.Unlock()
 	data.viewMu.Unlock()
-	data.indesMu.Unlock()
+	data.inodesMu.Unlock()
 
 	go func() {
 		// err := scanDir(ctx, data.request.Path, data.scanTree, req.Options)
@@ -79,7 +80,8 @@ func Init(req models.Request) (*models.Node, error) {
 		data.scanMu.Lock()
 		data.cancel = nil
 		// helpers.TempPrinAsJson(data.devInodes)
-		log.Println("Total:", data.scanTree.Size)
+		// log.Println("Total:", data.scanTree.Size, "(", time.Since(start), ")")
+		log.Printf("Total: %d (%s)", data.scanTree.Size, time.Since(start))
 		data.scanMu.Unlock()
 	}()
 

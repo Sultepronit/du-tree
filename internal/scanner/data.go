@@ -6,6 +6,13 @@ import (
 	"sync"
 )
 
+type sizeAttr struct {
+	size int64
+	dev  uint64
+	ino  uint64
+	path string
+}
+
 type dirNode struct {
 	Parent    *dirNode   `json:"-"`
 	Name      string     `json:"name"`
@@ -50,7 +57,7 @@ type scanData struct {
 	// inodes  map[uint64]bool
 	// inodes   map[uint64][]string
 	// inodes   map[uint64]string
-	indesMu   sync.RWMutex
+	inodesMu  sync.RWMutex
 	devInodes map[uint64]map[uint64]string
 }
 
