@@ -1,5 +1,6 @@
 import formatSize from "../utils/formatSize"
 import type { DataNode, ViewNode, UpdateBranch } from "../types"
+import formatTime from "../helpers/formatTime"
 
 const totalSize = document.getElementById("total-size") as HTMLDivElement
 const totalLocked = document.getElementById("lock-widget") as HTMLDivElement
@@ -17,9 +18,9 @@ let rootPath = ""
 function genLockedDetails(node: DataNode) {
     const re = []
     if (node.locked === -1) {
-        re.push(` You have no read rights for this dir`)
+        re.push(`\nYou have no read rights for this dir`)
     } else {
-        re.push(` Contains ${node.locked} nested dir(s) without access`)
+        re.push(`\nContains ${node.locked} nested dir(s) without access`)
     }
     re.push(` Run as root to get the full size.`)
 
@@ -33,11 +34,7 @@ const specialTypes = {
 }
 
 function genTitle(data: DataNode, path: string) {
-    const title = [`Path: ${rootPath}${path}`, `Name: ${data.name}`]
-
-    const t = data.type[0] === "L" ? data.type.slice(1) : data.type
-    const st = specialTypes[t]
-    if (st) title.push(`File type: ${st}`)
+    const title = [`Name: ${data.name}`, `Location: ${rootPath}${path}`]
 
     if (data.linkPath) {
         title.push(
@@ -49,21 +46,29 @@ function genTitle(data: DataNode, path: string) {
                     ? `Soft link to: ${data.linkPath} (Target inaccessible: permission denied).`
                     : `Soft link to: ${data.linkPath}`
         )
-    } else if (data.locked) {
-        title.push(...genLockedDetails(data))
     }
 
+    const t = data.linkPath ? data.type.slice(1) : data.type
+    const st = specialTypes[t]
+    if (st) title.push(`File type: ${st}`)
+
+    title.push(
+        `Last modified: ${formatTime(data.modTime)}`,
+        `Scan time: ${formatTime(data.scanTime)}`
+    )
+
     if (data.nlink) {
-        let msg = ` Shared inode: ${data.nlink} hard links exist.\n `
+        let msg = `\nShared inode: ${data.nlink} hard links exist.\n`
         if (data.isNeglected) {
             msg += "Size of this hard link is neglected."
         } else {
             msg += "Size of this hard link is counted, all others are neglected."
         }
-        title.push(
-            // ` Shared inode: ${data.nlink} hard links exist.\n Size counted once to reflect actual disk usage.`
-            msg
-        )
+        title.push(msg)
+    }
+
+    if (data.locked) {
+        title.push(...genLockedDetails(data))
     }
 
     return title.join("\n")

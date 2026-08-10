@@ -16,3 +16,4 @@ Changed [non]root indication to user@host
 
 refactored
 speeded up by adding gorutines for scan [and refactoring mutexes]
+implemented scand & mode time display

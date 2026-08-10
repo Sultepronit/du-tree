@@ -30,6 +30,8 @@ export type DataNode = {
     name: string
     type: string
     size: number
+    modTime: number
+    scanTime: number
     temp?: number
     locked?: number
     linkPath?: string
