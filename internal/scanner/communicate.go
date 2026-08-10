@@ -57,13 +57,15 @@ func PresentDir(path string, pages int) (*models.Node, error) {
 
 	if branch.Files == nil {
 		data.viewMu.Unlock()
-		files, err := getFiles(req.Path+path, req.Options)
+		// files, err := getDirCont(req.Path+path, req.Options)
+		files, dirs, err := getDirCont(req.Path+path, req.Options)
 		if err != nil {
 			// data.scanMu.Unlock()
 			return nil, err
 		}
 		data.viewMu.Lock()
 		branch.Files = files
+		prepareViewDirs(dirs, branch)
 	}
 
 	re := parseViewNode(branch, true)

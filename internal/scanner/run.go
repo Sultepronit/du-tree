@@ -12,6 +12,7 @@ import (
 	"strings"
 	"sync"
 	"syscall"
+	"time"
 )
 
 func handleReadDir(path string, node *dirNode) ([]os.DirEntry, error) {
@@ -39,20 +40,6 @@ func handleReadDir(path string, node *dirNode) ([]os.DirEntry, error) {
 	}
 
 	return entries, nil
-}
-
-func getInfo(entry os.DirEntry) (fs.FileInfo, *syscall.Stat_t, error) {
-	info, err := entry.Info()
-	if err != nil {
-		// not exists, no permission etc
-		return nil, nil, err
-	}
-
-	if stat, ok := info.Sys().(*syscall.Stat_t); ok {
-		return info, stat, nil
-	}
-
-	return info, nil, nil
 }
 
 // func getSizeEtc(entry os.DirEntry, info fs.FileInfo, stat *syscall.Stat_t, reqBlockSize bool, path string) int64 {
@@ -87,16 +74,17 @@ func getSizeEtc(entry os.DirEntry, info fs.FileInfo, stat *syscall.Stat_t, reqBl
 	return s
 }
 
-func collectDirs(dirs []*dirNode, entry os.DirEntry, parent *dirNode, size int64, fullPath string) []*dirNode {
+func collectDirs(dirs []*dirNode, entry os.DirEntry, parent *dirNode, size int64, fullPath string, t int64) []*dirNode {
 	if !entry.IsDir() {
 		return dirs
 	}
 
 	child := dirNode{
-		Parent: parent,
-		Name:   entry.Name(),
-		Size:   size,
-		Temp:   2,
+		Parent:   parent,
+		Name:     entry.Name(),
+		Size:     size,
+		ScanTime: t,
+		Temp:     2,
 	}
 
 	status := explorer.CheckDirStatus(fullPath)
@@ -157,12 +145,14 @@ func scanDir(ctx context.Context, path string, node *dirNode, options models.Req
 	// var dirContSize int64
 	sizes := make([]sizeAttr, 0, len(entries))
 
+	t := time.Now().UnixMilli()
+
 	for _, entry := range entries {
 		if options.ExcludeHidden && strings.HasPrefix(entry.Name(), ".") {
 			continue
 		}
 
-		info, stat, err := getInfo(entry)
+		info, stat, err := getFileInfo(entry)
 		if err != nil {
 			if !os.IsNotExist(err) {
 				fmt.Println("run/getInfo:", err)
@@ -182,7 +172,7 @@ func scanDir(ctx context.Context, path string, node *dirNode, options models.Req
 
 		sizeEtc := getSizeEtc(entry, info, stat, options.BlockSize, fullPath)
 
-		dirsOversized = collectDirs(dirsOversized, entry, node, sizeEtc.size, fullPath)
+		dirsOversized = collectDirs(dirsOversized, entry, node, sizeEtc.size, fullPath, t)
 
 		// data.scanMu.Lock()
 		// if size > 0 {
@@ -249,7 +239,7 @@ func scanDir(ctx context.Context, path string, node *dirNode, options models.Req
 	}
 
 	node.Dirs = dirs
-
+	node.ScanTime = t
 	node.Temp = 1
 
 	data.scanMu.Unlock()

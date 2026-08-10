@@ -43,6 +43,7 @@ type Node struct {
 	Type         string  `json:"type"`
 	Size         int64   `json:"size"`
 	ModTime      int64   `json:"modTime"`
+	ScanTime     int64   `json:"scanTime"`
 	Locked       int     `json:"locked,omitempty"`
 	LinkPath     string  `json:"linkPath,omitempty"`
 	Nlink        uint64  `json:"nlink,omitempty"`

@@ -4,38 +4,46 @@ import (
 	"du-tree/internal/explorer"
 	"du-tree/internal/helpers"
 	"du-tree/internal/models"
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
-	"syscall"
+	"time"
 )
 
-func getFiles(path string, options models.ReqOptions) ([]*fileNode, error) {
+// func getDirCont(path string, options models.ReqOptions) ([]*fileNode, error) {
+func getDirCont(path string, options models.ReqOptions) (files []*fileNode, dirs map[string]int64, err error) {
 	entries, err := os.ReadDir(path)
 	if err != nil {
-		return nil, err
+		// return nil, err
+		return
 	}
+
 	oversized := make([]*fileNode, 0, len(entries))
+	dirs = make(map[string]int64, len(entries))
+	t := time.Now().UnixMilli()
 
 	for _, e := range entries {
-		if e.IsDir() {
-			continue
-		}
+		// if e.IsDir() {
+		// 	continue
+		// }
 
 		if options.ExcludeHidden && strings.HasPrefix(e.Name(), ".") {
 			continue
 		}
 
-		info, err := e.Info()
-		if err != nil {
-			return nil, err
-		}
+		// info, err := e.Info()
+		// if err != nil {
+		// 	return nil, err
+		// }
 
-		stat, ok := info.Sys().(*syscall.Stat_t)
-		if !ok {
-			return nil, errors.New("no file info")
+		// stat, ok := info.Sys().(*syscall.Stat_t)
+		// if !ok {
+		// 	return nil, errors.New("no file info")
+		// }
+		info, stat, err := getFileInfo(e)
+		if err != nil {
+			return nil, nil, err
 		}
 
 		if options.OneFS && stat != nil && stat.Dev != rootDev {
@@ -43,10 +51,16 @@ func getFiles(path string, options models.ReqOptions) ([]*fileNode, error) {
 			continue
 		}
 
+		if e.IsDir() {
+			dirs[e.Name()] = info.ModTime().UnixMilli()
+			continue
+		}
+
 		node := &fileNode{
-			Name:    e.Name(),
-			ModTime: info.ModTime().Unix(),
-			Type:    e.Type().String()[0:1],
+			Name:     e.Name(),
+			ModTime:  info.ModTime().UnixMilli(),
+			ScanTime: t,
+			Type:     e.Type().String()[0:1],
 		}
 		oversized = append(oversized, node)
 
@@ -60,10 +74,7 @@ func getFiles(path string, options models.ReqOptions) ([]*fileNode, error) {
 		if stat.Nlink > 1 {
 			data.inodesMu.RLock()
 			node.Nlink = stat.Nlink
-			// if (data.inodes[stat.Ino][0] != filepath.Join(path, node.Name)) {
-			// if data.inodes[stat.Ino] != filepath.Join(path, node.Name) {
 			if data.devInodes[stat.Dev][stat.Ino] != filepath.Join(path, node.Name) {
-				// if data.inodes[stat.Ino] {
 				node.IsHardlink = true
 			}
 			data.inodesMu.RUnlock()
@@ -77,10 +88,11 @@ func getFiles(path string, options models.ReqOptions) ([]*fileNode, error) {
 		}
 	}
 
-	re := make([]*fileNode, len(oversized))
-	copy(re, oversized)
-	helpers.SortBySizeThenName(re)
+	files = make([]*fileNode, len(oversized))
+	copy(files, oversized)
+
+	helpers.SortBySizeThenName(files)
 	// helpers.TempPrinAsJson(re)
 
-	return re, nil
+	return
 }
