@@ -162,23 +162,6 @@ function rescan() {
 }
 document.getElementById("rescan-button").addEventListener("click", rescan)
 
-// export async function renderTree(path: string) {
-//     rootPath = path
-//     status.set("scanning")
-
-//     const data = (await doFetch("/dir", { path: "", pages: 1 })) as DataNode
-//     console.log(data)
-//     if (!data) {
-//         // one of cases -- dir without the access
-//         status.set("done")
-//         return
-//     }
-
-//     rebuildTree(data, path)
-//     if (data.temp) initUpdates()
-//     else status.set("done")
-// }
-
 let canceled = false
 export function setCanceled() {
     canceled = true
@@ -258,9 +241,6 @@ async function addMore(button: HTMLButtonElement) {
 }
 
 async function unfoldDir(target: HTMLElement) {
-    // if (target.classList.contains("itself")) return
-    // if (target.classList.contains("link")) return
-    // if (target.classList.contains("unavailable")) return
     const l = target.classList
     if (l.contains("itself") || l.contains("link") || l.contains("unavailable")) return
 

@@ -11,7 +11,7 @@ const pageSize = 100
 
 let max = 1
 
-let branches2 = {} as Record<string, UpdateBranch>
+let branches = {} as Record<string, UpdateBranch>
 
 let rootPath = ""
 
@@ -125,13 +125,13 @@ export function createBranch(data: DataNode, prePath: string): DocumentFragment 
         document.documentElement.style.setProperty("--max-size", (max / 100).toString())
     }
 
-    if (data.temp || data.contentCount) {
-        branches2[path] = {
-            dataShoots: new Map(data.content.map(s => [s.name, s])),
-            pages: 1
-        }
-        // console.log("branches2", branches2)
+    // if (data.temp || data.contentCount) {
+    branches[path] = {
+        dataShoots: new Map(data.content.map(s => [s.name, s])),
+        pages: 1
     }
+    // }
+    console.log("branches:", branches)
 
     const lis = data.content.map(entry => createLi(entry, path))
     if (data.contentCount) {
@@ -163,8 +163,8 @@ export function appendBranch(data: DataNode, button: HTMLButtonElement, pages: n
     data.name = shortPath
     updateBranch(data) // update old pages
     li.insertAdjacentHTML("beforebegin", lis.join("")) // add new one
-    // if (branches2[shortPath]) branches2[shortPath].pages = pages // for next updates
-    const branch = branches2[shortPath]
+
+    const branch = branches[shortPath]
     if (branch) {
         branch.pages = pages // for next updates
         newNodes.forEach(d => branch.dataShoots.set(d.name, d))
@@ -242,27 +242,31 @@ function resetShoot(viewNode: ViewNode, data: DataNode) {
     viewNode.shoot.title = genTitle(data, viewNode.shoot.dataset.path)
 }
 
-// async function updateBranch(branchUpdate: DataNode) {
-function updateBranch(branchUpdate: DataNode) {
+function updateBranch(branchUpdate: DataNode, forcefully = false) {
     if (!branchUpdate?.content) return // user navigates dirs before scan
 
     console.log("branch update:", branchUpdate)
 
-    const branch = branches2[branchUpdate.name]
+    const branch = branches[branchUpdate.name]
     // console.log("branch:", branch)
 
-    const mix = new Map(branch.dataShoots)
-    branchUpdate.content.forEach(s => mix.set(s.name, s))
+    let actual: DataNode[]
+    if (forcefully) {
+        actual = branchUpdate.content
+    } else {
+        const mix = new Map(branch.dataShoots)
+        branchUpdate.content.forEach(s => mix.set(s.name, s))
 
-    const actual = [...mix.values()]
-        .sort((a, b) => {
-            if (b.size === a.size) {
-                return a.name.localeCompare(b.name)
-            }
-            return b.size - a.size
-        })
-        .slice(0, pageSize * branch.pages)
-    // console.log("actual", actual)
+        // const actual = [...mix.values()]
+        actual = [...mix.values()]
+            .sort((a, b) => {
+                if (b.size === a.size) {
+                    return a.name.localeCompare(b.name)
+                }
+                return b.size - a.size
+            })
+            .slice(0, pageSize * branch.pages)
+    }
 
     if (branchUpdate.name === "") {
         if (actual[0].size != max) {
@@ -369,6 +373,21 @@ function updateBranch(branchUpdate: DataNode) {
         mix.size === branch.dataShoots.size ? mix : new Map(actual.map(s => [s.name, s]))
 }
 
+export function filterTree() {
+    console.log("filter")
+    for (const [name, branch] of Object.entries(branches)) {
+        console.log(name, branch.dataShoots)
+        const data = Array.from(branch.dataShoots.values())
+        console.log(data)
+        const filtered = data.filter(n => {
+            return !n.name.startsWith(".")
+        })
+        updateBranch({ name, content: filtered }, true)
+    }
+}
+
+setTimeout(filterTree, 2000)
+
 export function updateTree(bNodes: DataNode[]) {
     updateTreeRoot(bNodes[0])
     if (!bNodes[0].content) return
@@ -413,7 +432,7 @@ export function simulateScan() {
 export function resetTree() {
     treeBlock.innerHTML = ""
     max = 1
-    branches2 = {}
+    branches = {}
     updateTreeRoot({ name: "", size: -7 } as DataNode)
     totalSize.title = ""
     totalSize.textContent = ""
