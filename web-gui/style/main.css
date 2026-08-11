@@ -29,6 +29,12 @@ body {
     font-family: "Ubuntu Mono", monospace;
 }
 
+h4 {
+    font: inherit;
+    font-family: "Ubuntu", sans-serif;
+    font-size: 0.9em;
+}
+
 fieldset {
     margin: 0;
     padding: 0;
@@ -54,7 +60,7 @@ label {
 label:has(input:not(:checked):disabled) {
     /* text-decoration: line-through;
     color: black; */
-    display: none;
+    display: none !important;
 }
 
 label:has(input:checked) {

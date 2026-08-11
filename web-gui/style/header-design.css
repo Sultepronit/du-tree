@@ -143,7 +143,8 @@
     background-color: red;
 }
 
-/* .options { */
+/* options -------------------- */
+
 #options {
     display: flex;
     gap: 0.2em 0.8em;
@@ -152,4 +153,57 @@
 
 #scanset {
     display: contents;
+}
+
+#excludeset {
+    margin-top: 0.1em;
+    display: flex;
+    gap: 0.2em 0.4em;
+    flex-wrap: wrap;
+}
+
+#exclude-form h4 {
+    padding-top: 0.06em;
+}
+
+#exclude-form label {
+    display: block;
+    padding-top: 0.12em;
+}
+
+#exclude-form input[type="text"] {
+    font-size: 0.9em;
+    field-sizing: content;
+    min-width: 2em;
+    max-width: 90%;
+    padding: 0 0.1em;
+    color: blue;
+}
+
+#exclude-form input[type="text"]:disabled {
+    background-color: #0000;
+    border-color: #0000;
+    min-width: 0.5em;
+    color: black;
+    color: blue;
+}
+
+#exlude-label:has(input:disabled) {
+    display: none !important;
+}
+
+#exclude-form label:has(input:checked:disabled)::before {
+    display: none !important;
+    width: 0;
+}
+
+#exclude-form label:has(input:checked:disabled) {
+    margin-left: 0;
+}
+
+#exclude-form input[type="checkbox"]:focus {
+    /* outline: 1px solid gray;
+    outline-offset: 2px; */
+    /* outline: none; */
+    /* box-shadow: 0 0px 2px 0 rgb(0, 0, 0); */
 }

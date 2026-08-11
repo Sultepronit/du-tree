@@ -1,4 +1,5 @@
 import { doFetch } from "../api/fetch"
+import excluded from "../functions/exclude"
 
 import type { DataNode, ReqOptions } from "../types"
 import { disablePathInput, enablePathInput, handlePathInput } from "./pathInput"
@@ -11,11 +12,13 @@ import {
     resetTree
 } from "./treeBuilder"
 
-const optionsForm = document.getElementById("options") as HTMLFormElement
+export const optionsForm = document.getElementById("options") as HTMLFormElement
 // const useBlockSize = document.getElementById("use-block-size") as HTMLInputElement
 const scanButton = document.getElementById("scan") as HTMLButtonElement
 const autoExit = document.getElementById("auto-exit") as HTMLInputElement
 const treeRoot = document.getElementById("tree-root") as HTMLElement
+
+export { autoExit }
 
 let rootPath = ""
 
@@ -27,22 +30,36 @@ window.addEventListener("pagehide", () => {
 })
 
 export function setOptions(inputOptions: ReqOptions) {
-    // useBlockSize.checked = inputOptions.blockSize ?? false
     optionsForm["size-type"].value = inputOptions.blockSize ? "block" : "apparent"
-    optionsForm["exclude-hidden"].checked = inputOptions.excludeHidden
+    // optionsForm["exclude-hidden"].checked = inputOptions.excludeHidden
     optionsForm["one-fs"].checked = inputOptions.oneFS
+    if (
+        inputOptions.excludeHidden ||
+        (inputOptions.exPatt?.length > 0 && inputOptions.exPatt[0] !== "")
+    ) {
+        optionsForm.exclude.checked = true
+        excluded.show(true)
+        excluded.set({
+            hidden: inputOptions.excludeHidden,
+            patterns: inputOptions.exPatt
+        })
+    }
 }
+
+optionsForm.exclude.addEventListener("change", e => {
+    excluded.show(e.target.checked)
+})
 
 function disableEdit() {
     optionsForm.scanset.disabled = true
-    // useBlockSize.disabled = true
     disablePathInput()
+    excluded.disable()
 }
 
 function enableEdit() {
-    // useBlockSize.disabled = false
     optionsForm.scanset.disabled = false
     enablePathInput()
+    excluded.enable()
     resetTree()
 }
 
@@ -92,9 +109,18 @@ export async function initTree(path: string, initScan = true) {
 
     const options = {
         blockSize: optionsForm["size-type"].value === "block",
-        excludeHidden: optionsForm["exclude-hidden"].checked,
+        // excludeHidden: optionsForm["exclude-hidden"].checked,
         oneFS: optionsForm["one-fs"].checked
+        // excludeHidden: exc.hidden,
+        // exPatt: exc.patterns
     } as ReqOptions
+
+    if (optionsForm.exclude.checked === true) {
+        const exc = excluded.get()
+        console.log(exc)
+        options.excludeHidden = exc.hidden
+        options.exPatt = exc.patterns as string[]
+    }
 
     const req = initScan ? "/scan" : "/dir"
     // yes, if "/dir" case options mean nothing

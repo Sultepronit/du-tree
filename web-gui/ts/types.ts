@@ -20,10 +20,10 @@ export type PathDetails = {
 }
 
 export type ReqOptions = {
-    // blockSize?: true
     blockSize?: boolean
-    excludeHidden?: boolean
     oneFS?: boolean
+    excludeHidden?: boolean
+    exPatt?: string[]
 }
 
 export type DataNode = {
