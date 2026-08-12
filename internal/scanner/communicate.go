@@ -48,7 +48,7 @@ func getBranch(path string) *viewNode {
 func PresentDir(path string, req models.Request) (*models.Branch, error) {
 	// data.scanMu.Lock()
 	data.viewMu.Lock()
-	// req := data.request
+	baseReq := data.request
 	branch := getBranch(path)
 	if branch == nil {
 		// data.scanMu.Unlock()
@@ -60,7 +60,7 @@ func PresentDir(path string, req models.Request) (*models.Branch, error) {
 	if branch.Files == nil {
 		data.viewMu.Unlock()
 		// files, err := getDirCont(req.Path+path, req.Options)
-		files, dirs, err := getDirCont(req.Path+path, req.Options)
+		files, dirs, err := getDirCont(baseReq.Path+path, req.Options)
 		if err != nil {
 			// data.scanMu.Unlock()
 			return nil, err

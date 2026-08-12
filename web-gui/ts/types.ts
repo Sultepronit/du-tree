@@ -38,7 +38,17 @@ export type DataNode = {
     nlink?: number
     isNeglected?: true
     content?: DataNode[]
+    // contentCount?: number
+}
+
+export type DataBranch = {
+    name: string
+    size?: number
+    temp?: number
+    locked?: number
+    content?: DataNode[]
     contentCount?: number
+    isFiltered?: true
 }
 
 export type ViewNode = {
@@ -48,7 +58,7 @@ export type ViewNode = {
     nameVidget?: HTMLDivElement
 }
 
-export type UpdateBranch = {
+export type ViewBranch = {
     data: DataNode[]
     // dataNodesIndex: Map<string, DataNode>
     viewNodesIndex: Map<string, ViewNode>

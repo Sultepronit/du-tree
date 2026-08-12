@@ -1,7 +1,8 @@
 import formatSize from "../utils/formatSize"
-import type { DataNode, ViewNode, UpdateBranch } from "../types"
+import type { DataNode, ViewNode, ViewBranch, DataBranch } from "../types"
 import { createLi, genLockedDetails, genTitle, handleBytesExt } from "./treeTemplates"
 import { sortBySizeThanName } from "../helpers/sort"
+import { filterBranchCont } from "./filters"
 
 const totalSize = document.getElementById("total-size") as HTMLDivElement
 const totalLocked = document.getElementById("lock-widget") as HTMLDivElement
@@ -11,7 +12,7 @@ const pageSize = 100
 
 let max = 1
 
-let branches = {} as Record<string, UpdateBranch>
+let branches = {} as Record<string, ViewBranch>
 
 let rootPath = ""
 
@@ -110,20 +111,51 @@ let rootPath = ""
 //     </div></li>`
 // }
 
-export function createBranch(data: DataNode, prePath: string): DocumentFragment {
-    // if (!node.content) return
+// export function filterTree() {
+//     console.log("filter")
+//     for (const [name, branch] of Object.entries(branches)) {
+//         console.log(name, branch.dataNodesIndex)
+//         const data = Array.from(branch.dataNodesIndex.values())
+//         console.log(data)
+//         const filtered = data.filter(n => {
+//             return !n.name.startsWith(".")
+//         })
+//         updateBranch({ name, content: filtered }, true)
+//     }
+// }
+
+// setTimeout(filterTree, 2000)
+
+function prepareBranchData(data: DataBranch) {
+    if (data.name === "" && data.content[0].size > max) {
+        max = data.content[0].size
+        document.documentElement.style.setProperty("--max-size", (max / 100).toString())
+    }
+
+    if (data.isFiltered) return { filtered: data.content }
+
+    // const filtered = filterBranchCont(data.content)
+    return {
+        raw: data.content,
+        filtered: filterBranchCont(data.content)
+    }
+}
+
+// export function createBranch(data: DataNode, prePath: string): DocumentFragment {
+export function createBranch(data: DataBranch, prePath: string): DocumentFragment {
+    const templ = document.createElement("template")
     if (!data?.content) {
-        const templ = document.createElement("template")
         templ.innerHTML = `<ul class="dir-content"></ul>`
 
         return templ.content
     }
     const path = prePath ? `${prePath}/${data.name}` : data.name
 
-    if (data.content[0].size > max) {
-        max = data.content[0].size
-        document.documentElement.style.setProperty("--max-size", (max / 100).toString())
-    }
+    prepareBranchData(data)
+    // if (data.content[0].size > max) {
+    //     max = data.content[0].size
+    //     document.documentElement.style.setProperty("--max-size", (max / 100).toString())
+    // }
 
     const viewNodesIndex = new Map<string, ViewNode>()
     for (const n of data.content) {
@@ -137,7 +169,7 @@ export function createBranch(data: DataNode, prePath: string): DocumentFragment 
         pages: 1
     }
 
-    console.log("branches:", branches)
+    // console.log("branches:", branches)
 
     const lis = data.content.map(entry => createLi(entry, path, rootPath))
     if (data.contentCount) {
@@ -149,14 +181,15 @@ export function createBranch(data: DataNode, prePath: string): DocumentFragment 
             </button>
         </li>`)
     }
-    const templ = document.createElement("template")
+    // const templ = document.createElement("template")
     // console.log(templ)
     templ.innerHTML = `<ul class="dir-content" data-path="${path}">${lis.join("")}</ul>`
 
     return templ.content
 }
 
-export function appendBranch(data: DataNode, button: HTMLButtonElement, pages: number) {
+// export function appendBranch(data: DataNode, button: HTMLButtonElement, pages: number) {
+export function appendBranch(data: DataBranch, button: HTMLButtonElement, pages: number) {
     const oldNodesCount = (pages - 1) * pageSize
     const newNodes = data.content.slice(oldNodesCount)
     // console.log(oldNodesCount, newNodes)
@@ -258,17 +291,18 @@ function resetShoot(viewNode: ViewNode, data: DataNode) {
     viewNode.data = data
 }
 
-function updateBranch(branchUpdate: DataNode, forcefully = false) {
-    if (!branchUpdate?.content) return // user navigates dirs before scan
+// function updateBranch(branchUpdate: DataNode, forcefully = false) {
+function updateBranch(dataBranch: DataBranch, forcefully = false) {
+    if (!dataBranch?.content) return // user navigates dirs before scan
 
-    console.log("branch update:", branchUpdate)
+    console.log("branch update:", dataBranch)
 
-    const branch = branches[branchUpdate.name]
+    const branch = branches[dataBranch.name]
     // console.log("branch:", branch)
 
     let actual: DataNode[]
     if (forcefully) {
-        actual = branchUpdate.content
+        actual = dataBranch.content
     } else {
         // const mix = new Map(branch.dataNodesIndex)
         // branchUpdate.content.forEach(s => mix.set(s.name, s))
@@ -276,7 +310,7 @@ function updateBranch(branchUpdate: DataNode, forcefully = false) {
         for (const n of branch.data) {
             mix.set(n.name, n)
         }
-        for (const n of branchUpdate.content) {
+        for (const n of dataBranch.content) {
             mix.set(n.name, n)
         }
 
@@ -292,7 +326,7 @@ function updateBranch(branchUpdate: DataNode, forcefully = false) {
         branch.data = actual
     }
 
-    if (branchUpdate.name === "") {
+    if (dataBranch.name === "") {
         // if (actual[0].size != max) {
         if (actual[0].size > max) {
             // works bad if recalculation gives less sum?
@@ -302,12 +336,12 @@ function updateBranch(branchUpdate: DataNode, forcefully = false) {
     }
 
     if (!branch.ul) {
-        branch.ul = treeBlock.querySelector(`ul[data-path="${branchUpdate.name}"]`)
+        branch.ul = treeBlock.querySelector(`ul[data-path="${dataBranch.name}"]`)
         // branch.viewNodesIndex = new Map()
 
         // do we need them all?..
         const shootEls = branch.ul.querySelectorAll(
-            `.shoot[data-path="${branchUpdate.name}"]`
+            `.shoot[data-path="${dataBranch.name}"]`
         ) as NodeListOf<HTMLDivElement>
         // console.log(shootEls)
         shootEls.forEach(shoot => {
@@ -427,22 +461,7 @@ function updateBranch(branchUpdate: DataNode, forcefully = false) {
     //     mix.size === branch.dataNodesIndex.size ? mix : new Map(actual.map(s => [s.name, s]))
 }
 
-// export function filterTree() {
-//     console.log("filter")
-//     for (const [name, branch] of Object.entries(branches)) {
-//         console.log(name, branch.dataNodesIndex)
-//         const data = Array.from(branch.dataNodesIndex.values())
-//         console.log(data)
-//         const filtered = data.filter(n => {
-//             return !n.name.startsWith(".")
-//         })
-//         updateBranch({ name, content: filtered }, true)
-//     }
-// }
-
-// setTimeout(filterTree, 2000)
-
-export function updateTree(bNodes: DataNode[]) {
+export function updateTree(bNodes: DataBranch[]) {
     updateTreeRoot(bNodes[0])
     if (!bNodes[0].content) return
 
@@ -452,7 +471,7 @@ export function updateTree(bNodes: DataNode[]) {
 }
 
 let totalSizeVal = -7
-function updateTreeRoot(data: DataNode) {
+function updateTreeRoot(data: DataBranch) {
     if (data?.size !== totalSizeVal) {
         totalSize.title = `${data.size} B`
         totalSize.textContent = formatSize(data.size)
@@ -473,21 +492,21 @@ function updateTreeRoot(data: DataNode) {
     else totalSize.parentElement.classList.remove("probably-bigger")
 }
 
-export function buildTree(data: DataNode, path: string) {
+export function buildTree(data: DataBranch, path: string) {
     rootPath = path
     updateTreeRoot(data)
     treeBlock.appendChild(createBranch(data, ""))
 }
 
 export function simulateScan() {
-    updateTreeRoot({ name: "", size: 0, temp: 1 } as DataNode)
+    updateTreeRoot({ name: "", size: 0, temp: 1 } as DataBranch)
 }
 
 export function resetTree() {
     treeBlock.innerHTML = ""
     max = 1
     branches = {}
-    updateTreeRoot({ name: "", size: -7 } as DataNode)
+    updateTreeRoot({ name: "", size: -7 } as DataBranch)
     totalSize.title = ""
     totalSize.textContent = ""
 }

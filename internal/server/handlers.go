@@ -80,7 +80,7 @@ func handleDir(w http.ResponseWriter, r *http.Request) {
 	// re, err := scanner.PresentDir(req.Path, req.Pages)
 	re, err := scanner.PresentDir(req.Path, req)
 	if err != nil {
-		log.Println(err)
+		log.Println("handlers/PresentDir:", err)
 	}
 	sendResult(w, re)
 }

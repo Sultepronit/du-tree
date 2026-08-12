@@ -2,6 +2,7 @@ import { doFetch } from "../api/fetch"
 import excluded from "../functions/exclude"
 
 import type { DataNode, ReqOptions } from "../types"
+import { getFilters } from "./filters"
 import { disablePathInput, enablePathInput, handlePathInput } from "./pathInput"
 import {
     appendBranch,
@@ -13,7 +14,7 @@ import {
 } from "./treeBuilder"
 
 const optionsForm = document.getElementById("options") as HTMLFormElement
-const filtersForm = document.getElementById("filters") as HTMLFormElement
+// const filtersForm = document.getElementById("filters") as HTMLFormElement
 // const useBlockSize = document.getElementById("use-block-size") as HTMLInputElement
 const scanButton = document.getElementById("scan") as HTMLButtonElement
 const autoExit = document.getElementById("auto-exit") as HTMLInputElement
@@ -114,11 +115,11 @@ function getOptions() {
     return options
 }
 
-function getFilters() {
-    return {
-        showHidden: filtersForm["show-hidden"].checked
-    }
-}
+// function getFilters() {
+//     return {
+//         showHidden: filtersForm["show-hidden"].checked
+//     }
+// }
 
 export async function initTree(path: string, initScan = true) {
     rootPath = path
