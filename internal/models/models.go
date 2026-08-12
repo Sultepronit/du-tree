@@ -28,10 +28,15 @@ type ReqOptions struct {
 	ExPatt        []string `json:"exPatt,omitempty"`
 }
 
+type ReqFilters struct {
+	ShowHidden bool `json:"showHidden"`
+}
+
 type Request struct {
 	Path    string     `json:"path,omitempty"`
 	Pages   int        `json:"pages,omitempty"`
 	Options ReqOptions `json:"options"`
+	Filters ReqFilters `json:"filters"`
 }
 
 type SortNode interface {
@@ -50,9 +55,19 @@ type Node struct {
 	Nlink        uint64  `json:"nlink,omitempty"`
 	Content      []*Node `json:"content,omitempty"`
 	ContentCount int     `json:"contentCount,omitempty"`
-	SizeIsTemp   bool    `json:"sizeIsTemp,omitempty"`
+	// SizeIsTemp   bool    `json:"sizeIsTemp,omitempty"`
+	Temp        int8 `json:"temp,omitempty"`
+	IsNeglected bool `json:"isNeglected,omitempty"`
+}
+
+type Branch struct {
+	Name         string  `json:"name"`
+	Size         int64   `json:"size"`
+	Locked       int     `json:"locked,omitempty"`
+	ContentCount int     `json:"contentCount,omitempty"`
 	Temp         int8    `json:"temp,omitempty"`
-	IsNeglected  bool    `json:"isNeglected,omitempty"`
+	IsFiltered   bool    `json:"isFiltered,omitempty"`
+	Content      []*Node `json:"content,omitempty"`
 }
 
 func (n *Node) GetName() string { return n.Name }

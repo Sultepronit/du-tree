@@ -145,13 +145,22 @@
 
 /* options -------------------- */
 
-#options {
+/* #options { */
+.settings {
     display: flex;
     gap: 0.2em 0.8em;
     flex-wrap: wrap;
 }
 
+#options {
+    display: contents;
+}
+
 #scanset {
+    display: contents;
+}
+
+#filters {
     display: contents;
 }
 
@@ -199,11 +208,4 @@
 
 #exclude-form label:has(input:checked:disabled) {
     margin-left: 0;
-}
-
-#exclude-form input[type="checkbox"]:focus {
-    /* outline: 1px solid gray;
-    outline-offset: 2px; */
-    /* outline: none; */
-    /* box-shadow: 0 0px 2px 0 rgb(0, 0, 0); */
 }

@@ -41,12 +41,14 @@ func getBranch(path string) *viewNode {
 	return target
 }
 
-var pageSize = 100
+// var pageSize = 100
 
-func PresentDir(path string, pages int) (*models.Node, error) {
+// func PresentDir(path string, pages int) (*models.Node, error) {
+// func PresentDir(path string, req models.Request) (*models.Node, error) {
+func PresentDir(path string, req models.Request) (*models.Branch, error) {
 	// data.scanMu.Lock()
 	data.viewMu.Lock()
-	req := data.request
+	// req := data.request
 	branch := getBranch(path)
 	if branch == nil {
 		// data.scanMu.Unlock()
@@ -68,19 +70,20 @@ func PresentDir(path string, pages int) (*models.Node, error) {
 		prepareViewDirs(dirs, branch)
 	}
 
-	re := parseViewNode(branch, true)
+	res := parseBranch(branch, true)
 	// data.scanMu.Unlock()
 	data.viewMu.Unlock()
 
-	helpers.SortBySizeThenName(re.Content)
+	helpers.SortBySizeThenName(res.Content)
 
-	contLen := pageSize * pages
-	if len(re.Content) > contLen {
-		re.ContentCount = len(re.Content)
-		re.Content = re.Content[:contLen]
-	}
+	// contLen := pageSize * pages
+	// if len(re.Content) > contLen {
+	// 	re.ContentCount = len(re.Content)
+	// 	re.Content = re.Content[:contLen]
+	// }
+	filterBranchCont(res, req)
 
-	return re, nil
+	return res, nil
 }
 
 func checkCanceled() bool {
@@ -93,8 +96,10 @@ func checkCanceled() bool {
 	return data.cancel == nil && data.scanTree.Temp != 0
 }
 
-func GetUpdate(req []models.Request) []*models.Node {
-	re := make([]*models.Node, len(req))
+// func GetUpdate(req []models.Request) []*models.Node {
+func GetUpdate(req []models.Request) []*models.Branch {
+	// re := make([]*models.Node, len(req))
+	re := make([]*models.Branch, len(req))
 
 	// data.scanMu.Lock()
 	// defer data.scanMu.Unlock()
@@ -108,7 +113,7 @@ func GetUpdate(req []models.Request) []*models.Node {
 
 	for i, r := range req {
 		b := getBranch(r.Path)
-		re[i] = parseViewNode(b, false)
+		re[i] = parseBranch(b, false)
 		re[i].Name = r.Path
 
 		re[i].Content = helpers.LimitSlice(re[i].Content, pageSize*r.Pages)

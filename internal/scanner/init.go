@@ -28,7 +28,8 @@ func getRoot(target string) (size int64, err error) {
 	return 0, errors.New("no syscall.Stat_t")
 }
 
-func Init(req models.Request) (*models.Node, error) {
+// func Init(req models.Request) (*models.Node, error) {
+func Init(req models.Request) (*models.Branch, error) {
 	if !strings.HasSuffix(req.Path, "/") {
 		req.Path += "/"
 	}
@@ -87,7 +88,8 @@ func Init(req models.Request) (*models.Node, error) {
 
 	// helpers.TempPrinAsJson(data.scanTree)
 	time.Sleep(time.Millisecond * 100)
-	return PresentDir("", req.Pages)
+	// return PresentDir("", req.Pages)
+	return PresentDir("", req)
 }
 
 func Stop() {

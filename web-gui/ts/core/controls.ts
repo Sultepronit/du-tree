@@ -12,7 +12,8 @@ import {
     resetTree
 } from "./treeBuilder"
 
-export const optionsForm = document.getElementById("options") as HTMLFormElement
+const optionsForm = document.getElementById("options") as HTMLFormElement
+const filtersForm = document.getElementById("filters") as HTMLFormElement
 // const useBlockSize = document.getElementById("use-block-size") as HTMLInputElement
 const scanButton = document.getElementById("scan") as HTMLButtonElement
 const autoExit = document.getElementById("auto-exit") as HTMLInputElement
@@ -97,6 +98,28 @@ document.addEventListener("path-status", (e: CustomEvent) => {
     status.set(e.detail === "valid" ? "ready" : "setting")
 })
 
+function getOptions() {
+    const options = {
+        blockSize: optionsForm["size-type"].value === "block",
+        // excludeHidden: optionsForm["exclude-hidden"].checked,
+        oneFS: optionsForm["one-fs"].checked
+    } as ReqOptions
+
+    if (optionsForm.exclude.checked === true) {
+        const exc = excluded.get()
+        options.excludeHidden = exc.hidden
+        options.exPatt = exc.patterns as string[]
+    }
+
+    return options
+}
+
+function getFilters() {
+    return {
+        showHidden: filtersForm["show-hidden"].checked
+    }
+}
+
 export async function initTree(path: string, initScan = true) {
     rootPath = path
     status.set("scanning")
@@ -107,20 +130,20 @@ export async function initTree(path: string, initScan = true) {
     //     options.blockSize = true
     // }
 
-    const options = {
-        blockSize: optionsForm["size-type"].value === "block",
-        // excludeHidden: optionsForm["exclude-hidden"].checked,
-        oneFS: optionsForm["one-fs"].checked
-        // excludeHidden: exc.hidden,
-        // exPatt: exc.patterns
-    } as ReqOptions
+    // const options = {
+    //     blockSize: optionsForm["size-type"].value === "block",
+    //     // excludeHidden: optionsForm["exclude-hidden"].checked,
+    //     oneFS: optionsForm["one-fs"].checked
+    //     // excludeHidden: exc.hidden,
+    //     // exPatt: exc.patterns
+    // } as ReqOptions
 
-    if (optionsForm.exclude.checked === true) {
-        const exc = excluded.get()
-        console.log(exc)
-        options.excludeHidden = exc.hidden
-        options.exPatt = exc.patterns as string[]
-    }
+    // if (optionsForm.exclude.checked === true) {
+    //     const exc = excluded.get()
+    //     console.log(exc)
+    //     options.excludeHidden = exc.hidden
+    //     options.exPatt = exc.patterns as string[]
+    // }
 
     const req = initScan ? "/scan" : "/dir"
     // yes, if "/dir" case options mean nothing
@@ -128,7 +151,8 @@ export async function initTree(path: string, initScan = true) {
     const data = (await doFetch(req, {
         path,
         pages: 1,
-        options
+        options: getOptions(),
+        filters: getFilters()
     })) as DataNode
     console.log(data)
     if (!data) {

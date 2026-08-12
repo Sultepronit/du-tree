@@ -17,14 +17,16 @@ func prepareViewDirs(times map[string]int64, node *viewNode) {
 	}
 }
 
-func parseDirNode(node *dirNode) *models.Node {
-	return &models.Node{
-		Name:     node.Name,
-		Size:     node.Size,
-		Type:     "d",
-		ScanTime: node.ScanTime,
-		Locked:   node.Locked,
-		Temp:     node.Temp,
+// func parseBranchHead(node *dirNode) *models.Node {
+func parseBranchHead(node *dirNode) *models.Branch {
+	// return &models.Node{
+	return &models.Branch{
+		Name: node.Name,
+		Size: node.Size,
+		// Type: "d",
+		// ScanTime: node.ScanTime,
+		Locked: node.Locked,
+		Temp:   node.Temp,
 	}
 }
 
@@ -53,11 +55,12 @@ func parseFileNode(node *fileNode) *models.Node {
 	}
 }
 
-func parseViewNode(branch *viewNode, includeFiles bool) *models.Node {
+// func parseBranch(branch *viewNode, includeFiles bool) *models.Node {
+func parseBranch(branch *viewNode, includeFiles bool) *models.Branch {
 	data.scanMu.RLock()
 	defer data.scanMu.RUnlock()
 	// re := parseDirNode(branch.dirNode)
-	re := parseDirNode(branch.dirNode)
+	re := parseBranchHead(branch.dirNode)
 	re.Content = make([]*models.Node, 0, 10)
 
 	// to avoid interfering with the scanning!!!
