@@ -42,13 +42,21 @@ export type DataNode = {
 }
 
 export type ViewNode = {
-    shoot: HTMLDivElement
-    size?: HTMLDivElement
+    data: DataNode
+    shoot?: HTMLDivElement
+    sizeVidget?: HTMLDivElement
+    nameVidget?: HTMLDivElement
 }
 
 export type UpdateBranch = {
-    dataShoots: Map<string, DataNode>
-    viewShoots?: Map<string, ViewNode>
+    data: DataNode[]
+    // dataNodesIndex: Map<string, DataNode>
+    viewNodesIndex: Map<string, ViewNode>
+    //  displayIndex: {
+    //     dataNodes: Map<string, DataNode>
+    //     viewNodes?: Map<string, ViewNode>
+    // }
+    // viewNodesIndex2: Map<string, ViewNode>
     ul?: HTMLUListElement
     pages?: number
 }
