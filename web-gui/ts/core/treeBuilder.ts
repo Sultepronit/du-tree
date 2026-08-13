@@ -16,126 +16,31 @@ let branches = {} as Record<string, ViewBranch>
 
 let rootPath = ""
 
-// function genLockedDetails(node: DataNode) {
-//     const re = []
-//     if (node.locked === -1) {
-//         re.push(`\nYou have no read rights for this dir`)
-//     } else {
-//         re.push(`\nContains ${node.locked} nested dir(s) without access`)
-//     }
-//     re.push(` Run as root to get the full size.`)
-
-//     return re
-// }
-
-// const specialTypes = {
-//     S: "Socket",
-//     p: "Pipe",
-//     D: "Device"
-// }
-
-// function genTitle(data: DataNode, path: string) {
-//     const title = [`Name: ${data.name}`, `Location: ${rootPath}${path}`]
-
-//     if (data.linkPath) {
-//         title.push(
-//             data.type === "Lbrk"
-//                 ? `Broken soft link to: ${data.linkPath}`
-//                 : data.type === "Lperm-file"
-//                   ? `Soft link (Target hidden: permission denied).`
-//                   : data.type === "Lperm-target"
-//                     ? `Soft link to: ${data.linkPath} (Target inaccessible: permission denied).`
-//                     : `Soft link to: ${data.linkPath}`
-//         )
-//     }
-
-//     const t = data.linkPath ? data.type.slice(1) : data.type
-//     const st = specialTypes[t]
-//     if (st) title.push(`File type: ${st}`)
-
-//     title.push(
-//         `Last modified: ${formatTime(data.modTime)}`,
-//         `Scan time: ${formatTime(data.scanTime)}`
-//     )
-
-//     if (data.nlink) {
-//         let msg = `\nShared inode: ${data.nlink} hard links exist.\n`
-//         if (data.isNeglected) {
-//             msg += "Size of this hard link is neglected."
-//         } else {
-//             msg += "Size of this hard link is counted, all others are neglected."
-//         }
-//         title.push(msg)
-//     }
-
-//     if (data.locked) {
-//         title.push(...genLockedDetails(data))
-//     }
-
-//     return title.join("\n")
-// }
-
-// const handleBytesExt = (data: DataNode) => {
-//     return formatSize(data.size, data.temp > 0 || data.locked !== undefined)
-// }
-
-// function createLi(data: DataNode, path: string): string {
-//     const type = data.type[0] === "L" ? `link t${data.type.slice(1)}` : `t${data.type}`
-
-//     const classes = [`shoot ${type}`]
-//     if (data.locked) {
-//         classes.push("locked")
-//         if (data.locked === -1) classes.push("itself")
-//     }
-//     if (data.temp) {
-//         classes.push("temp")
-//         if (data.temp === 2) classes.push("unavailable")
-//     }
-//     if (data.nlink) {
-//         classes.push("hardlink")
-//         if (data.isNeglected) classes.push("neglected")
-//     }
-
-//     return `<li><div
-//             class="${classes.join(" ")}"
-//             title="${genTitle(data, path)}"
-//             data-path="${path}"
-//             data-name="${data.name}"
-//             style="--size: ${data.size}%"
-//         >
-//             <div class="fd-entry">
-//                 <div class="fd-sizebar"></div>
-//                 <div class="fd-size" title="${data.size} B">${handleBytesExt(data)}</div>
-//                 <div class="fd-name">${data.name}</div>
-//             </div>
-//     </div></li>`
-// }
-
 export function filterTree() {
     console.log("filter")
     for (const [name, b] of Object.entries(branches)) {
         console.log(b)
         // const filtered = filterBranchCont(b.data).slice(0, b.pages * pageSize)
-        const filtered = filterBranchCont(b.data)
+        const filtered = filterBranchCont({ content: b.data, size: b.size })
         console.log(filtered)
-        updateBranch({ name, content: filtered }, true)
+        // updateBranch({ name, content: filtered.content }, false)
+        updateBranch({ name, ...filtered }, false)
     }
 }
 
 document.addEventListener("filter-update", filterTree)
 
-function prepareBranchData(data: DataBranch, pages = 1) {
+function prepareBranchData(data: DataBranch) {
     if (data.name === "" && data.content[0].size > max) {
         max = data.content[0].size
         document.documentElement.style.setProperty("--max-size", (max / 100).toString())
     }
 
-    if (data.isFiltered) return { filtered: data.content }
+    if (data.isFiltered) return { filtered: data }
 
-    // const filtered = filterBranchCont(data.content)
     return {
-        raw: data.content,
-        filtered: filterBranchCont(data.content).slice(0, pages * pageSize)
+        raw: data, // STUPID!
+        filtered: filterBranchCont(data)
     }
 }
 
@@ -160,31 +65,58 @@ export function createBranch(data: DataBranch, prePath: string): DocumentFragmen
     //     viewNodesIndex.set(n.name, { data: n })
     // }
     const lis = [] as string[]
-    for (const n of filtered) {
+    for (const n of filtered.content.slice(0, pageSize)) {
         viewNodesIndex.set(n.name, { data: n })
         lis.push(createLi(n, path, rootPath))
     }
 
-    branches[path] = {
-        // data: data.content,
-        ...(raw ? { data: raw, isFull: true } : { data: filtered }),
-        // dataNodesIndex: new Map(data.content.map(s => [s.name, s])),
+    const newViewBranch = {
+        size: data.size,
         viewNodesIndex,
         pages: 1
+    } as ViewBranch
+
+    if (raw) {
+        newViewBranch.data = raw.content
+        newViewBranch.isFull = true
+        newViewBranch.filtered = filtered.content
+    } else {
+        newViewBranch.data = filtered.content
     }
+
+    branches[path] = newViewBranch
+    // branches[path] = {
+    //     // data: data.content,
+    //     // ...(raw ? { data: raw, isFull: true } : { data: filtered }),
+    //     size: data.size,
+    //     // dataNodesIndex: new Map(data.content.map(s => [s.name, s])),
+    //     viewNodesIndex,
+    //     pages: 1
+    // }
 
     console.log("branches:", branches)
 
+    lis.push(
+        `<li class="dir-summary">
+    <div></div><div>Items</div><div>Size</div>
+    <div>Total</div><div>${data.content.length}</div><div>${handleBytesExt(data)}</div>
+    <div class="filter">Filtered</div>
+    <div class="filter items">${filtered.filteredItems}</div>
+    <div class="filter size">${formatSize(filtered.filteredSize, false)}</div>
+    <div>Shown</div><div></div><div></div>
+</li>`
+    )
+
     // const lis = data.content.map(entry => createLi(entry, path, rootPath))
-    if (data.contentCount) {
-        // lis.push(`<li class="show-more" title="${path ? path + "/" : "Root"}">
-        lis.push(`<li class="show-more">
-            <span class="so-far">${data.content.length}/${data.contentCount}</span>
-            <button name="add-more" data-path="${path}" data-pages="1">
-                Show more
-            </button>
-        </li>`)
-    }
+    //     if (data.contentCount) {
+    //         // lis.push(`<li class="show-more" title="${path ? path + "/" : "Root"}">
+    //         lis.push(`<li class="show-more">
+    //     <span class="so-far">${data.content.length}/${data.contentCount}</span>
+    //     <button name="add-more" data-path="${path}" data-pages="1">
+    //         Show more
+    //     </button>
+    // </li>`)
+    //     }
     // const templ = document.createElement("template")
     // console.log(templ)
     templ.innerHTML = `<ul class="dir-content" data-path="${path}">${lis.join("")}</ul>`
@@ -296,7 +228,7 @@ function resetShoot(viewNode: ViewNode, data: DataNode) {
 }
 
 // function updateBranch(branchUpdate: DataNode, forcefully = false) {
-function updateBranch(dataBranch: DataBranch, forcefully = false) {
+function updateBranch(dataBranch: DataBranch, newData = true) {
     if (!dataBranch?.content) return // user navigates dirs before scan
 
     console.log("branch update:", dataBranch)
@@ -304,46 +236,55 @@ function updateBranch(dataBranch: DataBranch, forcefully = false) {
     const branch = branches[dataBranch.name]
     // console.log("branch:", branch)
 
+    // refactor this
     let actual: DataNode[]
-    if (forcefully) {
-        actual = dataBranch.content
+    let actualDataBranch: DataBranch
+    if (newData) {
+        const { filtered } = prepareBranchData(dataBranch)
+        actualDataBranch = filtered
+        actual = filtered.content.slice(0, branch.pages * pageSize)
     } else {
-        // const mix = new Map(branch.dataNodesIndex)
-        // branchUpdate.content.forEach(s => mix.set(s.name, s))
-        const mix = new Map()
-        for (const n of branch.data) {
-            mix.set(n.name, n)
-        }
-        for (const n of dataBranch.content) {
-            mix.set(n.name, n)
-        }
-
-        // actual = [...mix.values()]
-        //     .sort((a, b) => {
-        //         if (b.size === a.size) {
-        //             return a.name.localeCompare(b.name)
-        //         }
-        //         return b.size - a.size
-        //     })
-        //     .slice(0, pageSize * branch.pages)
-        actual = sortBySizeThanName([...mix.values()]).slice(0, pageSize * branch.pages)
-        branch.data = actual
+        actual = dataBranch.content
+        actualDataBranch = dataBranch
     }
+    // if (forcefully) {
+    //     actual = dataBranch.content
+    // } else {
+    //     // const mix = new Map(branch.dataNodesIndex)
+    //     // branchUpdate.content.forEach(s => mix.set(s.name, s))
+    //     const mix = new Map()
+    //     for (const n of branch.data) {
+    //         mix.set(n.name, n)
+    //     }
+    //     for (const n of dataBranch.content) {
+    //         mix.set(n.name, n)
+    //     }
 
-    if (dataBranch.name === "") {
-        // if (actual[0].size != max) {
-        if (actual[0].size > max) {
-            // works bad if recalculation gives less sum?
-            max = actual[0].size
-            document.documentElement.style.setProperty("--max-size", (max / 100).toString())
-        }
-    }
+    //     // actual = [...mix.values()]
+    //     //     .sort((a, b) => {
+    //     //         if (b.size === a.size) {
+    //     //             return a.name.localeCompare(b.name)
+    //     //         }
+    //     //         return b.size - a.size
+    //     //     })
+    //     //     .slice(0, pageSize * branch.pages)
+    //     actual = sortBySizeThanName([...mix.values()]).slice(0, pageSize * branch.pages)
+    //     branch.data = actual
+    // }
+
+    // if (dataBranch.name === "") {
+    //     // if (actual[0].size != max) {
+    //     if (actual[0].size > max) {
+    //         // works bad if recalculation gives less sum?
+    //         max = actual[0].size
+    //         document.documentElement.style.setProperty("--max-size", (max / 100).toString())
+    //     }
+    // }
 
     if (!branch.ul) {
         branch.ul = treeBlock.querySelector(`ul[data-path="${dataBranch.name}"]`)
         // branch.viewNodesIndex = new Map()
 
-        // do we need them all?..
         const shootEls = branch.ul.querySelectorAll(
             `.shoot[data-path="${dataBranch.name}"]`
         ) as NodeListOf<HTMLDivElement>
@@ -362,6 +303,13 @@ function updateBranch(dataBranch: DataBranch, forcefully = false) {
 
     branch.ul.style.display = "none"
 
+    const filterVidgets = branch.ul.lastElementChild.querySelectorAll(".filter")
+    console.log(branch.ul.lastElementChild)
+    console.log(filterVidgets)
+    console.log(actualDataBranch)
+    filterVidgets[1].textContent = actualDataBranch.filteredItems?.toString()
+    filterVidgets[2].textContent = formatSize(actualDataBranch.filteredSize ?? 0, false)
+
     if (branch.viewNodesIndex.size < actual.length) {
         // const newNodes = actual.filter(s => !branch.dataNodesIndex.has(s.name))
         // const newNodes = actual.filter(s => !branch.viewNodesIndex.has(s.name))
@@ -378,8 +326,9 @@ function updateBranch(dataBranch: DataBranch, forcefully = false) {
         }
 
         // const lis = newNodes.map(entry => createLi(entry, branch.ul.dataset.path, rootPath))
-        console.log(lis)
-        branch.ul.insertAdjacentHTML("beforeend", lis.join(""))
+        // console.log(lis)
+        // branch.ul.insertAdjacentHTML("beforeend", lis.join(""))
+        branch.ul.lastElementChild.insertAdjacentHTML("beforebegin", lis.join(""))
     }
 
     const store = new DocumentFragment()
@@ -433,9 +382,18 @@ function updateBranch(dataBranch: DataBranch, forcefully = false) {
     })
     // console.log(store.childNodes)
     // reset shoots
-    actual.forEach((data, i) => {
+    // actual.forEach((data, i) => {
+    for (let i = 0; i < branch.ul.childNodes.length - 1; i++) {
+        if (i >= actual.length) {
+            const liContShoot = branch.ul.childNodes[i].childNodes[0]
+            if (liContShoot instanceof HTMLDivElement) store.appendChild(liContShoot)
+            continue
+        }
+        const data = actual[i]
+
         // if (!branch.dataNodesIndex.has(data.name)) {
-        if (branch.viewNodesIndex.has(data.name)) return
+        // if (branch.viewNodesIndex.has(data.name)) return
+        if (branch.viewNodesIndex.has(data.name)) continue
         // console.log("reset:", data.name)
         let shootEl = branch.ul.childNodes[i].childNodes[0] as HTMLDivElement
         if (!shootEl) {
@@ -457,7 +415,9 @@ function updateBranch(dataBranch: DataBranch, forcefully = false) {
 
         resetShoot(viewNode, data)
         console.log("reset")
-    })
+        // })
+    }
+
     branch.ul.style.display = ""
     // console.log(store.childNodes)
 
@@ -507,9 +467,9 @@ export function simulateScan() {
 }
 
 export function resetTree() {
+    branches = {}
     treeBlock.innerHTML = ""
     max = 1
-    branches = {}
     updateTreeRoot({ name: "", size: -7 } as DataBranch)
     totalSize.title = ""
     totalSize.textContent = ""

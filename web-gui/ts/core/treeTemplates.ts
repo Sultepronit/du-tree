@@ -1,5 +1,5 @@
 import formatTime from "../helpers/formatTime"
-import type { DataNode } from "../types"
+import type { DataBranch, DataNode } from "../types"
 import formatSize from "../utils/formatSize"
 
 export function genLockedDetails(node: DataNode) {
@@ -62,7 +62,7 @@ export function genTitle(data: DataNode, path: string, rootPath: string) {
     return title.join("\n")
 }
 
-export function handleBytesExt(data: DataNode) {
+export function handleBytesExt(data: DataNode | DataBranch) {
     return formatSize(data.size, data.temp > 0 || data.locked !== undefined)
 }
 

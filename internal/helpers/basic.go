@@ -7,13 +7,13 @@ import (
 	"strings"
 )
 
-func LimitSlice[T any](s []T, limit int) []T {
-	if len(s) <= limit {
-		return s
-	}
+// func LimitSlice[T any](s []T, limit int) []T {
+// 	if len(s) <= limit {
+// 		return s
+// 	}
 
-	return s[:limit]
-}
+// 	return s[:limit]
+// }
 
 func SortBySizeThenName[T models.SortNode](s []T) {
 	slices.SortFunc(s, func(a, b T) int {

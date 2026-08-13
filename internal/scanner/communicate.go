@@ -113,10 +113,12 @@ func GetUpdate(req []models.Request) []*models.Branch {
 
 	for i, r := range req {
 		b := getBranch(r.Path)
-		re[i] = parseBranch(b, false)
+		// re[i] = parseBranch(b, false)
+		re[i] = parseBranch(b, true)
 		re[i].Name = r.Path
 
-		re[i].Content = helpers.LimitSlice(re[i].Content, pageSize*r.Pages)
+		// re[i].Content = helpers.LimitSlice(re[i].Content, pageSize*r.Pages)
+		filterBranchCont(re[i], r)
 	}
 
 	return re
