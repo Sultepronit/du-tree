@@ -60,7 +60,7 @@ func PresentDir(path string, req models.Request) (*models.Branch, error) {
 	if branch.Files == nil {
 		data.viewMu.Unlock()
 		// files, err := getDirCont(req.Path+path, req.Options)
-		files, dirs, err := getDirCont(baseReq.Path+path, req.Options)
+		files, dirs, err := getDirCont(baseReq.Path+path, baseReq.Options)
 		if err != nil {
 			// data.scanMu.Unlock()
 			return nil, err

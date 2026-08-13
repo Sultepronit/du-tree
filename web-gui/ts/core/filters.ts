@@ -1,6 +1,10 @@
-import type { DataBranch, DataNode } from "../types"
+import type { DataNode } from "../types"
 
 const filtersForm = document.getElementById("filters") as HTMLFormElement
+
+filtersForm.addEventListener("change", () => {
+    document.dispatchEvent(new Event("filter-update"))
+})
 
 export function getFilters() {
     return {
@@ -11,7 +15,7 @@ export function getFilters() {
 export function filterBranchCont(list: DataNode[]) {
     const filters = getFilters()
 
-    let re: DataNode[]
+    let re = list
     if (!filters.showHidden) {
         re = list.filter(n => {
             return !n.name.startsWith(".")

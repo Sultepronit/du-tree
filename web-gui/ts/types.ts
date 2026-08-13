@@ -60,13 +60,9 @@ export type ViewNode = {
 
 export type ViewBranch = {
     data: DataNode[]
+    isFull?: true
     // dataNodesIndex: Map<string, DataNode>
     viewNodesIndex: Map<string, ViewNode>
-    //  displayIndex: {
-    //     dataNodes: Map<string, DataNode>
-    //     viewNodes?: Map<string, ViewNode>
-    // }
-    // viewNodesIndex2: Map<string, ViewNode>
     ul?: HTMLUListElement
     pages?: number
 }

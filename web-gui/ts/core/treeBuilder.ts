@@ -111,22 +111,20 @@ let rootPath = ""
 //     </div></li>`
 // }
 
-// export function filterTree() {
-//     console.log("filter")
-//     for (const [name, branch] of Object.entries(branches)) {
-//         console.log(name, branch.dataNodesIndex)
-//         const data = Array.from(branch.dataNodesIndex.values())
-//         console.log(data)
-//         const filtered = data.filter(n => {
-//             return !n.name.startsWith(".")
-//         })
-//         updateBranch({ name, content: filtered }, true)
-//     }
-// }
+export function filterTree() {
+    console.log("filter")
+    for (const [name, b] of Object.entries(branches)) {
+        console.log(b)
+        // const filtered = filterBranchCont(b.data).slice(0, b.pages * pageSize)
+        const filtered = filterBranchCont(b.data)
+        console.log(filtered)
+        updateBranch({ name, content: filtered }, true)
+    }
+}
 
-// setTimeout(filterTree, 2000)
+document.addEventListener("filter-update", filterTree)
 
-function prepareBranchData(data: DataBranch) {
+function prepareBranchData(data: DataBranch, pages = 1) {
     if (data.name === "" && data.content[0].size > max) {
         max = data.content[0].size
         document.documentElement.style.setProperty("--max-size", (max / 100).toString())
@@ -137,7 +135,7 @@ function prepareBranchData(data: DataBranch) {
     // const filtered = filterBranchCont(data.content)
     return {
         raw: data.content,
-        filtered: filterBranchCont(data.content)
+        filtered: filterBranchCont(data.content).slice(0, pages * pageSize)
     }
 }
 
@@ -151,27 +149,33 @@ export function createBranch(data: DataBranch, prePath: string): DocumentFragmen
     }
     const path = prePath ? `${prePath}/${data.name}` : data.name
 
-    prepareBranchData(data)
+    const { raw, filtered } = prepareBranchData(data)
     // if (data.content[0].size > max) {
     //     max = data.content[0].size
     //     document.documentElement.style.setProperty("--max-size", (max / 100).toString())
     // }
 
     const viewNodesIndex = new Map<string, ViewNode>()
-    for (const n of data.content) {
+    // for (const n of data.content) {
+    //     viewNodesIndex.set(n.name, { data: n })
+    // }
+    const lis = [] as string[]
+    for (const n of filtered) {
         viewNodesIndex.set(n.name, { data: n })
+        lis.push(createLi(n, path, rootPath))
     }
 
     branches[path] = {
-        data: data.content,
+        // data: data.content,
+        ...(raw ? { data: raw, isFull: true } : { data: filtered }),
         // dataNodesIndex: new Map(data.content.map(s => [s.name, s])),
         viewNodesIndex,
         pages: 1
     }
 
-    // console.log("branches:", branches)
+    console.log("branches:", branches)
 
-    const lis = data.content.map(entry => createLi(entry, path, rootPath))
+    // const lis = data.content.map(entry => createLi(entry, path, rootPath))
     if (data.contentCount) {
         // lis.push(`<li class="show-more" title="${path ? path + "/" : "Root"}">
         lis.push(`<li class="show-more">
