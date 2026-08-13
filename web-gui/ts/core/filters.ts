@@ -43,21 +43,22 @@ export function filterBranchCont(branch: DataBranch): DataBranch {
     // branch.filteredSize = 0
     const re = {
         content: [] as DataNode[],
-        filteredItems: 0,
-        filteredSize: 0
+        hiddenItems: branch.content.length,
+        hiddenSize: branch.size
     }
 
     const moreThan = filtersForm["more-than"].checked ? branch.size * 0.02 : 0
-    console.log(moreThan)
+    // console.log(moreThan)
     for (const n of branch.content) {
         if (filters.hideHidden && n.name.startsWith(".")) continue
 
         if (n.size <= moreThan) continue
 
         re.content.push(n)
-        re.filteredItems++
-        re.filteredSize += n.size
+        re.hiddenItems--
+        re.hiddenSize -= n.size
     }
+    console.log(re)
 
     return re
 }

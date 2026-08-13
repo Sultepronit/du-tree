@@ -49,8 +49,8 @@ export type DataBranch = {
     content?: DataNode[]
     contentCount?: number
     isFiltered?: true
-    filteredItems?: number
-    filteredSize?: number
+    hiddenItems?: number
+    hiddenSize?: number
 }
 
 export type ViewNode = {
@@ -61,18 +61,13 @@ export type ViewNode = {
 }
 
 export type ViewBranch = {
-    data: DataNode[]
     size: number
+    data: DataNode[]
+    filtered?: DataNode[] // need it?
     isFull?: true
-    filtered?: DataNode[]
     // dataNodesIndex: Map<string, DataNode>
     viewNodesIndex: Map<string, ViewNode>
+    hiddenSummary?: ViewNode
     ul?: HTMLUListElement
     pages?: number
-}
-
-export type FilterResults = {
-    content?: DataNode[]
-    filteredItems?: number
-    filteredSize?: number
 }

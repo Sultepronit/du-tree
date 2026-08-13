@@ -70,21 +70,34 @@ export function createBranch(data: DataBranch, prePath: string): DocumentFragmen
         lis.push(createLi(n, path, rootPath))
     }
 
-    const newViewBranch = {
+    const viewBranch = {
         size: data.size,
         viewNodesIndex,
         pages: 1
     } as ViewBranch
 
     if (raw) {
-        newViewBranch.data = raw.content
-        newViewBranch.isFull = true
-        newViewBranch.filtered = filtered.content
+        viewBranch.data = data.content
+        viewBranch.isFull = true
+        if (filtered.content.length > pageSize) {
+            viewBranch.filtered = filtered.content
+        }
     } else {
-        newViewBranch.data = filtered.content
+        viewBranch.data = filtered.content
     }
 
-    branches[path] = newViewBranch
+    if (filtered.hiddenItems > 0) {
+        viewBranch.hiddenSummary = {
+            data: {
+                name: `${filtered.hiddenItems} Filtered Out Items`,
+                size: filtered.hiddenSize,
+                type: "*"
+            } as DataNode
+        }
+        lis.push(createLi(viewBranch.hiddenSummary.data, path, rootPath))
+    }
+
+    branches[path] = viewBranch
     // branches[path] = {
     //     // data: data.content,
     //     // ...(raw ? { data: raw, isFull: true } : { data: filtered }),
@@ -98,13 +111,13 @@ export function createBranch(data: DataBranch, prePath: string): DocumentFragmen
 
     lis.push(
         `<li class="dir-summary">
-    <div></div><div>Items</div><div>Size</div>
-    <div>Total</div><div>${data.content.length}</div><div>${handleBytesExt(data)}</div>
-    <div class="filter">Filtered</div>
-    <div class="filter items">${filtered.filteredItems}</div>
-    <div class="filter size">${formatSize(filtered.filteredSize, false)}</div>
-    <div>Shown</div><div></div><div></div>
-</li>`
+        <div></div><div>Items</div><div>Size</div>
+        <div>Total</div><div>${data.content.length}</div><div>${handleBytesExt(data)}</div>
+        <div class="filter">Filtered</div>
+        <div class="filter items">${filtered.hiddenItems}</div>
+        <div class="filter size">${formatSize(filtered.hiddenSize, false)}</div>
+        <div>Shown</div><div></div><div></div>
+    </li>`
     )
 
     // const lis = data.content.map(entry => createLi(entry, path, rootPath))
@@ -307,8 +320,8 @@ function updateBranch(dataBranch: DataBranch, newData = true) {
     console.log(branch.ul.lastElementChild)
     console.log(filterVidgets)
     console.log(actualDataBranch)
-    filterVidgets[1].textContent = actualDataBranch.filteredItems?.toString()
-    filterVidgets[2].textContent = formatSize(actualDataBranch.filteredSize ?? 0, false)
+    filterVidgets[1].textContent = actualDataBranch.hiddenItems?.toString()
+    filterVidgets[2].textContent = formatSize(actualDataBranch.hiddenSize ?? 0, false)
 
     if (branch.viewNodesIndex.size < actual.length) {
         // const newNodes = actual.filter(s => !branch.dataNodesIndex.has(s.name))
