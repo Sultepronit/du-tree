@@ -56,6 +56,17 @@ li {
     margin-bottom: 0.2em;
 }
 
+.t_filt {
+    opacity: 0.65;
+    /* color: #0009; */
+    font-style: italic;
+}
+
+.t_filt .fd-name {
+    font-family: "Ubuntu", sans-serif;
+    font-size: 0.85em;
+}
+
 .td {
     cursor: pointer;
 }

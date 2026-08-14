@@ -16,6 +16,13 @@
     font-style: normal;
 }
 
+/* @font-face {
+    font-family: "Ubuntu Mono";
+    src: url("fonts/UbuntuMono-RI.ttf") format("truetype");
+    font-weight: 400;
+    font-style: italic;
+} */
+
 * {
     margin: 0;
     padding: 0;

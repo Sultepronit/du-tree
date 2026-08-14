@@ -36,12 +36,30 @@ function prepareBranchData(data: DataBranch) {
         document.documentElement.style.setProperty("--max-size", (max / 100).toString())
     }
 
-    if (data.isFiltered) return { filtered: data }
+    const filtered = data.isFiltered ? data : filterBranchCont(data)
 
-    return {
-        raw: data, // STUPID!
-        filtered: filterBranchCont(data)
+    const viewBranch = {
+        size: data.size,
+        hiddenSummary: {
+            data: {
+                name: `${filtered.hiddenItems} Filtered Out Item(s)`,
+                size: filtered.hiddenSize,
+                type: "_filt"
+            } as DataNode
+        }
+    } as ViewBranch
+
+    if (data.isFiltered) {
+        viewBranch.data = filtered.content
+    } else {
+        viewBranch.data = data.content
+        viewBranch.isFull = true
+        if (filtered.content.length > pageSize) {
+            viewBranch.filtered = filtered.content
+        }
     }
+
+    return { filtered, viewBranch }
 }
 
 // export function createBranch(data: DataNode, prePath: string): DocumentFragment {
@@ -54,7 +72,7 @@ export function createBranch(data: DataBranch, prePath: string): DocumentFragmen
     }
     const path = prePath ? `${prePath}/${data.name}` : data.name
 
-    const { raw, filtered } = prepareBranchData(data)
+    const { filtered } = prepareBranchData(data)
     // if (data.content[0].size > max) {
     //     max = data.content[0].size
     //     document.documentElement.style.setProperty("--max-size", (max / 100).toString())
@@ -76,26 +94,26 @@ export function createBranch(data: DataBranch, prePath: string): DocumentFragmen
         pages: 1
     } as ViewBranch
 
-    if (raw) {
+    if (data.isFiltered) {
+        viewBranch.data = filtered.content
+    } else {
         viewBranch.data = data.content
         viewBranch.isFull = true
         if (filtered.content.length > pageSize) {
             viewBranch.filtered = filtered.content
         }
-    } else {
-        viewBranch.data = filtered.content
     }
 
-    if (filtered.hiddenItems > 0) {
-        viewBranch.hiddenSummary = {
-            data: {
-                name: `${filtered.hiddenItems} Filtered Out Items`,
-                size: filtered.hiddenSize,
-                type: "*"
-            } as DataNode
-        }
-        lis.push(createLi(viewBranch.hiddenSummary.data, path, rootPath))
+    // if (filtered.hiddenItems > 0) {
+    viewBranch.hiddenSummary = {
+        data: {
+            name: `${filtered.hiddenItems} Filtered Out Item(s)`,
+            size: filtered.hiddenSize,
+            type: "_filt"
+        } as DataNode
     }
+    lis.push(createLi(viewBranch.hiddenSummary.data, path, rootPath))
+    // }
 
     branches[path] = viewBranch
     // branches[path] = {
@@ -109,16 +127,16 @@ export function createBranch(data: DataBranch, prePath: string): DocumentFragmen
 
     console.log("branches:", branches)
 
-    lis.push(
-        `<li class="dir-summary">
-        <div></div><div>Items</div><div>Size</div>
-        <div>Total</div><div>${data.content.length}</div><div>${handleBytesExt(data)}</div>
-        <div class="filter">Filtered</div>
-        <div class="filter items">${filtered.hiddenItems}</div>
-        <div class="filter size">${formatSize(filtered.hiddenSize, false)}</div>
-        <div>Shown</div><div></div><div></div>
-    </li>`
-    )
+    // lis.push(
+    //     `<li class="dir-summary">
+    //     <div></div><div>Items</div><div>Size</div>
+    //     <div>Total</div><div>${data.content.length}</div><div>${handleBytesExt(data)}</div>
+    //     <div class="filter">Filtered</div>
+    //     <div class="filter items">${filtered.hiddenItems}</div>
+    //     <div class="filter size">${formatSize(filtered.hiddenSize, false)}</div>
+    //     <div>Shown</div><div></div><div></div>
+    // </li>`
+    // )
 
     // const lis = data.content.map(entry => createLi(entry, path, rootPath))
     //     if (data.contentCount) {
@@ -308,6 +326,9 @@ function updateBranch(dataBranch: DataBranch, newData = true) {
             if (node) {
                 node.shoot = shoot
                 branch.viewNodesIndex.set(shoot.dataset.name, node)
+            } else if (shoot.classList.contains("t_filt")) {
+                branch.hiddenSummary.shoot = shoot
+                console.log(branch.hiddenSummary)
             } else {
                 console.warn("No node found for:", shoot.dataset.name)
             }
@@ -316,12 +337,21 @@ function updateBranch(dataBranch: DataBranch, newData = true) {
 
     branch.ul.style.display = "none"
 
-    const filterVidgets = branch.ul.lastElementChild.querySelectorAll(".filter")
-    console.log(branch.ul.lastElementChild)
-    console.log(filterVidgets)
-    console.log(actualDataBranch)
-    filterVidgets[1].textContent = actualDataBranch.hiddenItems?.toString()
-    filterVidgets[2].textContent = formatSize(actualDataBranch.hiddenSize ?? 0, false)
+    // const filterVidgets = branch.ul.lastElementChild.querySelectorAll(".filter")
+    // console.log(branch.ul.lastElementChild)
+    // console.log(filterVidgets)
+    // console.log(actualDataBranch)
+    // filterVidgets[1].textContent = actualDataBranch.hiddenItems?.toString()
+    // filterVidgets[2].textContent = formatSize(actualDataBranch.hiddenSize ?? 0, false)
+    if (branch.hiddenSummary.data.size !== actualDataBranch.hiddenSize) {
+        branch.hiddenSummary.data.size = actualDataBranch.hiddenSize
+
+        // branch.hiddenSummary.sizeVidget
+        updateShootSize(branch.hiddenSummary, {
+            size: actualDataBranch.hiddenSize,
+            temp: 0
+        } as DataNode)
+    }
 
     if (branch.viewNodesIndex.size < actual.length) {
         // const newNodes = actual.filter(s => !branch.dataNodesIndex.has(s.name))

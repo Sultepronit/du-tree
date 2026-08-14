@@ -29,7 +29,11 @@ type ReqOptions struct {
 }
 
 type ReqFilters struct {
-	ShowHidden bool `json:"showHidden"`
+	HideHidden bool `json:"hideHidden"`
+	MoreThan   struct {
+		Value float64 `json:"value"`
+		Unit  string  `json:"unit"`
+	} `json:"moreThan"`
 }
 
 type Request struct {
