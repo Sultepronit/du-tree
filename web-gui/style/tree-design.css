@@ -45,10 +45,6 @@ li {
     text-align: center;
 }
 
-.no-filters .filter {
-    display: none;
-}
-
 .shoot {
     /* cursor: auto; */
     position: relative;
@@ -60,6 +56,10 @@ li {
     opacity: 0.65;
     /* color: #0009; */
     font-style: italic;
+}
+
+.no-filtered .t_filt {
+    display: none;
 }
 
 .t_filt .fd-name {

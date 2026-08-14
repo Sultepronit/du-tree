@@ -117,6 +117,8 @@ func GetUpdate(req []models.Request) []*models.Branch {
 		re[i] = parseBranch(b, true)
 		re[i].Name = r.Path
 
+		helpers.SortBySizeThenName(re[i].Content)
+
 		// re[i].Content = helpers.LimitSlice(re[i].Content, pageSize*r.Pages)
 		filterBranchCont(re[i], r)
 	}

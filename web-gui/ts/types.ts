@@ -60,14 +60,25 @@ export type ViewNode = {
     nameVidget?: HTMLDivElement
 }
 
+// export type HiddenSummaryView = {
+//     hiddenItems?: number
+//     hiddenSize?: number
+//     shoot?: HTMLDivElement
+//     sizeVidget?: HTMLDivElement
+//     nameVidget?: HTMLDivElement
+// }
+
 export type ViewBranch = {
     size: number
     data: DataNode[]
-    filtered?: DataNode[] // need it?
+    filtered?: DataNode[]
     isFull?: true
+    pages?: number
     // dataNodesIndex: Map<string, DataNode>
     viewNodesIndex: Map<string, ViewNode>
     hiddenSummary?: ViewNode
+    // hiddenSummary?: HiddenSummaryView
+    hiddenItems?: number
+    hiddenSize?: number
     ul?: HTMLUListElement
-    pages?: number
 }
