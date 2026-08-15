@@ -2,9 +2,9 @@ import type { DataBranch, DataNode } from "../types"
 
 const filtersForm = document.getElementById("filters") as HTMLFormElement
 
-let filters = setFilters()
+let filters = grabFilters()
 
-function setFilters() {
+function grabFilters() {
     const re = {} as Record<string, any>
     const moreThan = {
         value: 2,
@@ -24,7 +24,7 @@ function setFilters() {
 }
 
 filtersForm.addEventListener("change", () => {
-    filters = setFilters()
+    filters = grabFilters()
 
     document.dispatchEvent(new Event("filter-update"))
 })

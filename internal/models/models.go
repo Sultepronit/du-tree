@@ -43,6 +43,14 @@ type Request struct {
 	Filters ReqFilters `json:"filters"`
 }
 
+type UpdateReq struct {
+	Filters ReqFilters `json:"filters"`
+	List    []struct {
+		Path  string `json:"path,omitempty"`
+		Pages int    `json:"pages,omitempty"`
+	} `json:"list"`
+}
+
 type SortNode interface {
 	GetName() string
 	GetSize() int64

@@ -1,7 +1,7 @@
 import { doFetch } from "../api/fetch"
 import excluded from "../functions/exclude"
 
-import type { DataNode, ReqOptions } from "../types"
+import type { DataBranch, DataNode, ReqOptions } from "../types"
 import { getFilters } from "./filters"
 import { disablePathInput, enablePathInput, handlePathInput } from "./pathInput"
 import {
@@ -211,10 +211,20 @@ async function cancel() {
 }
 document.getElementById("cancel").addEventListener("click", cancel)
 
-async function update() {
+let updateList = [] as { path: string; pages: number }[]
+let updateFilterList = [] as { path: string; pages: number }[]
+
+async function update(sortUpdate = false) {
     await new Promise(resolve => setTimeout(resolve, interval))
     if (interval < 900) interval += 100
-    const updates = await doFetch("/update", updateList)
+    // const updates = await doFetch("/update", updateList)
+    const options = {
+        filters: getFilters(),
+        list: sortUpdate ? updateFilterList : updateList
+    }
+
+    const updates = await doFetch("/update", options)
+
     // console.log(updates)
     if (!updates) {
         status.set("done")
@@ -234,23 +244,43 @@ async function update() {
     update()
 }
 
-let updateList = [] as { path: string; pages: number }[]
+async function sortUpdate() {
+    if (updateFilterList.length < 1) return
+    const updates = await doFetch("/update", {
+        filters: getFilters(),
+        list: updateFilterList
+    })
+
+    if (!updates) {
+        return
+    }
+
+    updateTree(updates)
+    sanitizeUpdateList(updates)
+}
+
+document.addEventListener("filter-update", sortUpdate)
+
 function initUpdates() {
     updateList = [{ path: "", pages: 1 }]
+    updateFilterList = []
     interval = 200
     update()
 }
 
-function populateUpdateList(data: DataNode, prePath: string, dirname: string) {
+function populateUpdateList(data: DataBranch, prePath: string, dirname: string) {
+    const path = prePath ? `${prePath}/${dirname}` : dirname
     if (status.get() === "scanning" && data.temp) {
-        const path = prePath ? `${prePath}/${dirname}` : dirname
         updateList.push({ path, pages: 1 })
+    }
+    if (data.isFiltered) {
+        updateFilterList.push({ path, pages: 1 })
+        console.log(updateFilterList)
     }
 }
 
 function sanitizeUpdateList(results: DataNode[]) {
     updateList = updateList.filter((_, i) => !results[i] || results[i].temp)
-    // remove also branches on DOM manipulations side?
 }
 
 async function addMore(button: HTMLButtonElement) {
@@ -278,7 +308,8 @@ async function unfoldDir(target: HTMLElement) {
 
         const path = dataset.path ? `${dataset.path}/${dataset.name}` : dataset.name
 
-        const data = (await doFetch("/dir", { path, pages: 1 })) as DataNode
+        // const data = (await doFetch("/dir", { path, pages: 1 })) as DataNode
+        const data = (await doFetch("/dir", { path, pages: 1 })) as DataBranch
         console.log("dir:", data)
 
         if (dataset.name !== data.name) {

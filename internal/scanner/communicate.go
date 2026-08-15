@@ -81,7 +81,8 @@ func PresentDir(path string, req models.Request) (*models.Branch, error) {
 	// 	re.ContentCount = len(re.Content)
 	// 	re.Content = re.Content[:contLen]
 	// }
-	filterBranchCont(res, req)
+	// filterBranchCont(res, req)
+	filterBranchCont(res, req.Pages, req.Filters)
 
 	return res, nil
 }
@@ -97,9 +98,10 @@ func checkCanceled() bool {
 }
 
 // func GetUpdate(req []models.Request) []*models.Node {
-func GetUpdate(req []models.Request) []*models.Branch {
+// func GetUpdate(req []models.Request) []*models.Branch {
+func GetUpdate(req models.UpdateReq) []*models.Branch {
 	// re := make([]*models.Node, len(req))
-	re := make([]*models.Branch, len(req))
+	re := make([]*models.Branch, len(req.List))
 
 	// data.scanMu.Lock()
 	// defer data.scanMu.Unlock()
@@ -111,7 +113,8 @@ func GetUpdate(req []models.Request) []*models.Branch {
 	data.viewMu.Lock()
 	defer data.viewMu.Unlock()
 
-	for i, r := range req {
+	// for i, r := range req {
+	for i, r := range req.List {
 		b := getBranch(r.Path)
 		// re[i] = parseBranch(b, false)
 		re[i] = parseBranch(b, true)
@@ -120,7 +123,7 @@ func GetUpdate(req []models.Request) []*models.Branch {
 		helpers.SortBySizeThenName(re[i].Content)
 
 		// re[i].Content = helpers.LimitSlice(re[i].Content, pageSize*r.Pages)
-		filterBranchCont(re[i], r)
+		filterBranchCont(re[i], r.Pages, req.Filters)
 	}
 
 	return re

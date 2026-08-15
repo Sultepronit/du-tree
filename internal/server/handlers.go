@@ -87,13 +87,13 @@ func handleDir(w http.ResponseWriter, r *http.Request) {
 
 func handleUpdate(w http.ResponseWriter, r *http.Request) {
 	// log.Println(r.URL.Path)
-	var req []models.Request
+	// var req []models.Request
+	var req models.UpdateReq
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Bad JSON", 400)
 		return
 	}
 	// fmt.Println(req)
-	// sendResult(w, du.GetUpdate(req))
 	sendResult(w, scanner.GetUpdate(req))
 }
 
