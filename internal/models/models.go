@@ -80,6 +80,8 @@ type Branch struct {
 	Temp         int8    `json:"temp,omitempty"`
 	IsFiltered   bool    `json:"isFiltered,omitempty"`
 	Content      []*Node `json:"content,omitempty"`
+	HiddenItems  int     `json:"hiddenItems,omitempty"`
+	HiddenSize   int64   `json:"hiddenSize,omitempty"`
 }
 
 func (n *Node) GetName() string { return n.Name }

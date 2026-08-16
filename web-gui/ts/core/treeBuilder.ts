@@ -30,7 +30,7 @@ export function filterTree() {
 
 document.addEventListener("filter-update", filterTree)
 
-function prepareBranchData(data: DataBranch, pages = 1) {
+function prepareBranchData(data: DataBranch) {
     if (data.name === "" && data.content[0].size > max) {
         max = data.content[0].size
         document.documentElement.style.setProperty("--max-size", (max / 100).toString())
@@ -74,7 +74,8 @@ export function createBranch(data: DataBranch, prePath: string): DocumentFragmen
     // const { filtered } = prepareBranchData(data)
     prepareBranchData(data)
 
-    const filtered = data.isFiltered ? data : filterBranchCont(data)
+    // const filtered = data.isFiltered ? data : filterBranchCont(data)
+    const filtered = filterBranchCont(data)
 
     const viewNodesIndex = new Map<string, ViewNode>()
 

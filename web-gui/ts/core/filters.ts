@@ -37,6 +37,7 @@ export function getFilters() {
 export function filterBranchCont(branch: DataBranch): DataBranch {
     // if (!filters) return branch.content
     if (!filters) return branch
+    if (branch.isFiltered) return branch
 
     // const content = [] as DataNode[]
     // branch.filteredItems = 0
