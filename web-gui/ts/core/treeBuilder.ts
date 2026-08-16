@@ -18,45 +18,17 @@ let rootPath = ""
 export function filterTree() {
     console.log("filter")
     for (const [name, b] of Object.entries(branches)) {
-        // console.log(b)
-        // const filtered = filterBranchCont(b.data).slice(0, b.pages * pageSize)
-        // const filtered = filterBranchCont({ content: b.data, size: b.size })
-        // console.log(filtered)
-        // // updateBranch({ name, content: filtered.content }, false)
-        // updateBranch({ name, ...filtered }, false)
         updateBranch({ name, content: b.data, size: b.size }, false)
     }
 }
 
 document.addEventListener("filter-update", filterTree)
 
-function prepareBranchData(data: DataBranch) {
+function setMax(data: DataBranch) {
     if (data.name === "" && data.content[0].size > max) {
         max = data.content[0].size
         document.documentElement.style.setProperty("--max-size", (max / 100).toString())
     }
-
-    // const filtered = data.isFiltered ? data : filterBranchCont(data)
-
-    // const viewBranch = {
-    //     size: data.size,
-    //     data: data.content,
-    //     hiddenItems: filtered.hiddenItems,
-    //     hiddenSize: filtered.hiddenSize
-    // } as ViewBranch
-
-    // if (!data.isFiltered) viewBranch.isFull = true
-
-    // const length = pages * pageSize
-    // if (filtered.content.length > length) {
-    //     viewBranch.filtered = filtered.content
-    //     // viewBranch.forView = filtered.content.slice(0, length)
-    // } else {
-    //     viewBranch.filtered = null
-    //     // viewBranch.forView = filtered.content
-    // }
-
-    // return viewBranch
 }
 
 function genFilteredOutName(count: number) {
@@ -71,10 +43,8 @@ export function createBranch(data: DataBranch, prePath: string): DocumentFragmen
         return templ.content
     }
 
-    // const { filtered } = prepareBranchData(data)
-    prepareBranchData(data)
+    setMax(data)
 
-    // const filtered = data.isFiltered ? data : filterBranchCont(data)
     const filtered = filterBranchCont(data)
 
     const viewNodesIndex = new Map<string, ViewNode>()
@@ -103,11 +73,16 @@ export function createBranch(data: DataBranch, prePath: string): DocumentFragmen
             type: "_filt"
         } as DataNode
     }
-    lis.push(createLi(viewBranch.hiddenSummary.data, path, rootPath))
-
     branches[path] = viewBranch
-
     console.log("branches:", branches)
+
+    lis.push(createLi(viewBranch.hiddenSummary.data, path, rootPath))
+    lis.push(`<li class="show-more">
+        <span class="so-far">${data.content.length}/${data.contentCount}</span>
+        <button name="add-more" data-path="${path}" data-pages="1">
+            Show more
+        </button>
+    </li>`)
 
     templ.innerHTML = `<ul class="dir-content" data-path="${path}">${lis.join("")}</ul>`
 
@@ -233,7 +208,6 @@ function selectElements(viewBranch: ViewBranch, dataBranch: DataBranch) {
             viewBranch.viewNodesIndex.set(shoot.dataset.name, node)
         } else if (shoot.classList.contains("t_filt")) {
             viewBranch.hiddenSummary.shoot = shoot
-            // console.log(branch.hiddenSummary)
         } else {
             console.warn("No node found for:", shoot.dataset.name)
         }
@@ -241,29 +215,40 @@ function selectElements(viewBranch: ViewBranch, dataBranch: DataBranch) {
 }
 
 // function updateBranch(branchUpdate: DataNode, forcefully = false) {
-function updateBranch(inputDataBranch: DataBranch, newData = true) {
-    if (!inputDataBranch?.content) return // user navigates dirs before scan
+function updateBranch(inputData: DataBranch, newData = true) {
+    if (!inputData?.content) return
 
-    console.log("branch update:", inputDataBranch)
+    console.log("branch update:", inputData)
 
-    const branch = branches[inputDataBranch.name]
+    const branch = branches[inputData.name]
     // console.log("branch:", branch)
 
-    const filtered = filterBranchCont(inputDataBranch)
+    const filtered = filterBranchCont(inputData)
     branch.filtered = filtered.content
-    const actual = filtered.content.slice(0, branch.pages * pageSize)
+    // const actual = filtered.content.slice(0, branch.pages * pageSize)
 
-    // refactor this
-    // let actual: DataNode[]
-    // let actualDataBranch: DataBranch
     if (newData) {
-        branch.size = inputDataBranch.size
-        branch.data = inputDataBranch.content
+        branch.size = inputData.size
+        branch.data = inputData.content
+        setMax(inputData)
     }
 
-    selectElements(branch, inputDataBranch)
+    selectElements(branch, inputData)
 
     branch.ul.style.display = "none"
+
+    let actual = filtered.content
+    const contLen = branch.pages * pageSize
+    const showMoreLi = branch.ul.lastElementChild as HTMLElement
+    if (inputData.contentCount || filtered.content.length > contLen) {
+        showMoreLi.hidden = false
+        actual = filtered.content.slice(0, contLen)
+        console.log(showMoreLi)
+        const soFar = showMoreLi.querySelector(".so-far")
+        soFar.textContent = `${contLen}/${inputData.contentCount || filtered.content.length}`
+    } else {
+        showMoreLi.hidden = true
+    }
 
     // to separate function!
     if (branch.hiddenItems !== filtered.hiddenItems) {
@@ -301,7 +286,8 @@ function updateBranch(inputDataBranch: DataBranch, newData = true) {
             }
         }
 
-        branch.ul.lastElementChild.insertAdjacentHTML("beforebegin", lis.join(""))
+        // branch.ul.lastElementChild.insertAdjacentHTML("beforebegin", lis.join(""))
+        branch.hiddenSummary.shoot.closest("li").insertAdjacentHTML("beforebegin", lis.join(""))
     }
 
     const store = new DocumentFragment()
@@ -356,7 +342,7 @@ function updateBranch(inputDataBranch: DataBranch, newData = true) {
     // console.log(store.childNodes)
     // reset shoots
     // actual.forEach((data, i) => {
-    for (let i = 0; i < branch.ul.childNodes.length - 1; i++) {
+    for (let i = 0; i < branch.ul.childNodes.length - 2; i++) {
         if (i >= actual.length) {
             const liContShoot = branch.ul.childNodes[i].childNodes[0]
             if (liContShoot instanceof HTMLDivElement) store.appendChild(liContShoot)
