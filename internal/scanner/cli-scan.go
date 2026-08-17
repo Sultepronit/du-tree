@@ -36,7 +36,7 @@ func InitCLI(path string, options models.ReqOptions) {
 
 	Init(models.Request{
 		Path:    working,
-		Pages:   1,
+		Limit:   50,
 		Options: options,
 	})
 }

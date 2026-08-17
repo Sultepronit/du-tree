@@ -67,10 +67,10 @@ export type ViewBranch = {
     filtered?: DataNode[]
     hiddenItems?: number
     hiddenSize?: number
-    pages?: number
+    // limit?: number
     // dataNodesIndex: Map<string, DataNode>
     viewNodesIndex: Map<string, ViewNode>
     hiddenSummary?: ViewNode
-    showMore?: HTMLLIElement
+    // showMore?: HTMLLIElement
     ul?: HTMLUListElement
 }

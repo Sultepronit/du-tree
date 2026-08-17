@@ -82,7 +82,7 @@ func PresentDir(path string, req models.Request) (*models.Branch, error) {
 	// 	re.Content = re.Content[:contLen]
 	// }
 	// filterBranchCont(res, req)
-	filterBranchCont(res, req.Pages, req.Filters)
+	filterBranchCont(res, req.Limit, req.Filters)
 
 	return res, nil
 }
@@ -123,7 +123,7 @@ func GetUpdate(req models.UpdateReq) []*models.Branch {
 		helpers.SortBySizeThenName(re[i].Content)
 
 		// re[i].Content = helpers.LimitSlice(re[i].Content, pageSize*r.Pages)
-		filterBranchCont(re[i], r.Pages, req.Filters)
+		filterBranchCont(re[i], r.Limit, req.Filters)
 	}
 
 	return re

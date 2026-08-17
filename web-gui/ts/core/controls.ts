@@ -5,12 +5,12 @@ import type { DataBranch, DataNode, ReqOptions } from "../types"
 import { getFilters } from "./filters"
 import { disablePathInput, enablePathInput, handlePathInput } from "./pathInput"
 import {
-    appendBranch,
     createBranch,
     buildTree,
     updateTree,
     simulateScan,
-    resetTree
+    resetTree,
+    updateBranch
 } from "./treeBuilder"
 
 const optionsForm = document.getElementById("options") as HTMLFormElement
@@ -22,6 +22,7 @@ const treeRoot = document.getElementById("tree-root") as HTMLElement
 
 export { autoExit }
 
+const baceLimit = 50
 let rootPath = ""
 
 // page close
@@ -115,43 +116,16 @@ function getOptions() {
     return options
 }
 
-// function getFilters() {
-//     return {
-//         showHidden: filtersForm["show-hidden"].checked
-//     }
-// }
-
 export async function initTree(path: string, initScan = true) {
     rootPath = path
     status.set("scanning")
-
-    // const options = {} as ReqOptions
-    // if (useBlockSize.checked) {
-    // if (optionsForm["size-type"].value === "block") {
-    //     options.blockSize = true
-    // }
-
-    // const options = {
-    //     blockSize: optionsForm["size-type"].value === "block",
-    //     // excludeHidden: optionsForm["exclude-hidden"].checked,
-    //     oneFS: optionsForm["one-fs"].checked
-    //     // excludeHidden: exc.hidden,
-    //     // exPatt: exc.patterns
-    // } as ReqOptions
-
-    // if (optionsForm.exclude.checked === true) {
-    //     const exc = excluded.get()
-    //     console.log(exc)
-    //     options.excludeHidden = exc.hidden
-    //     options.exPatt = exc.patterns as string[]
-    // }
 
     const req = initScan ? "/scan" : "/dir"
     // yes, if "/dir" case options mean nothing
     // const data = (await doFetch("/scan", {
     const data = (await doFetch(req, {
         path,
-        pages: 1,
+        limit: baceLimit,
         options: getOptions(),
         filters: getFilters()
     })) as DataNode
@@ -211,19 +185,17 @@ async function cancel() {
 }
 document.getElementById("cancel").addEventListener("click", cancel)
 
-let updateList = [] as { path: string; pages: number }[]
-let updateFilterList = [] as { path: string; pages: number }[]
+let updateList = [] as { path: string; limit: number }[]
+let updateFilterList = [] as { path: string; limit: number }[]
 
-async function update(sortUpdate = false) {
+async function update() {
     await new Promise(resolve => setTimeout(resolve, interval))
     if (interval < 900) interval += 100
-    // const updates = await doFetch("/update", updateList)
-    const options = {
-        filters: getFilters(),
-        list: sortUpdate ? updateFilterList : updateList
-    }
 
-    const updates = await doFetch("/update", options)
+    const updates = await doFetch("/update", {
+        filters: getFilters(),
+        list: updateList
+    })
 
     // console.log(updates)
     if (!updates) {
@@ -246,23 +218,29 @@ async function update(sortUpdate = false) {
 
 async function sortUpdate() {
     if (updateFilterList.length < 1) return
-    const updates = await doFetch("/update", {
-        filters: getFilters(),
-        list: updateFilterList
-    })
+    // const updates = await doFetch("/update", {
+    //     filters: getFilters(),
+    //     list: updateFilterList
+    // })
 
-    if (!updates) {
-        return
+    // if (!updates) {
+    //     return
+    // }
+
+    // updateTree(updates)
+    // sanitizeUpdateList(updates)
+    for (const req of updateFilterList) {
+        const data = (await doFetch("/dir", { ...req, filters: getFilters() })) as DataNode
+        console.log(data)
+        data.name = req.path
+        updateBranch(data)
     }
-
-    updateTree(updates)
-    sanitizeUpdateList(updates)
 }
 
 document.addEventListener("filter-update", sortUpdate)
 
 function initUpdates() {
-    updateList = [{ path: "", pages: 1 }]
+    updateList = [{ path: "", limit: baceLimit }]
     updateFilterList = []
     interval = 200
     update()
@@ -271,11 +249,10 @@ function initUpdates() {
 function populateUpdateList(data: DataBranch, prePath: string, dirname: string) {
     const path = prePath ? `${prePath}/${dirname}` : dirname
     if (status.get() === "scanning" && data.temp) {
-        updateList.push({ path, pages: 1 })
+        updateList.push({ path, limit: baceLimit })
     }
     if (data.isFiltered) {
-        updateFilterList.push({ path, pages: 1 })
-        console.log(updateFilterList)
+        updateFilterList.push({ path, limit: baceLimit })
     }
 }
 
@@ -285,14 +262,20 @@ function sanitizeUpdateList(results: DataNode[]) {
 
 async function addMore(button: HTMLButtonElement) {
     const path = rootPath + button.dataset.path
-    const pages = Number(button.dataset.pages) + 1
-    const data = (await doFetch("/dir", { path, pages })) as DataNode
+    const limit = Number(button.dataset.limit) * 2
+    const data = (await doFetch("/dir", { path, limit, filters: getFilters() })) as DataNode
     console.log(data)
 
-    appendBranch(data, button, pages)
+    button.dataset.limit = limit.toString()
+    // appendBranch(data, button, limit)
+
+    data.name = button.dataset.path
+    updateBranch(data)
 
     const branch = updateList.find(b => b.path === button.dataset.path)
-    if (branch) branch.pages = pages
+    if (branch) branch.limit = limit
+    const branch2 = updateFilterList.find(b => b.path === button.dataset.path)
+    if (branch2) branch2.limit = limit
 }
 
 async function unfoldDir(target: HTMLElement) {
@@ -309,7 +292,11 @@ async function unfoldDir(target: HTMLElement) {
         const path = dataset.path ? `${dataset.path}/${dataset.name}` : dataset.name
 
         // const data = (await doFetch("/dir", { path, pages: 1 })) as DataNode
-        const data = (await doFetch("/dir", { path, pages: 1 })) as DataBranch
+        const data = (await doFetch("/dir", {
+            path,
+            limit: baceLimit,
+            filters: getFilters()
+        })) as DataBranch
         console.log("dir:", data)
 
         if (dataset.name !== data.name) {

@@ -4,7 +4,7 @@ import (
 	"du-tree/internal/models"
 )
 
-var pageSize = 100
+// var pageSize = 100
 
 // func filter(input []*models.Node, filters models.ReqFilters) []*models.Node {
 // func filter(br *models.Branch, filters models.ReqFilters) []*models.Node {
@@ -44,21 +44,14 @@ func filter(br *models.Branch, filters models.ReqFilters) {
 }
 
 // func filterBranchCont(br *models.Branch, req models.Request) {
-func filterBranchCont(br *models.Branch, pages int, flters models.ReqFilters) {
-	// contLen := pageSize * req.Pages
-	contLen := pageSize * pages
-	// fmt.Println(req.Filters)
-	// helpers.TempPrinAsJson(req.Filters)
-	if len(br.Content) > contLen*2 {
+func filterBranchCont(br *models.Branch, limit int, flters models.ReqFilters) {
+	if len(br.Content) > limit {
 		br.IsFiltered = true
-		// cont := filter(br.Content, req.Filters)
-		// cont := filter(br.Content, flters)
-		// cont := filter(br, flters)
 		filter(br, flters)
 
-		if len(br.Content) > contLen {
+		if len(br.Content) > limit {
 			br.ContentCount = len(br.Content)
-			br.Content = br.Content[:contLen]
+			br.Content = br.Content[:limit]
 		}
 	}
 }

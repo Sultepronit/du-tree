@@ -7,7 +7,8 @@ const totalSize = document.getElementById("total-size") as HTMLDivElement
 const totalLocked = document.getElementById("lock-widget") as HTMLDivElement
 const treeBlock = document.getElementById("tree")!
 
-const pageSize = 100
+// const pageSize = 100
+const baceLimit = 50
 
 let max = 1
 
@@ -51,7 +52,7 @@ export function createBranch(data: DataBranch, prePath: string): DocumentFragmen
 
     const lis = [] as string[]
     const path = prePath ? `${prePath}/${data.name}` : data.name
-    for (const n of filtered.content.slice(0, pageSize)) {
+    for (const n of filtered.content) {
         viewNodesIndex.set(n.name, { data: n })
         lis.push(createLi(n, path, rootPath))
     }
@@ -60,7 +61,7 @@ export function createBranch(data: DataBranch, prePath: string): DocumentFragmen
         size: data.size,
         data: data.content,
         filtered: filtered.content,
-        pages: 1,
+        // limit: baceLimit,
         viewNodesIndex,
         hiddenItems: filtered.hiddenItems,
         hiddenSize: filtered.hiddenSize
@@ -74,12 +75,12 @@ export function createBranch(data: DataBranch, prePath: string): DocumentFragmen
         } as DataNode
     }
     branches[path] = viewBranch
-    console.log("branches:", branches)
+    // console.log("branches:", branches)
 
     lis.push(createLi(viewBranch.hiddenSummary.data, path, rootPath))
-    lis.push(`<li class="show-more">
+    lis.push(`<li class="show-more" hidden="${data.contentCount > 0}">
         <span class="so-far">${data.content.length}/${data.contentCount}</span>
-        <button name="add-more" data-path="${path}" data-pages="1">
+        <button name="add-more" data-path="${path}" data-limit="${baceLimit}">
             Show more
         </button>
     </li>`)
@@ -90,40 +91,40 @@ export function createBranch(data: DataBranch, prePath: string): DocumentFragmen
 }
 
 // export function appendBranch(data: DataNode, button: HTMLButtonElement, pages: number) {
-export function appendBranch(data: DataBranch, button: HTMLButtonElement, pages: number) {
-    const oldNodesCount = (pages - 1) * pageSize
-    const newNodes = data.content.slice(oldNodesCount)
-    // console.log(oldNodesCount, newNodes)
+// export function appendBranch(data: DataBranch, button: HTMLButtonElement, pages: number) {
+//     const oldNodesCount = (pages - 1) * pageSize
+//     const newNodes = data.content.slice(oldNodesCount)
+//     // console.log(oldNodesCount, newNodes)
 
-    const shortPath = button.dataset.path
-    const lis = newNodes.map(entry => createLi(entry, shortPath, rootPath))
+//     const shortPath = button.dataset.path
+//     const lis = newNodes.map(entry => createLi(entry, shortPath, rootPath))
 
-    const buttonLi = button.closest("li") as HTMLLIElement
+//     const buttonLi = button.closest("li") as HTMLLIElement
 
-    data.name = shortPath
-    updateBranch(data) // update old pages
-    buttonLi.insertAdjacentHTML("beforebegin", lis.join("")) // add new one
+//     data.name = shortPath
+//     updateBranch(data) // update old pages
+//     buttonLi.insertAdjacentHTML("beforebegin", lis.join("")) // add new one
 
-    const branch = branches[shortPath]
-    if (branch) {
-        branch.pages = pages // for next updates
-        // newNodes.forEach(d => branch.dataNodesIndex.set(d.name, d))
-        // branch.data.push(...newNodes) // & sort?
-        branch.data = data.content
-        for (const n of newNodes) {
-            branch.viewNodesIndex.set(n.name, { data: n })
-        }
-    }
+//     const branch = branches[shortPath]
+//     if (branch) {
+//         branch.limit = pages // for next updates
+//         // newNodes.forEach(d => branch.dataNodesIndex.set(d.name, d))
+//         // branch.data.push(...newNodes) // & sort?
+//         branch.data = data.content
+//         for (const n of newNodes) {
+//             branch.viewNodesIndex.set(n.name, { data: n })
+//         }
+//     }
 
-    if (!data.contentCount) {
-        buttonLi.remove()
-        return
-    }
-    button.dataset.pages = pages.toString()
-    const soFar = buttonLi.querySelector(".so-far")
-    // soFar.textContent = (pages * pageSize).toString()
-    soFar.textContent = `${pages * pageSize}/${data.contentCount}`
-}
+//     if (!data.contentCount) {
+//         buttonLi.remove()
+//         return
+//     }
+//     button.dataset.pages = pages.toString()
+//     const soFar = buttonLi.querySelector(".so-far")
+//     // soFar.textContent = (pages * pageSize).toString()
+//     soFar.textContent = `${pages * pageSize}/${data.contentCount}`
+// }
 
 // function updateLocked(elNode: ViewNode, oldD: DataNode, newD: DataNode) {
 function updateLocked(viewNode: ViewNode, newData: DataNode) {
@@ -215,17 +216,17 @@ function selectElements(viewBranch: ViewBranch, dataBranch: DataBranch) {
 }
 
 // function updateBranch(branchUpdate: DataNode, forcefully = false) {
-function updateBranch(inputData: DataBranch, newData = true) {
+export function updateBranch(inputData: DataBranch, newData = true) {
     if (!inputData?.content) return
 
     console.log("branch update:", inputData)
 
     const branch = branches[inputData.name]
-    // console.log("branch:", branch)
+    console.log("branch:", branch)
 
     const filtered = filterBranchCont(inputData)
     branch.filtered = filtered.content
-    // const actual = filtered.content.slice(0, branch.pages * pageSize)
+    let actual = filtered.content
 
     if (newData) {
         branch.size = inputData.size
@@ -237,15 +238,11 @@ function updateBranch(inputData: DataBranch, newData = true) {
 
     branch.ul.style.display = "none"
 
-    let actual = filtered.content
-    const contLen = branch.pages * pageSize
     const showMoreLi = branch.ul.lastElementChild as HTMLElement
-    if (inputData.contentCount || filtered.content.length > contLen) {
+    if (inputData.contentCount) {
         showMoreLi.hidden = false
-        actual = filtered.content.slice(0, contLen)
-        console.log(showMoreLi)
         const soFar = showMoreLi.querySelector(".so-far")
-        soFar.textContent = `${contLen}/${inputData.contentCount || filtered.content.length}`
+        soFar.textContent = `${filtered.content.length}/${inputData.contentCount}`
     } else {
         showMoreLi.hidden = true
     }

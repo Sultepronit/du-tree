@@ -38,7 +38,7 @@ type ReqFilters struct {
 
 type Request struct {
 	Path    string     `json:"path,omitempty"`
-	Pages   int        `json:"pages,omitempty"`
+	Limit   int        `json:"limit,omitempty"`
 	Options ReqOptions `json:"options"`
 	Filters ReqFilters `json:"filters"`
 }
@@ -47,7 +47,7 @@ type UpdateReq struct {
 	Filters ReqFilters `json:"filters"`
 	List    []struct {
 		Path  string `json:"path,omitempty"`
-		Pages int    `json:"pages,omitempty"`
+		Limit int    `json:"limit,omitempty"`
 	} `json:"list"`
 }
 

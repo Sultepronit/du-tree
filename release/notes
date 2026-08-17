@@ -17,3 +17,4 @@ Changed [non]root indication to user@host
 refactored
 speeded up by adding gorutines for scan [and refactoring mutexes]
 implemented scan & mode time display
+changed pagination from +100 to 50->100->200->400...
