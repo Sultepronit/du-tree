@@ -78,14 +78,15 @@ export function createBranch(data: DataBranch, prePath: string): DocumentFragmen
     // console.log("branches:", branches)
 
     lis.push(createLi(viewBranch.hiddenSummary.data, path, rootPath))
-    lis.push(`<li class="show-more" hidden="${data.contentCount > 0}">
-        <span class="so-far">${data.content.length}/${data.contentCount}</span>
-        <button name="add-more" data-path="${path}" data-limit="${baceLimit}">
-            Show more
-        </button>
-    </li>`)
+    lis.push(`<li class="show-more" ${data.contentCount ? "" : "hidden"}>
+    <span class="so-far">${data.content.length}/${data.contentCount}</span>
+    <button name="add-more" data-path="${path}" data-limit="${baceLimit}">
+        Show more
+    </button>
+</li>`)
 
-    templ.innerHTML = `<ul class="dir-content" data-path="${path}">${lis.join("")}</ul>`
+    templ.innerHTML = `<ul class="dir-content${filtered.hiddenItems ? "" : " no-filtered"}"
+data-path="${path}">${lis.join("")}</ul>`
 
     return templ.content
 }
@@ -338,18 +339,18 @@ export function updateBranch(inputData: DataBranch, newData = true) {
     })
     // console.log(store.childNodes)
     // reset shoots
-    // actual.forEach((data, i) => {
-    for (let i = 0; i < branch.ul.childNodes.length - 2; i++) {
-        if (i >= actual.length) {
-            const liContShoot = branch.ul.childNodes[i].childNodes[0]
-            if (liContShoot instanceof HTMLDivElement) store.appendChild(liContShoot)
-            continue
-        }
-        const data = actual[i]
+    actual.forEach((data, i) => {
+        // for (let i = 0; i < branch.ul.childNodes.length - 2; i++) {
+        //     if (i >= actual.length) {
+        //         const liContShoot = branch.ul.childNodes[i].childNodes[0]
+        //         if (liContShoot instanceof HTMLDivElement) store.appendChild(liContShoot)
+        //         continue
+        //     }
+        //     const data = actual[i]
 
         // if (!branch.dataNodesIndex.has(data.name)) {
-        // if (branch.viewNodesIndex.has(data.name)) return
-        if (branch.viewNodesIndex.has(data.name)) continue
+        if (branch.viewNodesIndex.has(data.name)) return
+        // if (branch.viewNodesIndex.has(data.name)) continue
         // console.log("reset:", data.name)
         let shootEl = branch.ul.childNodes[i].childNodes[0] as HTMLDivElement
         if (!shootEl) {
@@ -371,8 +372,16 @@ export function updateBranch(inputData: DataBranch, newData = true) {
 
         resetShoot(viewNode, data)
         console.log("reset")
-        // })
+    })
+    // }
+
+    // remove shoots
+    for (let i = actual.length; i < branch.ul.childNodes.length - 2; i++) {
+        const liContShoot = branch.ul.childNodes[i].childNodes[0]
+        if (liContShoot instanceof HTMLDivElement) store.appendChild(liContShoot)
     }
+    // const lis = Array.from(branch.ul.childNodes)
+    // for (let i = actual.length; i < lis.length - 2; i++)
 
     branch.ul.style.display = ""
     // console.log(store.childNodes)
