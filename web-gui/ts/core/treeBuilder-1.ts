@@ -1,12 +1,13 @@
 import formatSize from "../utils/formatSize"
 import type { DataNode, ViewNode, ViewBranch, DataBranch } from "../types"
-import { createLi, genLockedDetails, genTitle, genVoidLi, handleBytesExt } from "./treeTemplates"
+import { createLi, genLockedDetails, genTitle, handleBytesExt } from "./treeTemplates"
 import { filterBranchCont } from "./filters"
 
 const totalSize = document.getElementById("total-size") as HTMLDivElement
 const totalLocked = document.getElementById("lock-widget") as HTMLDivElement
 const treeBlock = document.getElementById("tree")!
 
+// const pageSize = 100
 const baceLimit = 50
 
 let max = 1
@@ -89,6 +90,42 @@ export function createBranch(data: DataBranch, prePath: string): DocumentFragmen
     return templ.content
 }
 
+// export function appendBranch(data: DataNode, button: HTMLButtonElement, pages: number) {
+// export function appendBranch(data: DataBranch, button: HTMLButtonElement, pages: number) {
+//     const oldNodesCount = (pages - 1) * pageSize
+//     const newNodes = data.content.slice(oldNodesCount)
+//     // console.log(oldNodesCount, newNodes)
+
+//     const shortPath = button.dataset.path
+//     const lis = newNodes.map(entry => createLi(entry, shortPath, rootPath))
+
+//     const buttonLi = button.closest("li") as HTMLLIElement
+
+//     data.name = shortPath
+//     updateBranch(data) // update old pages
+//     buttonLi.insertAdjacentHTML("beforebegin", lis.join("")) // add new one
+
+//     const branch = branches[shortPath]
+//     if (branch) {
+//         branch.limit = pages // for next updates
+//         // newNodes.forEach(d => branch.dataNodesIndex.set(d.name, d))
+//         // branch.data.push(...newNodes) // & sort?
+//         branch.data = data.content
+//         for (const n of newNodes) {
+//             branch.viewNodesIndex.set(n.name, { data: n })
+//         }
+//     }
+
+//     if (!data.contentCount) {
+//         buttonLi.remove()
+//         return
+//     }
+//     button.dataset.pages = pages.toString()
+//     const soFar = buttonLi.querySelector(".so-far")
+//     // soFar.textContent = (pages * pageSize).toString()
+//     soFar.textContent = `${pages * pageSize}/${data.contentCount}`
+// }
+
 // function updateLocked(elNode: ViewNode, oldD: DataNode, newD: DataNode) {
 function updateLocked(viewNode: ViewNode, newData: DataNode) {
     // if (oldD.locked === newD.locked) return
@@ -106,20 +143,15 @@ function updateLocked(viewNode: ViewNode, newData: DataNode) {
 
 // function updateShootSize(viewNode: ViewNode, oldD: DataNode | null, newD: DataNode) {
 function updateShootSize(viewNode: ViewNode, newData: DataNode) {
-    console.log(newData.name, viewNode.data.size, newData.size)
     // if (oldD?.size !== newData.size) {
     if (viewNode.data.size !== newData.size) {
         viewNode.shoot.style.setProperty("--size", `${newData.size}%`)
-        // if (!viewNode.sizeVidget) viewNode.sizeVidget = viewNode.shoot.querySelector(".fd-size")
-        if (!viewNode.sizeVidget)
-            viewNode.sizeVidget = viewNode.shoot.children[0].children[1] as HTMLDivElement
+        if (!viewNode.sizeVidget) viewNode.sizeVidget = viewNode.shoot.querySelector(".fd-size")
         viewNode.sizeVidget.textContent = handleBytesExt(newData)
         viewNode.sizeVidget.title = `${newData.size} B`
         // } else if (oldD?.temp !== newData.temp || oldD?.locked !== newData.locked) {
     } else if (viewNode.data.temp !== newData.temp || viewNode.data.locked !== newData.locked) {
-        // if (!viewNode.sizeVidget) viewNode.sizeVidget = viewNode.shoot.querySelector(".fd-size")
-        if (!viewNode.sizeVidget)
-            viewNode.sizeVidget = viewNode.shoot.children[0].children[1] as HTMLDivElement
+        if (!viewNode.sizeVidget) viewNode.sizeVidget = viewNode.shoot.querySelector(".fd-size")
         viewNode.sizeVidget.textContent = handleBytesExt(newData)
     }
 
@@ -135,39 +167,6 @@ function updateShootSize(viewNode: ViewNode, newData: DataNode) {
     }
 }
 
-// function setShoot(viewNode: ViewNode, data: DataNode) {
-//     const classes = [`shoot t${data.type}`]
-//     if (data.locked) {
-//         classes.push("locked")
-//         if (data.locked === -1) classes.push("itself")
-//     } else if (data.nlink) {
-//         classes.push("hardlink")
-//         if (data.isNeglected) classes.push("neglected")
-//     }
-//     viewNode.shoot.className = classes.join(" ")
-
-//     viewNode.shoot.dataset.name = data.name
-//     if (!viewNode.nameVidget) {
-//         viewNode.nameVidget = viewNode.shoot.children[0].children[2] as HTMLDivElement
-//     }
-//     viewNode.nameVidget.textContent = data.name
-
-//     updateShootSize(viewNode, data)
-//     viewNode.shoot.title = genTitle(data, viewNode.shoot.dataset.path, rootPath)
-//     viewNode.data = data
-// }
-
-// function createLi2(data: DataNode) {
-//     const li = genVoidLi()
-//     const viewNode = {
-//         data: {},
-//         shoot: li.children[0]
-//     } as ViewNode
-//     setShoot(viewNode, data)
-
-//     return { li, viewNode }
-// }
-
 function resetShoot(viewNode: ViewNode, data: DataNode) {
     delete viewNode.shoot.dataset.nested
     viewNode.shoot.querySelector("ul")?.remove() // remove the branch too?
@@ -180,10 +179,6 @@ function resetShoot(viewNode: ViewNode, data: DataNode) {
         classes.push("hardlink")
         if (data.isNeglected) classes.push("neglected")
     }
-    // if (data.temp) {
-    //     classes.push("temp")
-    //     if (data.temp === 2) classes.push("unavailable")
-    // }
     viewNode.shoot.className = classes.join(" ")
 
     viewNode.shoot.dataset.name = data.name
@@ -205,51 +200,22 @@ function selectElements(viewBranch: ViewBranch, dataBranch: DataBranch) {
 
     viewBranch.store = new DocumentFragment()
 
-    // const shootEls = viewBranch.ul.querySelectorAll(
-    //     `.shoot[data-path="${dataBranch.name}"]`
-    // ) as NodeListOf<HTMLDivElement>
+    const shootEls = viewBranch.ul.querySelectorAll(
+        `.shoot[data-path="${dataBranch.name}"]`
+    ) as NodeListOf<HTMLDivElement>
 
-    // shootEls.forEach(shoot => {
-    //     const node = viewBranch.viewNodesIndex.get(shoot.dataset.name)
-    //     if (node) {
-    //         node.shoot = shoot
-    //         viewBranch.viewNodesIndex.set(shoot.dataset.name, node)
-    //     } else if (shoot.classList.contains("t_filt")) {
-    //         viewBranch.hiddenSummary.shoot = shoot
-    //     } else {
-    //         console.warn("No node found for:", shoot.dataset.name)
-    //     }
-    // })
-
-    for (let i = 0; i < viewBranch.ul.children.length - 2; i++) {
-        const shoot = viewBranch.ul.children[i].children[0] as HTMLDivElement
-        // console.log(shoot)
+    shootEls.forEach(shoot => {
         const node = viewBranch.viewNodesIndex.get(shoot.dataset.name)
         if (node) {
             node.shoot = shoot
             viewBranch.viewNodesIndex.set(shoot.dataset.name, node)
+        } else if (shoot.classList.contains("t_filt")) {
+            viewBranch.hiddenSummary.shoot = shoot
         } else {
             console.warn("No node found for:", shoot.dataset.name)
         }
-    }
-
-    viewBranch.hiddenSummary.shoot = viewBranch.ul.children[viewBranch.ul.children.length - 2]
-        .children[0] as HTMLDivElement
+    })
 }
-
-// function collectShoots(viewBranch: ViewBranch, start: number) {
-//     for (let i = 0; i < viewBranch.ul.children.length - 2; i++) {
-//         const shoot = viewBranch.ul.children[i].children[0] as HTMLDivElement
-//         console.log(shoot)
-//         const node = viewBranch.viewNodesIndex.get(shoot.dataset.name)
-//         if (node) {
-//             node.shoot = shoot
-//             viewBranch.viewNodesIndex.set(shoot.dataset.name, node)
-//         } else {
-//             console.warn("No node found for:", shoot.dataset.name)
-//         }
-//     }
-// }
 
 function updateHidden(branch: ViewBranch, filtered: DataBranch) {
     if (branch.hiddenItems !== filtered.hiddenItems) {
@@ -263,6 +229,7 @@ function updateHidden(branch: ViewBranch, filtered: DataBranch) {
 
         // branch.ul.classList.remove("no-filtered")
         branch.hiddenSummary.shoot.hidden = false
+        console.log(branch.ul.classList)
 
         resetShoot(branch.hiddenSummary, {
             name: genFilteredOutName(branch.hiddenItems),
@@ -286,7 +253,7 @@ export function updateBranch(inputData: DataBranch, newData = true) {
     console.log("branch update:", inputData)
 
     const branch = branches[inputData.name]
-    // console.log("branch:", branch)
+    console.log("branch:", branch)
 
     const filtered = filterBranchCont(inputData)
     branch.filtered = filtered.content
@@ -313,34 +280,22 @@ export function updateBranch(inputData: DataBranch, newData = true) {
 
     updateHidden(branch, filtered)
 
-    // if (branch.viewNodesIndex.size < actual.length) {
-    //     const lis = [] as string[]
-    //     for (const n of actual) {
-    //         if (!branch.viewNodesIndex.has(n.name)) {
-    //             // newNodes.push(n)
-    //             branch.viewNodesIndex.set(n.name, { data: n })
-    //             lis.push(createLi(n, branch.ul.dataset.path, rootPath))
-    //         }
-    //     }
-    //     // console.log(branch.ul.children[branch.ul.children.length - 3])
-    //     // console.log(branch.hiddenSummary.shoot.closest("li"))
-    //     // branch.hiddenSummary.shoot.closest("li").insertAdjacentHTML("beforebegin", lis.join(""))
-    //     branch.ul.children[branch.ul.children.length - 3].insertAdjacentHTML(
-    //         "afterend",
-    //         lis.join("")
-    //     )
-    // }
+    if (branch.viewNodesIndex.size < actual.length) {
+        const lis = [] as string[]
+        for (const n of actual) {
+            if (!branch.viewNodesIndex.has(n.name)) {
+                // newNodes.push(n)
+                branch.viewNodesIndex.set(n.name, { data: n })
+                lis.push(createLi(n, branch.ul.dataset.path, rootPath))
+            }
+        }
+
+        branch.hiddenSummary.shoot.closest("li").insertAdjacentHTML("beforebegin", lis.join(""))
+    }
 
     // const store = new DocumentFragment()
-    // update exhisting shoots & clreate new lis
-    const lastLiIdx = branch.ul.children.length - 2
-    const filterOutLi = branch.ul.children[lastLiIdx]
-    branch.filtered.forEach((data, i) => {
-        if (i >= lastLiIdx) {
-            // branch.ul.children[lastLiIdx++]
-            // branch.ul.insertBefore(genVoidLi(), branch.hiddenItems)
-            filterOutLi.before(genVoidLi())
-        }
+    // update exhisting shoots
+    actual.forEach((data, i) => {
         const found = branch.viewNodesIndex.get(data.name)
         if (!found) return
 
@@ -388,8 +343,7 @@ export function updateBranch(inputData: DataBranch, newData = true) {
         if (viewNode) branch.viewNodesIndex.delete(shootEl.dataset.name)
         else {
             console.warn("No node found for:", shootEl.dataset.name)
-            // viewNode = { data, shoot: shootEl }
-            viewNode = { data: {} as DataNode, shoot: shootEl }
+            viewNode = { data, shoot: shootEl }
         }
         branch.viewNodesIndex.set(data.name, viewNode)
 
@@ -443,8 +397,6 @@ export function buildTree(data: DataBranch, path: string) {
     rootPath = path
     updateTreeRoot(data)
     treeBlock.appendChild(createBranch(data, ""))
-
-    // console.log(createLi2(data.content[0]))
 }
 
 export function simulateScan() {

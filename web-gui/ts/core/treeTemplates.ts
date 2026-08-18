@@ -97,3 +97,23 @@ export function createLi(data: DataNode, path: string, rootPath: string): string
             </div>
     </div></li>`
 }
+
+const voidLi = (() => {
+    const template = document.createElement("template")
+    template.innerHTML = `
+<li>
+    <div>
+        <div class="fd-entry">
+            <div class="fd-sizebar"></div>
+            <div class="fd-size"></div>
+            <div class="fd-name"></div>
+        </div>
+    </div>
+</li>
+    `
+    return template.content.firstElementChild
+})()
+
+export function genVoidLi() {
+    return voidLi.cloneNode(true) as HTMLLIElement
+}
