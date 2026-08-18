@@ -63,14 +63,13 @@ export type ViewNode = {
 export type ViewBranch = {
     size: number
     data: DataNode[]
-    isFull?: true // need?
+    // isFull?: true // need?
     filtered?: DataNode[]
     hiddenItems?: number
     hiddenSize?: number
     // limit?: number
-    // dataNodesIndex: Map<string, DataNode>
     viewNodesIndex: Map<string, ViewNode>
+    store: DocumentFragment
     hiddenSummary?: ViewNode
-    // showMore?: HTMLLIElement
     ul?: HTMLUListElement
 }

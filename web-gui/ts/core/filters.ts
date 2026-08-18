@@ -14,11 +14,11 @@ function grabFilters() {
     if (!filtersForm["show-hidden"].checked) re.hideHidden = true
     if (filtersForm["more-than"].checked) re.moreThan = moreThan
     if (Object.keys(re).length < 1) {
-        document.body.classList.add("no-filters")
+        // document.body.classList.add("no-filters")
         return null
     }
 
-    document.body.classList.remove("no-filters")
+    // document.body.classList.remove("no-filters")
 
     return re
 }

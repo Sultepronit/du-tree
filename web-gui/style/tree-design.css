@@ -46,7 +46,6 @@ li {
 }
 
 .shoot {
-    /* cursor: auto; */
     position: relative;
     padding-left: 1.12em;
     margin-bottom: 0.2em;
@@ -58,9 +57,9 @@ li {
     font-style: italic;
 }
 
-.no-filtered .t_filt {
+/* .no-filtered > * > .t_filt {
     display: none;
-}
+} */
 
 .t_filt .fd-name {
     font-family: "Ubuntu", sans-serif;

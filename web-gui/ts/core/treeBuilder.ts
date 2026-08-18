@@ -16,13 +16,11 @@ let branches = {} as Record<string, ViewBranch>
 
 let rootPath = ""
 
-export function filterTree() {
-    console.log("filter")
+function filterTree() {
     for (const [name, b] of Object.entries(branches)) {
         updateBranch({ name, content: b.data, size: b.size }, false)
     }
 }
-
 document.addEventListener("filter-update", filterTree)
 
 function setMax(data: DataBranch) {
@@ -85,8 +83,9 @@ export function createBranch(data: DataBranch, prePath: string): DocumentFragmen
     </button>
 </li>`)
 
-    templ.innerHTML = `<ul class="dir-content${filtered.hiddenItems ? "" : " no-filtered"}"
-data-path="${path}">${lis.join("")}</ul>`
+    templ.innerHTML = `<ul class="dir-content" data-path="${path}">${lis.join("")}</ul>`
+
+    templ.content.querySelector<HTMLElement>(".t_filt").hidden = !filtered.hiddenItems
 
     return templ.content
 }
@@ -199,6 +198,8 @@ function selectElements(viewBranch: ViewBranch, dataBranch: DataBranch) {
 
     viewBranch.ul = treeBlock.querySelector(`ul[data-path="${dataBranch.name}"]`)
 
+    viewBranch.store = new DocumentFragment()
+
     const shootEls = viewBranch.ul.querySelectorAll(
         `.shoot[data-path="${dataBranch.name}"]`
     ) as NodeListOf<HTMLDivElement>
@@ -216,7 +217,36 @@ function selectElements(viewBranch: ViewBranch, dataBranch: DataBranch) {
     })
 }
 
-// function updateBranch(branchUpdate: DataNode, forcefully = false) {
+function updateHidden(branch: ViewBranch, filtered: DataBranch) {
+    if (branch.hiddenItems !== filtered.hiddenItems) {
+        branch.hiddenItems = filtered.hiddenItems
+        branch.hiddenSize = filtered.hiddenSize // no need to check
+        if (!branch.hiddenItems) {
+            // branch.ul.classList.add("no-filtered")
+            branch.hiddenSummary.shoot.hidden = true
+            return
+        }
+
+        // branch.ul.classList.remove("no-filtered")
+        branch.hiddenSummary.shoot.hidden = false
+        console.log(branch.ul.classList)
+
+        resetShoot(branch.hiddenSummary, {
+            name: genFilteredOutName(branch.hiddenItems),
+            type: "_filt",
+            size: branch.hiddenSize,
+            temp: 0
+        } as DataNode)
+    } else if (branch.hiddenSize !== filtered.hiddenSize) {
+        branch.hiddenSize = filtered.hiddenSize
+
+        updateShootSize(branch.hiddenSummary, {
+            size: branch.hiddenSize,
+            temp: 0
+        } as DataNode)
+    }
+}
+
 export function updateBranch(inputData: DataBranch, newData = true) {
     if (!inputData?.content) return
 
@@ -248,31 +278,7 @@ export function updateBranch(inputData: DataBranch, newData = true) {
         showMoreLi.hidden = true
     }
 
-    // to separate function!
-    if (branch.hiddenItems !== filtered.hiddenItems) {
-        branch.hiddenItems = filtered.hiddenItems
-        branch.hiddenSize = filtered.hiddenSize // no need to check
-        if (!branch.hiddenItems) {
-            branch.ul.classList.add("no-filtered")
-            // return
-        } else {
-            branch.ul.classList.remove("no-filtered")
-        }
-
-        resetShoot(branch.hiddenSummary, {
-            name: genFilteredOutName(branch.hiddenItems),
-            type: "_filt",
-            size: branch.hiddenSize,
-            temp: 0
-        } as DataNode)
-    } else if (branch.hiddenSize !== filtered.hiddenSize) {
-        branch.hiddenSize = filtered.hiddenSize
-
-        updateShootSize(branch.hiddenSummary, {
-            size: branch.hiddenSize,
-            temp: 0
-        } as DataNode)
-    }
+    updateHidden(branch, filtered)
 
     if (branch.viewNodesIndex.size < actual.length) {
         const lis = [] as string[]
@@ -284,84 +290,55 @@ export function updateBranch(inputData: DataBranch, newData = true) {
             }
         }
 
-        // branch.ul.lastElementChild.insertAdjacentHTML("beforebegin", lis.join(""))
         branch.hiddenSummary.shoot.closest("li").insertAdjacentHTML("beforebegin", lis.join(""))
     }
 
-    const store = new DocumentFragment()
+    // const store = new DocumentFragment()
     // update exhisting shoots
     actual.forEach((data, i) => {
-        // const existing = branch.dataNodesIndex.get(data.name)
         const found = branch.viewNodesIndex.get(data.name)
         if (!found) return
 
-        // let viewNode = branch.viewNodesIndex.get(data.name)
-        // if (!viewNode) {
         if (!found.shoot) {
-            // const shoot = branch.ul.querySelector(
             found.shoot = branch.ul.querySelector(
                 `.shoot[data-name="${data.name}"]`
             ) as HTMLDivElement
-            // console.log(shoot)
 
             // there is the data node but not the shoot... for some reason...
             // STILL HAPPENS???
-            // if (!shoot) {
             if (!found.shoot) {
-                // branch.dataNodesIndex.delete(data.name)
                 branch.viewNodesIndex.delete(data.name)
                 return
             }
-
-            // viewNode = { shoot }
-            // branch.viewNodesIndex.set(data.name, viewNode)
         }
-        // const shootEl = viewNode.shoot
-        const liContShoot = branch.ul.childNodes[i].childNodes[0]
+        const liContShoot = branch.ul.children[i].children[0]
 
         // if li does not contain the shoot we need
-        // if (liCont !== shootEl) {
         if (liContShoot !== found.shoot) {
             // if it contains wrong one - pull it out
-            if (liContShoot instanceof HTMLDivElement) store.appendChild(liContShoot)
+            // if (liContShoot instanceof HTMLDivElement) store.appendChild(liContShoot)
+            if (liContShoot instanceof HTMLDivElement) branch.store.appendChild(liContShoot)
             // add the right one
-            // branch.ul.childNodes[i].appendChild(shootEl)
-            branch.ul.childNodes[i].appendChild(found.shoot)
+            branch.ul.children[i].appendChild(found.shoot)
             // console.log("moved", data.name)
             console.log("moved")
         }
 
-        // updateShootSize(viewNode, found, data)
         updateShootSize(found, data)
-        // updateLocked(viewNode, found, data)
         updateLocked(found, data)
         found.data = data
     })
-    // console.log(store.childNodes)
+
     // reset shoots
     actual.forEach((data, i) => {
-        // for (let i = 0; i < branch.ul.childNodes.length - 2; i++) {
-        //     if (i >= actual.length) {
-        //         const liContShoot = branch.ul.childNodes[i].childNodes[0]
-        //         if (liContShoot instanceof HTMLDivElement) store.appendChild(liContShoot)
-        //         continue
-        //     }
-        //     const data = actual[i]
-
-        // if (!branch.dataNodesIndex.has(data.name)) {
         if (branch.viewNodesIndex.has(data.name)) return
-        // if (branch.viewNodesIndex.has(data.name)) continue
-        // console.log("reset:", data.name)
-        let shootEl = branch.ul.childNodes[i].childNodes[0] as HTMLDivElement
+        let shootEl = branch.ul.children[i].children[0] as HTMLDivElement
         if (!shootEl) {
-            shootEl = store.firstElementChild as HTMLDivElement
-            branch.ul.childNodes[i].appendChild(shootEl)
+            // shootEl = store.firstElementChild as HTMLDivElement
+            shootEl = branch.store.firstElementChild as HTMLDivElement
+            branch.ul.children[i].appendChild(shootEl)
         }
-        // const viewNode =
-        //     branch.viewNodesIndex.get(shootEl.dataset.name) ||
-        //     ({
-        //         shoot: shootEl
-        //     } as ViewNode)
+
         let viewNode = branch.viewNodesIndex.get(shootEl.dataset.name)
         if (viewNode) branch.viewNodesIndex.delete(shootEl.dataset.name)
         else {
@@ -373,18 +350,16 @@ export function updateBranch(inputData: DataBranch, newData = true) {
         resetShoot(viewNode, data)
         console.log("reset")
     })
-    // }
 
     // remove shoots
-    for (let i = actual.length; i < branch.ul.childNodes.length - 2; i++) {
-        const liContShoot = branch.ul.childNodes[i].childNodes[0]
-        if (liContShoot instanceof HTMLDivElement) store.appendChild(liContShoot)
+    for (let i = actual.length; i < branch.ul.children.length - 2; i++) {
+        const liContShoot = branch.ul.children[i].children[0]
+        // if (liContShoot instanceof HTMLDivElement) store.appendChild(liContShoot)
+        if (liContShoot instanceof HTMLDivElement) branch.store.appendChild(liContShoot)
     }
-    // const lis = Array.from(branch.ul.childNodes)
-    // for (let i = actual.length; i < lis.length - 2; i++)
 
     branch.ul.style.display = ""
-    // console.log(store.childNodes)
+    // console.log(store.children)
 }
 
 export function updateTree(bNodes: DataBranch[]) {
