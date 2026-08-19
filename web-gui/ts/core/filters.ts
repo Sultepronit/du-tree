@@ -7,7 +7,7 @@ let filters = grabFilters()
 function grabFilters() {
     const re = {} as Record<string, any>
     const moreThan = {
-        value: 2,
+        value: Number(filtersForm["more-number"].value),
         unit: "parent %"
     }
 
@@ -23,11 +23,21 @@ function grabFilters() {
     return re
 }
 
-filtersForm.addEventListener("change", () => {
+function fireFiters() {
     filters = grabFilters()
-
     document.dispatchEvent(new Event("filter-update"))
+}
+
+filtersForm.addEventListener("input", e => {
+    if (e.target === filtersForm["more-number"]) {
+        const value = Number(filtersForm["more-number"].value)
+
+        filtersForm["more-than"].checked = value > 0
+        fireFiters()
+    }
 })
+
+filtersForm.addEventListener("change", fireFiters)
 
 export function getFilters() {
     return filters
@@ -49,7 +59,7 @@ export function filterBranchCont(branch: DataBranch): DataBranch {
         hiddenSize: 0
     }
 
-    const moreThan = filtersForm["more-than"].checked ? branch.size * 0.02 : -1
+    const moreThan = filters?.moreThan?.value ? (branch.size * filters.moreThan.value) / 100 : -1
     // console.log(moreThan)
     for (const n of branch.content) {
         re.hiddenSize += n.size

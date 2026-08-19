@@ -22,6 +22,11 @@ const specialTypes = {
 
 // function genTitle(data: DataNode, path: string) {
 export function genTitle(data: DataNode, path: string, rootPath: string) {
+    if (data.type === "_filt") {
+        // return ""
+        return `${data.name}\nLocation: ${rootPath}${path}`
+    }
+
     const title = [`Name: ${data.name}`, `Location: ${rootPath}${path}`]
 
     if (data.linkPath) {

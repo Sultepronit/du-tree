@@ -79,13 +79,23 @@
 
                 <form id="filters">
                     <label>
-                        <input type="checkbox" id="show-hidden" autocomplete="on" />
+                        <input type="checkbox" id="show-hidden" checked autocomplete="on" />
                         Show hidden
                     </label>
 
                     <label>
                         <input type="checkbox" id="more-than" autocomplete="on" />
-                        > 2% of parent
+                        <!-- > 2% of parent -->
+                        >
+                        <input
+                            type="number"
+                            id="more-number"
+                            min="0"
+                            step="any"
+                            value="1"
+                            autocomplete="on"
+                        />
+                        % of parent
                     </label>
                 </form>
 

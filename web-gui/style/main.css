@@ -112,6 +112,13 @@ button:disabled {
     cursor: not-allowed;
 }
 
+input[type="number"] {
+    field-sizing: content;
+    min-width: 2em;
+    font-size: 0.9em;
+    padding: 0 0.1em;
+}
+
 input[type="checkbox"] {
     height: 0.8em;
     width: 0.8em;
