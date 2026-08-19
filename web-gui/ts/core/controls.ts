@@ -264,7 +264,7 @@ async function addMore(button: HTMLButtonElement) {
     const path = rootPath + button.dataset.path
     const limit = Number(button.dataset.limit) * 2
     const data = (await doFetch("/dir", { path, limit, filters: getFilters() })) as DataNode
-    console.log(data)
+    // console.log(data)
 
     button.dataset.limit = limit.toString()
     // appendBranch(data, button, limit)
