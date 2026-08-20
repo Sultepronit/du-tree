@@ -1,4 +1,4 @@
-import { checkPath, doFetch } from "../api/fetch"
+import { checkPath } from "../api/fetch"
 import arraysOfObjectsAreEqual from "../helpers/compareArrays"
 import sortByNeedlePosition from "../utils/sortByNeedlePosition"
 import type { PathDetails, PathSugg, SystemContext } from "../types"
@@ -353,23 +353,3 @@ export async function handlePathInput(e: KeyboardEvent) {
         hideSuggesions()
     }
 }
-
-// const autoExit = document.getElementById("auto-exit") as HTMLInputElement // yeah it shouldn't be there!
-// document.addEventListener("keydown", async e => {
-//     // console.log(e.key)
-//     // console.log(e.code)
-//     if (e.ctrlKey && e.code === "KeyQ") {
-//         autoExit.checked = !autoExit.checked
-//     }
-//     const st = status.get()
-//     if (st === "scanning") return
-//     if (st === "done") {
-//         if (e.key === "Enter" && e.ctrlKey) {
-//             e.preventDefault()
-//             status.set("ready")
-//         }
-
-//         return
-//     }
-//     handlePathInput(e)
-// })

@@ -89,9 +89,7 @@ export function createBranch(data: DataBranch, prePath: string): DocumentFragmen
     return templ.content
 }
 
-// function updateLocked(elNode: ViewNode, oldD: DataNode, newD: DataNode) {
 function updateLocked(viewNode: ViewNode, newData: DataNode) {
-    // if (oldD.locked === newD.locked) return
     if (viewNode.data.locked === newData.locked) return
 
     viewNode.shoot.classList.add("locked")
@@ -104,21 +102,20 @@ function updateLocked(viewNode: ViewNode, newData: DataNode) {
     }
 }
 
-// function updateShootSize(viewNode: ViewNode, oldD: DataNode | null, newD: DataNode) {
 function updateShootSize(viewNode: ViewNode, newData: DataNode) {
-    // if (oldD?.size !== newData.size) {
     if (viewNode.data.size !== newData.size) {
         viewNode.shoot.style.setProperty("--size", `${newData.size}%`)
-        // if (!viewNode.sizeVidget) viewNode.sizeVidget = viewNode.shoot.querySelector(".fd-size")
-        if (!viewNode.sizeVidget)
+
+        if (!viewNode.sizeVidget) {
             viewNode.sizeVidget = viewNode.shoot.children[0].children[1] as HTMLDivElement
+        }
+
         viewNode.sizeVidget.textContent = handleBytesExt(newData)
         viewNode.sizeVidget.title = `${newData.size} B`
-        // } else if (oldD?.temp !== newData.temp || oldD?.locked !== newData.locked) {
     } else if (viewNode.data.temp !== newData.temp || viewNode.data.locked !== newData.locked) {
-        // if (!viewNode.sizeVidget) viewNode.sizeVidget = viewNode.shoot.querySelector(".fd-size")
-        if (!viewNode.sizeVidget)
+        if (!viewNode.sizeVidget) {
             viewNode.sizeVidget = viewNode.shoot.children[0].children[1] as HTMLDivElement
+        }
         viewNode.sizeVidget.textContent = handleBytesExt(newData)
     }
 
@@ -173,32 +170,7 @@ function createLi2(data: DataNode, path: string) {
 function resetShoot(viewNode: ViewNode, data: DataNode) {
     delete viewNode.shoot.dataset.nested
     viewNode.shoot.querySelector("ul")?.remove() // remove the branch too?
-
     setShoot(viewNode, data)
-    // const classes = [`shoot t${data.type}`]
-    // if (data.locked) {
-    //     classes.push("locked")
-    //     if (data.locked === -1) classes.push("itself")
-    // } else if (data.nlink) {
-    //     classes.push("hardlink")
-    //     if (data.isNeglected) classes.push("neglected")
-    // }
-    // // if (data.temp) {
-    // //     classes.push("temp")
-    // //     if (data.temp === 2) classes.push("unavailable")
-    // // }
-    // viewNode.shoot.className = classes.join(" ")
-
-    // viewNode.shoot.dataset.name = data.name
-    // // viewNode.shoot.querySelector(".fd-name").textContent = data.name
-    // if (!viewNode.nameVidget) viewNode.nameVidget = viewNode.shoot.querySelector(".fd-name")
-    // viewNode.nameVidget.textContent = data.name
-
-    // // updateShootSize(viewNode, null, data)
-    // updateShootSize(viewNode, data)
-    // // resetTitle(viewNode, data)
-    // viewNode.shoot.title = genTitle(data, viewNode.shoot.dataset.path, rootPath)
-    // viewNode.data = data
 }
 
 function selectElements(viewBranch: ViewBranch, dataBranch: DataBranch) {
@@ -207,22 +179,6 @@ function selectElements(viewBranch: ViewBranch, dataBranch: DataBranch) {
     viewBranch.ul = treeBlock.querySelector(`ul[data-path="${dataBranch.name}"]`)
 
     viewBranch.store = new DocumentFragment()
-
-    // const shootEls = viewBranch.ul.querySelectorAll(
-    //     `.shoot[data-path="${dataBranch.name}"]`
-    // ) as NodeListOf<HTMLDivElement>
-
-    // shootEls.forEach(shoot => {
-    //     const node = viewBranch.viewNodesIndex.get(shoot.dataset.name)
-    //     if (node) {
-    //         node.shoot = shoot
-    //         viewBranch.viewNodesIndex.set(shoot.dataset.name, node)
-    //     } else if (shoot.classList.contains("t_filt")) {
-    //         viewBranch.hiddenSummary.shoot = shoot
-    //     } else {
-    //         console.warn("No node found for:", shoot.dataset.name)
-    //     }
-    // })
 
     for (let i = 0; i < viewBranch.ul.children.length - 2; i++) {
         const shoot = viewBranch.ul.children[i].children[0] as HTMLDivElement
@@ -300,31 +256,12 @@ export function updateBranch(inputData: DataBranch, newData = true) {
 
     updateHidden(branch, filtered)
 
-    // if (branch.viewNodesIndex.size < actual.length) {
-    //     const lis = [] as string[]
-    //     for (const n of actual) {
-    //         if (!branch.viewNodesIndex.has(n.name)) {
-    //             // newNodes.push(n)
-    //             branch.viewNodesIndex.set(n.name, { data: n })
-    //             lis.push(createLi(n, branch.ul.dataset.path, rootPath))
-    //         }
-    //     }
-    //     // console.log(branch.ul.children[branch.ul.children.length - 3])
-    //     // console.log(branch.hiddenSummary.shoot.closest("li"))
-    //     // branch.hiddenSummary.shoot.closest("li").insertAdjacentHTML("beforebegin", lis.join(""))
-    //     branch.ul.children[branch.ul.children.length - 3].insertAdjacentHTML(
-    //         "afterend",
-    //         lis.join("")
-    //     )
-    // }
-
     // create new lis
-    let lastLiIdx = branch.ul.children.length - 2
+    const lastLiIdx = branch.ul.children.length - 2
     const fragment = new DocumentFragment()
     for (let i = lastLiIdx; i < branch.filtered.length; i++) {
         const data = branch.filtered[i]
         const { li, viewNode } = createLi2(data, inputData.name)
-        // branch.ul.children[lastLiIdx++].before(li)
         fragment.appendChild(li)
         branch.viewNodesIndex.set(data.name, viewNode)
     }
@@ -438,8 +375,6 @@ export function buildTree(data: DataBranch, path: string) {
     rootPath = path
     updateTreeRoot(data)
     treeBlock.appendChild(createBranch(data, ""))
-
-    // console.log(createLi2(data.content[0]))
 }
 
 export function simulateScan() {

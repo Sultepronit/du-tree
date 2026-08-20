@@ -26,10 +26,7 @@ func checkUser(w http.ResponseWriter, _ *http.Request) {
 	sendResult(w, map[string]bool{"root": os.Getuid() == 0})
 }
 
-// var systemContext models.SystemContext
-
 func handleInit(w http.ResponseWriter, _ *http.Request) {
-	// sendResult(w, scanner.GetState())
 	sendResult(w, struct {
 		Scan    models.Request       `json:"scan"`
 		Context models.SystemContext `json:"context"`
