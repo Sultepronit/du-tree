@@ -5,7 +5,6 @@ import (
 	"du-tree/internal/scanner"
 	"du-tree/internal/server"
 	"flag"
-	"fmt"
 	"strings"
 )
 
@@ -31,8 +30,6 @@ func main() {
 	var exPatt arrayFlags
 	flag.Var(&exPatt, "e", "Exclude pattern (can be used multiple times)")
 	flag.Parse()
-
-	fmt.Println(exPatt)
 
 	// if *v {
 	// 	fmt.Println("version!")

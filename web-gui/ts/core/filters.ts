@@ -39,23 +39,26 @@ filtersForm.addEventListener("input", e => {
 
 filtersForm.addEventListener("change", fireFiters)
 
+export function toggleShowHidden(isAvailable: boolean) {
+    if (isAvailable) {
+        filtersForm["show-hidden"].disabled = false
+    } else {
+        filtersForm["show-hidden"].checked = false
+        filtersForm["show-hidden"].disabled = true
+    }
+}
+
 export function getFilters() {
     return filters
 }
 
-// export function filterBranchCont(list: DataNode[]) {
 export function filterBranchCont(branch: DataBranch): DataBranch {
-    // if (!filters) return branch.content
     if (!filters) return branch
     if (branch.isFiltered) return branch
 
-    // const content = [] as DataNode[]
-    // branch.filteredItems = 0
-    // branch.filteredSize = 0
     const re = {
         content: [] as DataNode[],
         hiddenItems: branch.content.length,
-        // hiddenSize: branch.size
         hiddenSize: 0
     }
 
@@ -72,7 +75,7 @@ export function filterBranchCont(branch: DataBranch): DataBranch {
         re.hiddenItems--
         re.hiddenSize -= n.size
     }
-    console.log(re)
+    // console.log(re)
 
     return re
 }

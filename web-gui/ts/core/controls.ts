@@ -1,5 +1,5 @@
 import { doFetch } from "../api/fetch"
-import excluded from "../functions/exclude"
+import excluded from "./exclude"
 
 import type { DataBranch, DataNode, ReqOptions } from "../types"
 import { getFilters } from "./filters"

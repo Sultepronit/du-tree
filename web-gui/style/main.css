@@ -61,7 +61,8 @@ label {
 }
 
 label {
-    color: #000c;
+    /* color: #000c; */
+    color: #000a;
 }
 
 label:has(input:not(:checked):disabled) {

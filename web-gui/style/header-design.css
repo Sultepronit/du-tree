@@ -147,6 +147,7 @@
 
 /* #options { */
 .settings {
+    margin-top: 0.1em;
     display: flex;
     gap: 0.2em 0.8em;
     flex-wrap: wrap;
