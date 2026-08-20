@@ -132,7 +132,8 @@ function updateShootSize(viewNode: ViewNode, newData: DataNode) {
 }
 
 function setShoot(viewNode: ViewNode, data: DataNode) {
-    const classes = [`shoot t${data.type}`]
+    const type = data.type[0] === "L" ? `link t${data.type.slice(1)}` : `t${data.type}`
+    const classes = [`shoot ${type}`]
     if (data.locked) {
         classes.push("locked")
         if (data.locked === -1) classes.push("itself")
