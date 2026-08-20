@@ -32,11 +32,38 @@ li {
     padding-left: 0.2em;
 }
 
+.dir-summary {
+    display: grid;
+    grid-template-columns: repeat(3, auto);
+    width: fit-content;
+    font-family: "Ubuntu", sans-serif;
+    font-size: 0.85em;
+}
+
+.dir-summary div {
+    padding-inline: 0.4em;
+    text-align: center;
+}
+
 .shoot {
-    /* cursor: auto; */
     position: relative;
     padding-left: 1.12em;
     margin-bottom: 0.2em;
+}
+
+.t_filt {
+    opacity: 0.65;
+    /* color: #0009; */
+    font-style: italic;
+}
+
+/* .no-filtered > * > .t_filt {
+    display: none;
+} */
+
+.t_filt .fd-name {
+    font-family: "Ubuntu", sans-serif;
+    font-size: 0.85em;
 }
 
 .td {

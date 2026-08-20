@@ -8,138 +8,154 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
-	"strings"
+	"runtime"
+	"sync"
 	"syscall"
+	"time"
 )
 
-// func calcSize0(entry os.DirEntry, reqBlockSize bool, path string) (int64, error) {
-// 	info, err := entry.Info()
-// 	if err != nil {
-// 		if os.IsNotExist(err) {
-// 			return 0, nil
-// 		}
-// 		return 0, err
-// 	}
-
-// 	stat, ok := info.Sys().(*syscall.Stat_t)
-// 	if !ok {
-// 		return 0, nil
-// 	}
-
-// 	var size int64
-// 	if reqBlockSize {
-// 		size = stat.Blocks * 512
-// 	} else if !entry.IsDir() {
-// 		size = info.Size()
-// 	}
-
-// 	if stat.Nlink > 1 && !entry.IsDir() {
-// 		fullPath := filepath.Join(path, entry.Name())
-// 		// if data.inodes[sysStat.Ino] {
-// 		// if data.inodes[sysStat.Ino] != "" {
-// 		// if data.devInodes[stat.Dev][stat.Ino] != "" {
-// 		// 	// data.inodes[sysStat.Ino] = append(data.inodes[sysStat.Ino], fullPath)
-// 		// 	size = 0
-// 		// } else {
-// 		// 	// data.inodes[sysStat.Ino] = []string{fullPath}
-// 		// 	// data.inodes[sysStat.Ino] = true
-// 		// 	// data.inodes[stat.Ino] = fullPath
-// 		// 	data.devInodes[stat.Dev][stat.Ino] = fullPath
-// 		// }
-// 		if data.devInodes[stat.Dev] == nil {
-// 			data.devInodes[stat.Dev] = make(map[uint64]string)
-// 			data.devInodes[stat.Dev][stat.Ino] = fullPath
-// 		} else if data.devInodes[stat.Dev][stat.Ino] == "" {
-// 			data.devInodes[stat.Dev][stat.Ino] = fullPath
-// 		} else {
-// 			size = 0
-// 		}
-
-// 		// fmt.Println(sysStat.Nlink, sysStat.Ino)
-// 		// helpers.TempPrinAsJson(data.inodes[sysStat.Ino])
-// 	}
-
-// 	return size, nil
-// }
-
-func getInfo(entry os.DirEntry) (fs.FileInfo, *syscall.Stat_t, error) {
-	info, err := entry.Info()
-	if err != nil {
-		// not exists, no permission etc
-		return nil, nil, err
-	}
-
-	if stat, ok := info.Sys().(*syscall.Stat_t); ok {
-		return info, stat, nil
-	}
-
-	return info, nil, nil
-}
-
-func calcSize2(entry os.DirEntry, info fs.FileInfo, stat *syscall.Stat_t, reqBlockSize bool, fullPath string) int64 {
-	var size int64
-	if reqBlockSize {
-		size = stat.Blocks * 512
-	} else if !entry.IsDir() {
-		size = info.Size()
-	}
-
-	if stat.Nlink > 1 && !entry.IsDir() {
-		if data.devInodes[stat.Dev] == nil {
-			data.devInodes[stat.Dev] = make(map[uint64]string)
-			data.devInodes[stat.Dev][stat.Ino] = fullPath
-		} else if data.devInodes[stat.Dev][stat.Ino] == "" {
-			data.devInodes[stat.Dev][stat.Ino] = fullPath
-		} else {
-			size = 0
-		}
-	}
-
-	return size
-}
-
-// func scanDir(ctx context.Context, path string, node *dirNode, reqBlockSize bool) error {
-func scanDir(ctx context.Context, path string, node *dirNode, options models.ReqOptions) error {
-	// fmt.Println("scanning:", path)
-	select {
-	case <-ctx.Done():
-		return ctx.Err()
-	default:
-	}
-
+func handleReadDir(path string, node *dirNode) ([]os.DirEntry, error) {
 	entries, err := os.ReadDir(path)
 	if err != nil {
 		if os.IsPermission(err) {
-			data.mu.Lock()
+			data.scanMu.Lock()
 			node.Locked = -1
 			node.Temp = 0
 
 			for p := node.Parent; p != nil; p = p.Parent {
 				p.Locked++
 			}
-			data.mu.Unlock()
-			return nil
+			data.scanMu.Unlock()
+			return nil, nil
 		} else if os.IsNotExist(err) {
-			data.mu.Lock()
+			data.scanMu.Lock()
 			node.IsRemoved = true // TO DO!
 			node.Temp = 0
-			data.mu.Unlock()
-			return nil
+			data.scanMu.Unlock()
+			return nil, nil
 		}
 
-		return err
+		return nil, err
 	}
 
-	dirs := make([]*dirNode, 0, len(entries))
+	return entries, nil
+}
 
-	data.mu.Lock()
+// func getSizeEtc(entry os.DirEntry, info fs.FileInfo, stat *syscall.Stat_t, reqBlockSize bool, path string) int64 {
+func getSizeEtc(entry os.DirEntry, info fs.FileInfo, stat *syscall.Stat_t, reqBlockSize bool, path string) sizeAttr {
+	// var size int64
+	s := sizeAttr{}
+	if reqBlockSize {
+		// size = stat.Blocks * 512
+		s.size = stat.Blocks * 512
+	} else if !entry.IsDir() {
+		// size = info.Size()
+		s.size = info.Size()
+	}
+
+	if stat.Nlink > 1 && !entry.IsDir() {
+		// data.inodesMu.Lock()
+		// if data.devInodes[stat.Dev] == nil {
+		// 	data.devInodes[stat.Dev] = make(map[uint64]string)
+		// 	data.devInodes[stat.Dev][stat.Ino] = path
+		// } else if data.devInodes[stat.Dev][stat.Ino] == "" {
+		// 	data.devInodes[stat.Dev][stat.Ino] = path
+		// } else {
+		// 	size = 0
+		// }
+		// data.inodesMu.Unlock()
+		s.dev = stat.Dev
+		s.ino = stat.Ino
+		s.path = path
+	}
+
+	// return size
+	return s
+}
+
+func collectDirs(dirs []*dirNode, entry os.DirEntry, parent *dirNode, size int64, fullPath string, t int64) []*dirNode {
+	if !entry.IsDir() {
+		return dirs
+	}
+
+	child := dirNode{
+		Parent:   parent,
+		Name:     entry.Name(),
+		Size:     size,
+		ScanTime: t,
+		Temp:     2,
+	}
+
+	status := explorer.CheckDirStatus(fullPath)
+	if status == explorer.NotFound {
+		return dirs
+	}
+
+	switch status {
+	case explorer.Empty:
+		child.Temp = 0
+	case explorer.Forbidden:
+		child.Temp = 0
+		child.Locked = -1
+
+		data.scanMu.Lock()
+		for p := parent; p != nil; p = p.Parent {
+			p.Locked++
+		}
+		data.scanMu.Unlock()
+	}
+
+	return append(dirs, &child)
+}
+
+// var sem = make(chan struct{}, 4)
+
+// var sem = make(chan struct{}, 2)
+
+// var sem = make(chan struct{}, 8)
+
+// var sem = make(chan struct{}, 1)
+
+var sem = make(chan struct{}, runtime.NumCPU()*2)
+
+// var sem = make(chan struct{}, runtime.NumCPU())
+
+func scanDir(ctx context.Context, path string, node *dirNode, options models.ReqOptions) error {
+	// fmt.Println("scanning:", path)
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+		// return nil
+	default:
+	}
+
+	// start := time.Now()
+	entries, err := handleReadDir(path, node)
+	if err != nil {
+		return err
+	}
+	if entries == nil {
+		return nil
+	}
+	// fmt.Println("read dir:", time.Since(start))
+
+	dirsOversized := make([]*dirNode, 0, len(entries))
+
+	// var dirContSize int64
+	sizes := make([]sizeAttr, 0, len(entries))
+
+	t := time.Now().UnixMilli()
 
 	for _, entry := range entries {
-		if options.ExcludeHidden && strings.HasPrefix(entry.Name(), ".") {
+		fullPath := filepath.Join(path, entry.Name())
+		// if options.ExcludeHidden && strings.HasPrefix(entry.Name(), ".") {
+		// 	continue
+		// }
+		if exc := exculde(options, fullPath, entry.Name()); exc {
 			continue
 		}
 
-		info, stat, err := getInfo(entry)
+		info, stat, err := getFileInfo(entry)
 		if err != nil {
 			if !os.IsNotExist(err) {
 				fmt.Println("run/getInfo:", err)
@@ -148,7 +164,6 @@ func scanDir(ctx context.Context, path string, node *dirNode, options models.Req
 			continue
 		}
 
-		// if options.OneFS && stat != nil && entry.IsDir() && stat.Dev != rootDev {
 		if options.OneFS && stat != nil && stat.Dev != rootDev {
 			// fmt.Println("dev:", stat.Dev, entry.Name())
 			continue
@@ -156,89 +171,117 @@ func scanDir(ctx context.Context, path string, node *dirNode, options models.Req
 
 		// time.Sleep(time.Millisecond * 30)
 
-		fullPath := filepath.Join(path, entry.Name())
+		sizeEtc := getSizeEtc(entry, info, stat, options.BlockSize, fullPath)
 
-		size := calcSize2(entry, info, stat, options.BlockSize, fullPath)
+		dirsOversized = collectDirs(dirsOversized, entry, node, sizeEtc.size, fullPath, t)
 
-		// size, err := calcSize(entry, reqBlockSize, path)
-		// size, err := calcSize(entry, options.BlockSize, path)
-		// if err != nil {
-		// 	fmt.Println("run/calcSize:", err)
+		// data.scanMu.Lock()
+		// if size > 0 {
+		// 	for n := node; n != nil; n = n.Parent {
+		// 		n.Size += size
+		// 	}
 		// }
+		// data.scanMu.Unlock()
 
-		if entry.IsDir() {
-			child := dirNode{
-				Parent: node,
-				Name:   entry.Name(),
-				Size:   size,
-				Temp:   2,
-			}
+		// dirContSize += size
 
-			// locked := !explorer.IsAccessible(path, entry.Name())
-			// if locked {
-			// 	child.Locked = -1
-			// 	child.Temp = 0
-
-			// 	for p := node; p != nil; p = p.Parent {
-			// 		p.Locked++
-			// 	}
-			// }
-			// dirs = append(dirs, &child)
-			// status := explorer.CheckDirStatus(filepath.Join(path, entry.Name()))
-			status := explorer.CheckDirStatus(fullPath)
-			if status == explorer.NotFound {
-				continue
-			}
-
-			switch status {
-			case explorer.Empty:
-				child.Temp = 0
-			case explorer.Forbidden:
-				child.Temp = 0
-				child.Locked = -1
-
-				for p := node; p != nil; p = p.Parent {
-					p.Locked++
-				}
-			}
-
-			dirs = append(dirs, &child)
-		}
-
-		if size > 0 {
-			for n := node; n != nil; n = n.Parent {
-				n.Size += size
-			}
-		}
+		sizes = append(sizes, sizeEtc)
 	}
 
-	node.Dirs = make([]*dirNode, len(dirs))
-	copy(node.Dirs, dirs)
+	// node.Dirs = make([]*dirNode, len(dirsOversized))
+	// copy(node.Dirs, dirsOversized)
 
-	node.Temp = 1
+	// node.Temp = 1
 
-	recursive := make([]*dirNode, 0, len(node.Dirs))
-	// copy(recursive, node.Dirs)
-	for _, d := range node.Dirs {
+	dirs := make([]*dirNode, len(dirsOversized))
+	copy(dirs, dirsOversized)
+
+	// recursive := make([]*dirNode, 0, len(node.Dirs))
+	recursive := make([]*dirNode, 0, len(dirs))
+	for _, d := range dirs {
 		if d.Temp > 0 {
 			recursive = append(recursive, d)
 		}
 	}
 
-	data.mu.Unlock()
+	var dirContSize int64
+	locked := false
+	for _, s := range sizes {
+		if s.ino != 0 {
+			if !locked {
+				locked = true
+				data.inodesMu.Lock()
+			}
 
-	for _, child := range recursive {
-		fullPath := filepath.Join(path, child.Name)
-		// err := scanDir(ctx, fullPath, child, reqBlockSize)
-		err := scanDir(ctx, fullPath, child, options)
-		if err != nil {
-			return err
+			if data.devInodes[s.dev] == nil {
+				data.devInodes[s.dev] = make(map[uint64]string)
+				data.devInodes[s.dev][s.ino] = s.path
+			} else if data.devInodes[s.dev][s.ino] == "" {
+				data.devInodes[s.dev][s.ino] = s.path
+			} else {
+				// the inode is counted already
+				continue
+			}
+		}
+
+		dirContSize += s.size
+	}
+
+	if locked {
+		data.inodesMu.Unlock()
+	}
+
+	data.scanMu.Lock()
+
+	if dirContSize > 0 {
+		for n := node; n != nil; n = n.Parent {
+			n.Size += dirContSize
 		}
 	}
 
-	data.mu.Lock()
+	node.Dirs = dirs
+	node.ScanTime = t
+	node.Temp = 1
+
+	data.scanMu.Unlock()
+
+	// fmt.Println("parse dir:", time.Since(start))
+
+	var wg sync.WaitGroup
+
+	for _, child := range recursive {
+		fullPath := filepath.Join(path, child.Name)
+		// err := scanDir(ctx, fullPath, child, options)
+		// if err != nil {
+		// 	return err
+		// }
+		select {
+		case <-ctx.Done():
+			// return nil
+			return ctx.Err()
+		case sem <- struct{}{}:
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				defer func() { <-sem }()
+				err := scanDir(ctx, fullPath, child, options)
+				if err != nil {
+					fmt.Println("run/ScanDir:", err)
+				}
+			}()
+		default:
+			err := scanDir(ctx, fullPath, child, options)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	wg.Wait()
+
+	data.scanMu.Lock()
 	node.Temp = 0
-	data.mu.Unlock()
+	data.scanMu.Unlock()
 
 	// helpers.TempPrinAsJson(data.result)
 	// helpers.TempPrinAsJson(data.devInodes)

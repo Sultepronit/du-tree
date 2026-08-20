@@ -26,10 +26,7 @@ func checkUser(w http.ResponseWriter, _ *http.Request) {
 	sendResult(w, map[string]bool{"root": os.Getuid() == 0})
 }
 
-// var systemContext models.SystemContext
-
 func handleInit(w http.ResponseWriter, _ *http.Request) {
-	// sendResult(w, scanner.GetState())
 	sendResult(w, struct {
 		Scan    models.Request       `json:"scan"`
 		Context models.SystemContext `json:"context"`
@@ -77,22 +74,23 @@ func handleDir(w http.ResponseWriter, r *http.Request) {
 	}
 	// fmt.Println(req)
 
-	re, err := scanner.PresentDir(req.Path, req.Pages)
+	// re, err := scanner.PresentDir(req.Path, req.Pages)
+	re, err := scanner.PresentDir(req.Path, req)
 	if err != nil {
-		log.Println(err)
+		log.Println("handlers/PresentDir:", err)
 	}
 	sendResult(w, re)
 }
 
 func handleUpdate(w http.ResponseWriter, r *http.Request) {
 	// log.Println(r.URL.Path)
-	var req []models.Request
+	// var req []models.Request
+	var req models.UpdateReq
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Bad JSON", 400)
 		return
 	}
 	// fmt.Println(req)
-	// sendResult(w, du.GetUpdate(req))
 	sendResult(w, scanner.GetUpdate(req))
 }
 

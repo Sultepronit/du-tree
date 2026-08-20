@@ -16,6 +16,13 @@
     font-style: normal;
 }
 
+/* @font-face {
+    font-family: "Ubuntu Mono";
+    src: url("fonts/UbuntuMono-RI.ttf") format("truetype");
+    font-weight: 400;
+    font-style: italic;
+} */
+
 * {
     margin: 0;
     padding: 0;
@@ -27,6 +34,12 @@ body {
     font-size: 1.2em;
     padding: min(0.3em, 2%);
     font-family: "Ubuntu Mono", monospace;
+}
+
+h4 {
+    font: inherit;
+    font-family: "Ubuntu", sans-serif;
+    font-size: 0.9em;
 }
 
 fieldset {
@@ -48,13 +61,14 @@ label {
 }
 
 label {
-    color: #000c;
+    /* color: #000c; */
+    color: #000a;
 }
 
 label:has(input:not(:checked):disabled) {
     /* text-decoration: line-through;
     color: black; */
-    display: none;
+    display: none !important;
 }
 
 label:has(input:checked) {
@@ -97,6 +111,13 @@ button:hover {
 button:disabled {
     opacity: 0.2;
     cursor: not-allowed;
+}
+
+input[type="number"] {
+    field-sizing: content;
+    min-width: 2em;
+    font-size: 0.9em;
+    padding: 0 0.1em;
 }
 
 input[type="checkbox"] {

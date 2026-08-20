@@ -20,14 +20,18 @@ func getBranch(path string) *viewNode {
 		if next, prs := target.Branches[name]; prs {
 			target = next
 		} else {
+			// the parget is parent of the branch we need
 			for _, dir := range target.Dirs {
 				if dir.Name == name {
+					// create branches if not exist
 					if target.Branches == nil {
 						target.Branches = make(map[string]*viewNode)
 					}
+					// create the target we need
 					target.Branches[name] = &viewNode{
 						dirNode: dir,
 					}
+					// set the target
 					target = target.Branches[name]
 					break
 				}
@@ -37,73 +41,98 @@ func getBranch(path string) *viewNode {
 	return target
 }
 
-var pageSize = 100
+// var pageSize = 100
 
-func PresentDir(path string, pages int) (*models.Node, error) {
-	data.mu.Lock()
-	req := data.request
-
+// func PresentDir(path string, pages int) (*models.Node, error) {
+// func PresentDir(path string, req models.Request) (*models.Node, error) {
+func PresentDir(path string, req models.Request) (*models.Branch, error) {
+	// data.scanMu.Lock()
+	data.viewMu.Lock()
+	baseReq := data.request
 	branch := getBranch(path)
 	if branch == nil {
-		data.mu.Unlock()
+		// data.scanMu.Unlock()
+		data.viewMu.Unlock()
 		return nil, errors.New("the branch does not exist")
 	}
 	// fmt.Println("branch:", branch)
 
 	if branch.Files == nil {
-		// files, err := getFiles(req.Path+path, req.Options.BlockSize)
-		files, err := getFiles(req.Path+path, req.Options)
+		data.viewMu.Unlock()
+		// files, err := getDirCont(req.Path+path, req.Options)
+		files, dirs, err := getDirCont(baseReq.Path+path, baseReq.Options)
 		if err != nil {
-			data.mu.Unlock()
+			// data.scanMu.Unlock()
 			return nil, err
 		}
+		data.viewMu.Lock()
 		branch.Files = files
+		prepareViewDirs(dirs, branch)
 	}
 
-	re := parseViewNode(branch, true)
-	data.mu.Unlock()
+	res := parseBranch(branch, true)
+	// data.scanMu.Unlock()
+	data.viewMu.Unlock()
 
-	helpers.SortBySizeThenName(re.Content)
+	helpers.SortBySizeThenName(res.Content)
 
-	contLen := pageSize * pages
-	if len(re.Content) > contLen {
-		re.ContentCount = len(re.Content)
-		re.Content = re.Content[:contLen]
-	}
+	// contLen := pageSize * pages
+	// if len(re.Content) > contLen {
+	// 	re.ContentCount = len(re.Content)
+	// 	re.Content = re.Content[:contLen]
+	// }
+	// filterBranchCont(res, req)
+	filterBranchCont(res, req.Limit, req.Filters)
 
-	return re, nil
+	return res, nil
 }
 
 func checkCanceled() bool {
+	data.scanMu.RLock()
+	defer data.scanMu.RUnlock()
+
 	if data.scanTree == nil {
 		return true
 	}
 	return data.cancel == nil && data.scanTree.Temp != 0
 }
 
-func GetUpdate(req []models.Request) []*models.Node {
-	re := make([]*models.Node, len(req))
+// func GetUpdate(req []models.Request) []*models.Node {
+// func GetUpdate(req []models.Request) []*models.Branch {
+func GetUpdate(req models.UpdateReq) []*models.Branch {
+	// re := make([]*models.Node, len(req))
+	re := make([]*models.Branch, len(req.List))
 
-	data.mu.Lock()
-	defer data.mu.Unlock()
+	// data.scanMu.Lock()
+	// defer data.scanMu.Unlock()
 
 	if checkCanceled() {
 		return nil
 	}
 
-	for i, r := range req {
+	data.viewMu.Lock()
+	defer data.viewMu.Unlock()
+
+	// for i, r := range req {
+	for i, r := range req.List {
 		b := getBranch(r.Path)
-		re[i] = parseViewNode(b, false)
+		// re[i] = parseBranch(b, false)
+		re[i] = parseBranch(b, true)
 		re[i].Name = r.Path
 
-		re[i].Content = helpers.LimitSlice(re[i].Content, pageSize*r.Pages)
+		helpers.SortBySizeThenName(re[i].Content)
+
+		// re[i].Content = helpers.LimitSlice(re[i].Content, pageSize*r.Pages)
+		filterBranchCont(re[i], r.Limit, req.Filters)
 	}
 
 	return re
 }
 
 func GetState() models.Request {
-	data.mu.RLock()
-	defer data.mu.RUnlock()
+	// data.scanMu.RLock()
+	// defer data.scanMu.RUnlock()
+	data.viewMu.RLock()
+	defer data.viewMu.RUnlock()
 	return data.request
 }

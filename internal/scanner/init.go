@@ -28,15 +28,20 @@ func getRoot(target string) (size int64, err error) {
 	return 0, errors.New("no syscall.Stat_t")
 }
 
-func Init(req models.Request) (*models.Node, error) {
+// func Init(req models.Request) (*models.Node, error) {
+func Init(req models.Request) (*models.Branch, error) {
 	if !strings.HasSuffix(req.Path, "/") {
 		req.Path += "/"
 	}
 	log.Println("Scanning:", req.Path)
-	data.mu.Lock()
+	start := time.Now()
+	data.scanMu.Lock()
+	data.viewMu.Lock()
+	data.inodesMu.Lock()
 
 	if data.cancel != nil {
 		log.Println("Previous scan is still running!")
+		// return?
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -52,41 +57,44 @@ func Init(req models.Request) (*models.Node, error) {
 	data.viewTree = &viewNode{dirNode: data.scanTree}
 
 	if req.Options.BlockSize || req.Options.OneFS {
-		rootSize, err := getRoot(data.request.Path)
+		// rootSize, err := getRoot(data.request.Path)
+		rootSize, err := getRoot(req.Path)
 		if err != nil {
 			fmt.Println("init/getRootBlockSize:", err)
-			// data.mu.Unlock()
-			// return nil, nil
 		}
 		if req.Options.BlockSize {
 			data.scanTree.Size = rootSize
 		}
 
 	}
-	data.mu.Unlock()
+	data.scanMu.Unlock()
+	data.viewMu.Unlock()
+	data.inodesMu.Unlock()
 
 	go func() {
-		// err := scanDir(ctx, data.request.Path, data.scanTree, req.Options.BlockSize)
-		err := scanDir(ctx, data.request.Path, data.scanTree, req.Options)
+		// err := scanDir(ctx, data.request.Path, data.scanTree, req.Options)
+		err := scanDir(ctx, req.Path, data.scanTree, req.Options)
 		if err != nil {
 			fmt.Println("init/scanDir:", err)
 		}
 
-		data.mu.Lock()
+		data.scanMu.Lock()
 		data.cancel = nil
 		// helpers.TempPrinAsJson(data.devInodes)
-		log.Println("Total:", data.scanTree.Size)
-		data.mu.Unlock()
+		// log.Println("Total:", data.scanTree.Size, "(", time.Since(start), ")")
+		log.Printf("Total: %d (%s)", data.scanTree.Size, time.Since(start))
+		data.scanMu.Unlock()
 	}()
 
 	// helpers.TempPrinAsJson(data.scanTree)
 	time.Sleep(time.Millisecond * 100)
-	return PresentDir("", req.Pages)
+	// return PresentDir("", req.Pages)
+	return PresentDir("", req)
 }
 
 func Stop() {
-	data.mu.Lock()
-	defer data.mu.Unlock()
+	data.scanMu.Lock()
+	defer data.scanMu.Unlock()
 
 	if data.cancel != nil {
 		log.Println("Stopping scan...")

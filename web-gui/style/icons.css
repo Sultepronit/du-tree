@@ -267,3 +267,9 @@
     -webkit-mask-image: url("icons/waypoints.svg");
     mask-image: url("icons/waypoints.svg");
 }
+
+.t_filt::before {
+    -webkit-mask-image: url("icons/funnel.svg");
+    mask-image: url("icons/funnel.svg");
+    /* background-color: #ffffff00; */
+}
