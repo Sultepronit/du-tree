@@ -231,7 +231,7 @@ async function sortUpdate() {
     // sanitizeUpdateList(updates)
     for (const req of updateFilterList) {
         const data = (await doFetch("/dir", { ...req, filters: getFilters() })) as DataNode
-        console.log(data)
+        // console.log(data)
         data.name = req.path
         updateBranch(data)
     }

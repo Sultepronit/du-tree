@@ -34,11 +34,15 @@ function genFilteredOutName(count: number) {
 }
 
 export function createBranch(data: DataBranch, prePath: string): DocumentFragment {
+    console.log("new branch:", data)
     const templ = document.createElement("template")
     if (!data?.content) {
-        templ.innerHTML = `<ul class="dir-content"></ul>`
-
-        return templ.content
+        if (data?.hiddenItems) {
+            data.content = []
+        } else {
+            templ.innerHTML = `<ul class="dir-content"></ul>`
+            return templ.content
+        }
     }
 
     setMax(data)
@@ -225,8 +229,14 @@ function updateHidden(branch: ViewBranch, filtered: DataBranch) {
 }
 
 export function updateBranch(inputData: DataBranch, newData = true) {
-    if (!inputData?.content) return
-
+    // if (!inputData?.content) return
+    if (!inputData?.content) {
+        if (inputData?.hiddenItems) {
+            inputData.content = []
+        } else {
+            return
+        }
+    }
     console.log("branch update:", inputData)
 
     const branch = branches[inputData.name]
