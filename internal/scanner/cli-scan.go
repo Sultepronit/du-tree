@@ -22,7 +22,11 @@ func InitCLI(path string, options models.ReqOptions) {
 		return
 	}
 
-	checked := explorer.CheckPath(path+"/", true)
+	slashed := path
+	if slashed[len(slashed)-1] != '/' {
+		slashed += "/"
+	}
+	checked := explorer.CheckPath(slashed, true)
 	working := checked.InputPath
 	if checked.WorkingPath != "" {
 		working = checked.WorkingPath

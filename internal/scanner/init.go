@@ -28,6 +28,10 @@ func getRoot(target string) (size int64, err error) {
 	return 0, errors.New("no syscall.Stat_t")
 }
 
+var waited1 int64
+var waited int64
+var waited3 int64
+
 // func Init(req models.Request) (*models.Node, error) {
 func Init(req models.Request) (*models.Branch, error) {
 	if !strings.HasSuffix(req.Path, "/") {
@@ -84,6 +88,9 @@ func Init(req models.Request) (*models.Branch, error) {
 		// log.Println("Total:", data.scanTree.Size, "(", time.Since(start), ")")
 		log.Printf("Total: %d (%s)", data.scanTree.Size, time.Since(start))
 		data.scanMu.Unlock()
+		fmt.Println(waited1/1000000, "ms")
+		fmt.Println(waited/1000000, "ms")
+		fmt.Println(waited3/1000000, "ms")
 	}()
 
 	// helpers.TempPrinAsJson(data.scanTree)
