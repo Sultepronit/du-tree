@@ -4,8 +4,11 @@ import (
 	"du-tree/internal/explorer"
 	"du-tree/internal/helpers"
 	"du-tree/internal/models"
+	"errors"
+	"log"
 	"os"
 	"path/filepath"
+	"syscall"
 	"time"
 )
 
@@ -22,10 +25,6 @@ func getDirCont(path string, options models.ReqOptions) (files []*fileNode, dirs
 	t := time.Now().UnixMilli()
 
 	for _, e := range entries {
-		// if e.IsDir() {
-		// 	continue
-		// }
-
 		fullPath := filepath.Join(path, e.Name())
 
 		if exc := exculde(options, fullPath, e.Name()); exc {
@@ -34,7 +33,27 @@ func getDirCont(path string, options models.ReqOptions) (files []*fileNode, dirs
 
 		info, stat, err := getFileInfo(e)
 		if err != nil {
-			return nil, nil, err
+			var errno syscall.Errno
+			if errors.As(err, &errno) {
+				switch errno {
+				case syscall.EIO:
+					log.Println("I/O Error:", err)
+					node := &fileNode{
+						Name:     e.Name(),
+						ModTime:  0,
+						ScanTime: t,
+						Type:     "ioe-",
+					}
+					if e.IsDir() {
+						node.Type = "ioed"
+					}
+					oversized = append(oversized, node)
+				default:
+					log.Println("dirCont/getFileInfo:", err)
+				}
+			}
+			// return nil, nil, err
+			continue
 		}
 
 		if options.OneFS && stat != nil && stat.Dev != rootDev {

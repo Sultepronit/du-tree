@@ -85,8 +85,7 @@ func Init(req models.Request) (*models.Branch, error) {
 		data.scanMu.Lock()
 		data.cancel = nil
 		// helpers.TempPrinAsJson(data.devInodes)
-		// log.Println("Total:", data.scanTree.Size, "(", time.Since(start), ")")
-		log.Printf("Total: %d (%s)", data.scanTree.Size, time.Since(start))
+		log.Printf("Total: %dB (%s)", data.scanTree.Size, time.Since(start))
 		data.scanMu.Unlock()
 		fmt.Println(waited1/1000000, "ms")
 		fmt.Println(waited/1000000, "ms")

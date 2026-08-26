@@ -41,10 +41,6 @@ func getBranch(path string) *viewNode {
 	return target
 }
 
-// var pageSize = 100
-
-// func PresentDir(path string, pages int) (*models.Node, error) {
-// func PresentDir(path string, req models.Request) (*models.Node, error) {
 func PresentDir(path string, req models.Request) (*models.Branch, error) {
 	// data.scanMu.Lock()
 	data.viewMu.Lock()
@@ -62,7 +58,6 @@ func PresentDir(path string, req models.Request) (*models.Branch, error) {
 		// files, err := getDirCont(req.Path+path, req.Options)
 		files, dirs, err := getDirCont(baseReq.Path+path, baseReq.Options)
 		if err != nil {
-			// data.scanMu.Unlock()
 			return nil, err
 		}
 		data.viewMu.Lock()

@@ -4,8 +4,10 @@ import (
 	"context"
 	"du-tree/internal/explorer"
 	"du-tree/internal/models"
+	"errors"
 	"fmt"
 	"io/fs"
+	"log"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -178,10 +180,18 @@ func scanDir(ctx context.Context, path string, node *dirNode, options models.Req
 		info, stat, err := getFileInfo(entry)
 		if err != nil {
 			if !os.IsNotExist(err) {
-				fmt.Println("run/getInfo:", err)
+				var errno syscall.Errno
+				if errors.As(err, &errno) {
+					switch errno {
+					case syscall.EIO:
+						log.Println("I/O Error:", err)
+						continue
+					default:
+						fmt.Println("run/getInfo:", err)
+						continue
+					}
+				}
 			}
-
-			continue
 		}
 
 		if options.OneFS && stat != nil && stat.Dev != rootDev {
