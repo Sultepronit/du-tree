@@ -4,7 +4,6 @@ import (
 	"du-tree/internal/explorer"
 	"du-tree/internal/helpers"
 	"du-tree/internal/models"
-	"fmt"
 	"os"
 	"path/filepath"
 	"time"
@@ -27,32 +26,19 @@ func getDirCont(path string, options models.ReqOptions) (files []*fileNode, dirs
 		// 	continue
 		// }
 
-		// if options.ExcludeHidden && strings.HasPrefix(e.Name(), ".") {
-		// 	continue
-		// }
-
 		fullPath := filepath.Join(path, e.Name())
 
 		if exc := exculde(options, fullPath, e.Name()); exc {
 			continue
 		}
 
-		// info, err := e.Info()
-		// if err != nil {
-		// 	return nil, err
-		// }
-
-		// stat, ok := info.Sys().(*syscall.Stat_t)
-		// if !ok {
-		// 	return nil, errors.New("no file info")
-		// }
 		info, stat, err := getFileInfo(e)
 		if err != nil {
 			return nil, nil, err
 		}
 
 		if options.OneFS && stat != nil && stat.Dev != rootDev {
-			fmt.Println("dev:", stat.Dev)
+			// fmt.Println("dev:", stat.Dev)
 			continue
 		}
 

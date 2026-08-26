@@ -2,18 +2,24 @@ package scanner
 
 import (
 	"du-tree/internal/models"
+	"log"
 )
 
 func prepareViewDirs(times map[string]int64, node *viewNode) {
-	if len(times) == 0 {
-		return
-	}
+	// if len(times) == 0 {
+	// 	return
+	// }
 
 	node.ViewDirs = make([]viewDir, len(node.Dirs))
 	data.scanMu.RLock()
 	defer data.scanMu.RUnlock()
 	for i, d := range node.Dirs {
-		node.ViewDirs[i] = viewDir{dirNode: d, ModTime: times[d.Name]}
+		t, ok := times[d.Name]
+		if !ok {
+			log.Println("No mod time for:", d.Name)
+		}
+		// node.ViewDirs[i] = viewDir{dirNode: d, ModTime: times[d.Name]}
+		node.ViewDirs[i] = viewDir{dirNode: d, ModTime: t}
 	}
 }
 
