@@ -1,6 +1,11 @@
 import formatTime from "../helpers/formatTime"
-import type { DataBranch, DataNode } from "../types"
+import type { DataBranch, DataNode, ReqOptions } from "../types"
 import formatSize from "../utils/formatSize"
+
+let options = {} as ReqOptions
+export function setOptions(val: ReqOptions) {
+    options = val
+}
 
 export function genLockedDetails(node: DataNode) {
     const re = []
@@ -20,7 +25,6 @@ const specialTypes = {
     D: "Device"
 }
 
-// function genTitle(data: DataNode, path: string) {
 export function genTitle(data: DataNode, path: string, rootPath: string) {
     if (data.type === "_filt") {
         // return ""
@@ -52,11 +56,14 @@ export function genTitle(data: DataNode, path: string, rootPath: string) {
 
     if (data.nlink) {
         let msg = `\nShared inode: ${data.nlink} hard links exist.\n`
-        if (data.isNeglected) {
-            msg += "Size of this hard link is neglected."
-        } else {
-            msg += "Size of this hard link is counted, all others are neglected."
+        if (!options.countLinks) {
+            if (data.isNeglected) {
+                msg += "Size of this hard link is neglected."
+            } else {
+                msg += "Size of this hard link is counted, all others are neglected."
+            }
         }
+
         title.push(msg)
     }
 

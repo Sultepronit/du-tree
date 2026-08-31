@@ -46,15 +46,15 @@ func handleReadDir(path string, node *dirNode) ([]os.DirEntry, error) {
 	return entries, nil
 }
 
-func getSizeEtc(entry os.DirEntry, info fs.FileInfo, stat *syscall.Stat_t, reqBlockSize bool, path string) sizeAttr {
+func getSizeEtc(entry os.DirEntry, info fs.FileInfo, stat *syscall.Stat_t, block bool, path string, cl bool) sizeAttr {
 	s := sizeAttr{}
-	if reqBlockSize && stat != nil {
+	if block && stat != nil {
 		s.size = stat.Blocks * 512
 	} else if !entry.IsDir() {
 		s.size = info.Size()
 	}
 
-	if stat != nil && stat.Nlink > 1 && !entry.IsDir() {
+	if !cl && stat != nil && stat.Nlink > 1 && !entry.IsDir() {
 		s.dev = stat.Dev
 		s.ino = stat.Ino
 		s.path = path
@@ -196,7 +196,7 @@ func scanDir(ctx context.Context, path string, node *dirNode, options models.Req
 
 		// time.Sleep(time.Millisecond * 30)
 
-		sizeEtc := getSizeEtc(entry, info, stat, options.BlockSize, fullPath)
+		sizeEtc := getSizeEtc(entry, info, stat, options.BlockSize, fullPath, options.CountLinks)
 
 		// dirsOversized = prepareDir(dirsOversized, entry, node, sizeEtc.size, fullPath, scanT)
 		child := prepareDir(entry, node, sizeEtc.size, fullPath, scanT)

@@ -24,9 +24,9 @@ func GetLinkInfo(path string, name string) (typ string, linkTo string) {
 			return "perm-target", target
 		}
 
-		if !os.IsNotExist(err) {
-			log.Println("symlinks/Stat:", err)
-		}
+		// if !os.IsNotExist(err) {
+		// 	log.Println("symlinks/Stat:", err)
+		// }
 
 		return "brk", target
 	}

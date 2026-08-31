@@ -79,16 +79,17 @@ func getDirCont(path string, options models.ReqOptions) (files []*fileNode, dirs
 
 		// fmt.Println(stat.Nlink, stat.Ino)
 		if stat.Nlink > 1 {
-			data.inodesMu.RLock()
 			node.Nlink = stat.Nlink
-			// if data.devInodes[stat.Dev][stat.Ino] != filepath.Join(path, node.Name) {
-			if data.devInodes[stat.Dev][stat.Ino] != fullPath {
-				node.IsHardlink = true
+
+			if !options.CountLinks {
+				data.inodesMu.RLock()
+				if data.devInodes[stat.Dev][stat.Ino] != fullPath {
+					node.IsHardlink = true
+				}
+				data.inodesMu.RUnlock()
 			}
-			data.inodesMu.RUnlock()
 		}
 
-		// if blockSizeReq {
 		if options.BlockSize {
 			node.Size = stat.Blocks * 512
 		} else {

@@ -13,9 +13,9 @@ import {
     updateBranch
 } from "./treeBuilder"
 
+import { setOptions as setTemplateOptions } from "./treeTemplates"
+
 const optionsForm = document.getElementById("options") as HTMLFormElement
-// const filtersForm = document.getElementById("filters") as HTMLFormElement
-// const useBlockSize = document.getElementById("use-block-size") as HTMLInputElement
 const scanButton = document.getElementById("scan") as HTMLButtonElement
 const autoExit = document.getElementById("auto-exit") as HTMLInputElement
 const treeRoot = document.getElementById("tree-root") as HTMLElement
@@ -33,9 +33,11 @@ window.addEventListener("pagehide", () => {
 })
 
 export function setOptions(inputOptions: ReqOptions) {
+    setTemplateOptions(inputOptions)
     optionsForm["size-type"].value = inputOptions.blockSize ? "block" : "apparent"
-    // optionsForm["exclude-hidden"].checked = inputOptions.excludeHidden
     optionsForm["one-fs"].checked = inputOptions.oneFS
+    optionsForm["count-links"].checked = inputOptions.countLinks
+
     if (
         inputOptions.excludeHidden ||
         (inputOptions.exPatt?.length > 0 && inputOptions.exPatt[0] !== "")
@@ -103,8 +105,8 @@ document.addEventListener("path-status", (e: CustomEvent) => {
 function getOptions() {
     const options = {
         blockSize: optionsForm["size-type"].value === "block",
-        // excludeHidden: optionsForm["exclude-hidden"].checked,
-        oneFS: optionsForm["one-fs"].checked
+        oneFS: optionsForm["one-fs"].checked,
+        countLinks: optionsForm["count-links"].checked
     } as ReqOptions
 
     if (optionsForm.exclude.checked === true) {
@@ -120,13 +122,15 @@ export async function initTree(path: string, initScan = true) {
     rootPath = path
     status.set("scanning")
 
+    const options = getOptions()
+    setTemplateOptions(options)
+
     const req = initScan ? "/scan" : "/dir"
     // yes, if "/dir" case options mean nothing
-    // const data = (await doFetch("/scan", {
     const data = (await doFetch(req, {
         path,
         limit: baceLimit,
-        options: getOptions(),
+        options,
         filters: getFilters()
     })) as DataNode
     console.log(data)

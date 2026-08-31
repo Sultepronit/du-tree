@@ -22,6 +22,7 @@ export type PathDetails = {
 export type ReqOptions = {
     blockSize?: boolean
     oneFS?: boolean
+    countLinks?: boolean
     excludeHidden?: boolean
     exPatt?: string[]
 }
