@@ -41,11 +41,6 @@ type fileNode struct {
 func (n *fileNode) GetName() string { return n.Name }
 func (n *fileNode) GetSize() int64  { return n.Size }
 
-// type dirAddInfo struct {
-// 	name    string
-// 	modTime int64
-// }
-
 type viewDir struct {
 	*dirNode
 	ModTime int64 `json:"modTime"`

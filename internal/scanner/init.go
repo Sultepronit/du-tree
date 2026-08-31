@@ -32,7 +32,6 @@ var waited1 int64
 var waited int64
 var waited3 int64
 
-// func Init(req models.Request) (*models.Node, error) {
 func Init(req models.Request) (*models.Branch, error) {
 	if !strings.HasSuffix(req.Path, "/") {
 		req.Path += "/"
@@ -53,15 +52,11 @@ func Init(req models.Request) (*models.Branch, error) {
 
 	data.request = req
 
-	// data.inodes = make(map[uint64][]string)
-	// data.inodes = make(map[uint64]bool)
-	// data.inodes = make(map[uint64]string)
 	data.devInodes = make(map[uint64]map[uint64]string)
 	data.scanTree = &dirNode{Temp: 2}
 	data.viewTree = &viewNode{dirNode: data.scanTree}
 
 	if req.Options.BlockSize || req.Options.OneFS {
-		// rootSize, err := getRoot(data.request.Path)
 		rootSize, err := getRoot(req.Path)
 		if err != nil {
 			fmt.Println("init/getRootBlockSize:", err)
@@ -76,7 +71,6 @@ func Init(req models.Request) (*models.Branch, error) {
 	data.inodesMu.Unlock()
 
 	go func() {
-		// err := scanDir(ctx, data.request.Path, data.scanTree, req.Options)
 		err := scanDir(ctx, req.Path, data.scanTree, req.Options)
 		if err != nil {
 			fmt.Println("init/scanDir:", err)
@@ -94,13 +88,14 @@ func Init(req models.Request) (*models.Branch, error) {
 
 	// helpers.TempPrinAsJson(data.scanTree)
 	time.Sleep(time.Millisecond * 100)
-	// return PresentDir("", req.Pages)
 	return PresentDir("", req)
 }
 
 func Stop() {
-	data.scanMu.Lock()
-	defer data.scanMu.Unlock()
+	// data.scanMu.Lock()
+	// defer data.scanMu.Unlock()
+	data.viewMu.Lock()
+	defer data.viewMu.Unlock()
 
 	if data.cancel != nil {
 		log.Println("Stopping scan...")

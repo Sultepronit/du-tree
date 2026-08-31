@@ -48,13 +48,13 @@ func handleReadDir(path string, node *dirNode) ([]os.DirEntry, error) {
 
 func getSizeEtc(entry os.DirEntry, info fs.FileInfo, stat *syscall.Stat_t, reqBlockSize bool, path string) sizeAttr {
 	s := sizeAttr{}
-	if reqBlockSize {
+	if reqBlockSize && stat != nil {
 		s.size = stat.Blocks * 512
 	} else if !entry.IsDir() {
 		s.size = info.Size()
 	}
 
-	if stat.Nlink > 1 && !entry.IsDir() {
+	if stat != nil && stat.Nlink > 1 && !entry.IsDir() {
 		s.dev = stat.Dev
 		s.ino = stat.Ino
 		s.path = path
@@ -180,18 +180,13 @@ func scanDir(ctx context.Context, path string, node *dirNode, options models.Req
 		info, stat, err := getFileInfo(entry)
 		if err != nil {
 			if !os.IsNotExist(err) {
-				var errno syscall.Errno
-				if errors.As(err, &errno) {
-					switch errno {
-					case syscall.EIO:
-						log.Println("I/O Error:", err)
-						continue
-					default:
-						fmt.Println("run/getInfo:", err)
-						continue
-					}
+				if errors.Is(err, syscall.EIO) {
+					log.Println("I/O Error:", err)
+				} else {
+					fmt.Println("run/getInfo:", err)
 				}
 			}
+			continue
 		}
 
 		if options.OneFS && stat != nil && stat.Dev != rootDev {

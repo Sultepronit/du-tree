@@ -42,12 +42,10 @@ func getBranch(path string) *viewNode {
 }
 
 func PresentDir(path string, req models.Request) (*models.Branch, error) {
-	// data.scanMu.Lock()
 	data.viewMu.Lock()
 	baseReq := data.request
 	branch := getBranch(path)
 	if branch == nil {
-		// data.scanMu.Unlock()
 		data.viewMu.Unlock()
 		return nil, errors.New("the branch does not exist")
 	}
@@ -55,7 +53,6 @@ func PresentDir(path string, req models.Request) (*models.Branch, error) {
 
 	if branch.Files == nil {
 		data.viewMu.Unlock()
-		// files, err := getDirCont(req.Path+path, req.Options)
 		files, dirs, err := getDirCont(baseReq.Path+path, baseReq.Options)
 		if err != nil {
 			return nil, err
@@ -66,25 +63,18 @@ func PresentDir(path string, req models.Request) (*models.Branch, error) {
 	}
 
 	res := parseBranch(branch, true)
-	// data.scanMu.Unlock()
 	data.viewMu.Unlock()
 
 	helpers.SortBySizeThenName(res.Content)
 
-	// contLen := pageSize * pages
-	// if len(re.Content) > contLen {
-	// 	re.ContentCount = len(re.Content)
-	// 	re.Content = re.Content[:contLen]
-	// }
-	// filterBranchCont(res, req)
 	filterBranchCont(res, req.Limit, req.Filters)
 
 	return res, nil
 }
 
 func checkCanceled() bool {
-	data.scanMu.RLock()
-	defer data.scanMu.RUnlock()
+	// data.scanMu.RLock()
+	// defer data.scanMu.RUnlock()
 
 	if data.scanTree == nil {
 		return true
@@ -92,21 +82,15 @@ func checkCanceled() bool {
 	return data.cancel == nil && data.scanTree.Temp != 0
 }
 
-// func GetUpdate(req []models.Request) []*models.Node {
-// func GetUpdate(req []models.Request) []*models.Branch {
 func GetUpdate(req models.UpdateReq) []*models.Branch {
-	// re := make([]*models.Node, len(req))
 	re := make([]*models.Branch, len(req.List))
 
-	// data.scanMu.Lock()
-	// defer data.scanMu.Unlock()
+	data.viewMu.Lock()
+	defer data.viewMu.Unlock()
 
 	if checkCanceled() {
 		return nil
 	}
-
-	data.viewMu.Lock()
-	defer data.viewMu.Unlock()
 
 	// for i, r := range req {
 	for i, r := range req.List {
@@ -117,7 +101,6 @@ func GetUpdate(req models.UpdateReq) []*models.Branch {
 
 		helpers.SortBySizeThenName(re[i].Content)
 
-		// re[i].Content = helpers.LimitSlice(re[i].Content, pageSize*r.Pages)
 		filterBranchCont(re[i], r.Limit, req.Filters)
 	}
 
@@ -125,8 +108,6 @@ func GetUpdate(req models.UpdateReq) []*models.Branch {
 }
 
 func GetState() models.Request {
-	// data.scanMu.RLock()
-	// defer data.scanMu.RUnlock()
 	data.viewMu.RLock()
 	defer data.viewMu.RUnlock()
 	return data.request

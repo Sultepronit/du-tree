@@ -33,25 +33,22 @@ func getDirCont(path string, options models.ReqOptions) (files []*fileNode, dirs
 
 		info, stat, err := getFileInfo(e)
 		if err != nil {
-			var errno syscall.Errno
-			if errors.As(err, &errno) {
-				switch errno {
-				case syscall.EIO:
-					log.Println("I/O Error:", err)
-					node := &fileNode{
-						Name:     e.Name(),
-						ModTime:  0,
-						ScanTime: t,
-						Type:     "ioe-",
-					}
-					if e.IsDir() {
-						node.Type = "ioed"
-					}
-					oversized = append(oversized, node)
-				default:
-					log.Println("dirCont/getFileInfo:", err)
+			if errors.Is(err, syscall.EIO) {
+				log.Println("I/O Error:", err)
+				node := &fileNode{
+					Name:     e.Name(),
+					ModTime:  0,
+					ScanTime: t,
+					Type:     "ioe-",
 				}
+				if e.IsDir() {
+					node.Type = "ioed"
+				}
+				oversized = append(oversized, node)
+			} else {
+				log.Println("dirCont/getFileInfo:", err)
 			}
+
 			// return nil, nil, err
 			continue
 		}
