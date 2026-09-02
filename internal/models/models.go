@@ -58,20 +58,22 @@ type SortNode interface {
 }
 
 type Node struct {
-	Name         string  `json:"name"`
-	Type         string  `json:"type"`
-	Size         int64   `json:"size"`
-	ModTime      int64   `json:"modTime"`
-	ScanTime     int64   `json:"scanTime"`
-	Locked       int     `json:"locked,omitempty"`
-	LinkPath     string  `json:"linkPath,omitempty"`
-	Nlink        uint64  `json:"nlink,omitempty"`
-	Content      []*Node `json:"content,omitempty"`
-	ContentCount int     `json:"contentCount,omitempty"`
-	// SizeIsTemp   bool    `json:"sizeIsTemp,omitempty"`
+	Name     string  `json:"name"`
+	Type     string  `json:"type"`
+	Size     int64   `json:"size"`
+	ModTime  int64   `json:"modTime"`
+	ScanTime int64   `json:"scanTime"`
+	Locked   int     `json:"locked,omitempty"`
+	LinkPath string  `json:"linkPath,omitempty"`
+	Nlink    uint64  `json:"nlink,omitempty"`
+	Content  []*Node `json:"content,omitempty"`
+	// ContentCount int     `json:"contentCount,omitempty"`
 	Temp        int8 `json:"temp,omitempty"`
 	IsNeglected bool `json:"isNeglected,omitempty"`
 }
+
+func (n *Node) GetName() string { return n.Name }
+func (n *Node) GetSize() int64  { return n.Size }
 
 type Branch struct {
 	Name         string  `json:"name"`
@@ -84,6 +86,3 @@ type Branch struct {
 	HiddenItems  int     `json:"hiddenItems,omitempty"`
 	HiddenSize   int64   `json:"hiddenSize,omitempty"`
 }
-
-func (n *Node) GetName() string { return n.Name }
-func (n *Node) GetSize() int64  { return n.Size }
